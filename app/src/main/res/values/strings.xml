@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">SmartShopping</string>
+
+    <!-- Login Activity -->
+
+    <string name="login_name">SMART SHOPPING</string>
+    <string name="login_text">Login</string>
+    <string name="create_account_text">Create Account</string>
+    <string name="login_facebook_text">Login With Facebook</string>
+    <string name="username_text">UserName</string>
+    <string name="password_text">Password</string>
+
+</resources>
