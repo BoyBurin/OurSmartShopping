@@ -10,4 +10,8 @@
     <string name="username_text">UserName</string>
     <string name="password_text">Password</string>
 
+    <string name="facebook_app_id">508906662779712</string>
+    <string name="fb_login_protocol_scheme">fb508906662779712</string>
+
+
 </resources>

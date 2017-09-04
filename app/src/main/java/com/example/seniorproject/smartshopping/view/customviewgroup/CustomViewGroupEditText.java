@@ -34,6 +34,11 @@ public class CustomViewGroupEditText extends BaseCustomViewGroup {
         return edTextCustomViewGroupEditText.getText().toString();
     }
 
+    public void setTextToEditText(String text){
+
+        edTextCustomViewGroupEditText.setText(text);
+    }
+
     public void setEditTextInputTypeToPassword(){
         edTextCustomViewGroupEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
         edTextCustomViewGroupEditText.setImeOptions(EditorInfo.IME_ACTION_DONE);

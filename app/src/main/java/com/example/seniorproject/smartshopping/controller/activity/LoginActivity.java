@@ -7,6 +7,7 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 import com.example.seniorproject.smartshopping.R;
 import com.example.seniorproject.smartshopping.controller.fragment.loginfragment.LoginFragment;
+import com.google.android.gms.common.SignInButton;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -15,6 +16,7 @@ public class LoginActivity extends AppCompatActivity {
      ***********************************************************************************************/
 
     private ImageView imageView;
+    private SignInButton btnfacebook;
 
     /***********************************************************************************************
      ************************************* Methods ********************************************
@@ -36,12 +38,14 @@ public class LoginActivity extends AppCompatActivity {
 
     private void initInstances(){
 
+
     }
 
 
     /***********************************************************************************************
-     ************************************* Implements methods ********************************************
+     ************************************* Listener variable ********************************************
      ***********************************************************************************************/
+
 
 
 }
