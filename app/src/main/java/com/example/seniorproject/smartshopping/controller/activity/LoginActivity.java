@@ -3,13 +3,14 @@ package com.example.seniorproject.smartshopping.controller.activity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.seniorproject.smartshopping.R;
 import com.example.seniorproject.smartshopping.controller.fragment.loginfragment.LoginFragment;
 import com.google.android.gms.common.SignInButton;
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends AppCompatActivity implements LoginFragment.LoginFragmentListener {
 
     /***********************************************************************************************
      ************************************* Variable class ********************************************
@@ -39,6 +40,11 @@ public class LoginActivity extends AppCompatActivity {
     private void initInstances(){
 
 
+    }
+
+    @Override
+    public void goToMain() {
+        finish();
     }
 
 

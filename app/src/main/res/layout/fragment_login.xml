@@ -27,7 +27,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom|center"
-                    android:layout_marginBottom="32dp"
+                    android:layout_marginBottom="40dp"
                     android:text="@string/login_name"
                     android:textSize="34sp"/>
 
@@ -63,8 +63,9 @@
 
                     <Button
                         android:id="@+id/btnLogin"
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:minEms="9"
                         android:layout_gravity="center"
                         android:layout_marginLeft="16dp"
                         android:layout_marginRight="16dp"
@@ -82,8 +83,9 @@
 
                     <Button
                         android:id="@+id/btnCreateAccount"
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:minEms="9"
                         android:layout_gravity="center"
                         android:layout_marginBottom="16dp"
                         android:layout_marginLeft="16dp"

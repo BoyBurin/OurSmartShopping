@@ -13,6 +13,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.example.seniorproject.smartshopping.R;
+import com.example.seniorproject.smartshopping.model.manager.Contextor;
 import com.example.seniorproject.smartshopping.view.customviewgroup.CustomViewGroupEditText;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.SignInButton;
@@ -21,6 +22,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -30,6 +32,10 @@ public class LoginFragment extends Fragment {
      ************************************* Variable class ********************************************
      ***********************************************************************************************/
 
+    public interface LoginFragmentListener{
+        void goToMain();
+    }
+
     private CustomViewGroupEditText customGroupUserName;
     private CustomViewGroupEditText customGroupPassword;
     private Button btnLogin;
@@ -38,6 +44,9 @@ public class LoginFragment extends Fragment {
     private FirebaseAuth mAuth;
     private FirebaseDatabase mFirebaseDatabase;
     private DatabaseReference mMessagesDatabaseReference;
+
+    private String username = "BoyBurin";
+    private boolean updateProfile = true;
 
 
     /***********************************************************************************************
@@ -106,11 +115,14 @@ public class LoginFragment extends Fragment {
 
         super.onStart();
         //updateUI(currentUser);
+        mAuth.addAuthStateListener(mAuthListener);
+
     }
 
     @Override
     public void onStop() {
         super.onStop();
+        mAuth.removeAuthStateListener(mAuthListener);
     }
 
     /*
@@ -144,16 +156,15 @@ public class LoginFragment extends Fragment {
                     String email = customGroupUserName.getTextFromEditText().toString();
                     String password = customGroupPassword.getTextFromEditText().toString();
 
-                    //Toast.makeText(getActivity(), email + " : " + password, Toast.LENGTH_SHORT).show();
+                    if(email == null || password == null || email.equals("") || password.equals("")){
+                        return;
+                    }
+
+                    customGroupUserName.setTextToEditText("");
+                    customGroupPassword.setTextToEditText("");
 
                     mAuth.signInWithEmailAndPassword(email, password).
                             addOnCompleteListener(getActivity(), loginOnCompleteListener);
-                    customGroupUserName.setTextToEditText("");
-                    customGroupPassword.setTextToEditText("");
-                } else{
-                    String email = user.getEmail();
-                    Toast.makeText(getActivity(), email, Toast.LENGTH_SHORT).show();
-                    mAuth.getInstance().signOut();
                 }
             }
 
@@ -162,18 +173,10 @@ public class LoginFragment extends Fragment {
                 if(user == null){
                     String email = "boyzaburin@hotmail.com";
                     String password = "123456";
-                    String username = "BoyBurin";
 
-                    mAuth.createUserWithEmailAndPassword(email, password);
-
-                    mAuth.signInWithEmailAndPassword(email, password).
-                            addOnCompleteListener(getActivity(), loginOnCompleteListener);
-
-                    String id = mAuth.getCurrentUser().getUid();
-                    mMessagesDatabaseReference.child("users").child(id).child("username").setValue(username);
-                    Toast.makeText(getActivity(), "Create Account Success", Toast.LENGTH_SHORT).show();
-                }else{
-                    Toast.makeText(getActivity(), user.getEmail(), Toast.LENGTH_SHORT).show();
+                    updateProfile = false;
+                    mAuth.createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(createdOnCompleteListener);
                 }
             }
         }
@@ -185,11 +188,50 @@ public class LoginFragment extends Fragment {
         public void onComplete(@NonNull Task<AuthResult> task) {
             if (task.isSuccessful()) {
                 // Sign in success, update UI with the signed-in user's information
-                Toast.makeText(getActivity(), "signInWithEmail:success", Toast.LENGTH_SHORT).show();
-                FirebaseUser user = mAuth.getCurrentUser();
+                Toast.makeText(Contextor.getInstance().getContext(), "signInWithEmail:success", Toast.LENGTH_SHORT).show();
             } else {
                 // If sign in fails, display a message to the user.
-                Toast.makeText(getActivity(), "signInWithEmail:failure", Toast.LENGTH_SHORT).show();
+                Toast.makeText(Contextor.getInstance().getContext(), "signInWithEmail:failure", Toast.LENGTH_SHORT).show();
+            }
+        }
+    };
+
+    final OnCompleteListener<AuthResult> createdOnCompleteListener =  new OnCompleteListener<AuthResult>() {
+        @Override
+        public void onComplete(@NonNull Task<AuthResult> task) {
+            if (task.isSuccessful()) {
+                // Sign in success, update UI with the signed-in user's information
+                Toast.makeText(Contextor.getInstance().getContext(), "createWithEmail:success", Toast.LENGTH_SHORT).show();
+                UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                        .setDisplayName(username)
+                        .build();
+                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                user.updateProfile(profileUpdates);
+            } else {
+                // If sign in fails, display a message to the user.
+                Toast.makeText(Contextor.getInstance().getContext(), "createWithEmail:failure", Toast.LENGTH_SHORT).show();
+            }
+        }
+    };
+
+
+    final FirebaseAuth.AuthStateListener mAuthListener = new FirebaseAuth.AuthStateListener() {
+        @Override
+        public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+            FirebaseUser user = firebaseAuth.getCurrentUser();
+            if (user != null) {
+                // User is signed in
+                Log.e("TAG", "onAuthStateChanged:signed_in:" + user.getDisplayName());
+
+                LoginFragmentListener loginFragmentListener = (LoginFragmentListener) getActivity();
+                loginFragmentListener.goToMain();
+
+                // Authenticated successfully with authData
+
+
+            } else {
+                // User is signed out
+                Log.e("TAG", "onAuthStateChanged:signed_out");
             }
         }
     };
