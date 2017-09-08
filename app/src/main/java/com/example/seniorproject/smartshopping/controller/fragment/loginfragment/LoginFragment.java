@@ -13,7 +13,10 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.example.seniorproject.smartshopping.R;
+import com.example.seniorproject.smartshopping.model.dao.Group;
+import com.example.seniorproject.smartshopping.model.dao.User;
 import com.example.seniorproject.smartshopping.model.manager.Contextor;
+import com.example.seniorproject.smartshopping.model.manager.GroupManager;
 import com.example.seniorproject.smartshopping.view.customviewgroup.CustomViewGroupEditText;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.SignInButton;
@@ -23,8 +26,13 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
 
 public class LoginFragment extends Fragment {
 
@@ -160,11 +168,11 @@ public class LoginFragment extends Fragment {
                         return;
                     }
 
-                    customGroupUserName.setTextToEditText("");
+                    //customGroupUserName.setTextToEditText("");
                     customGroupPassword.setTextToEditText("");
 
                     mAuth.signInWithEmailAndPassword(email, password).
-                            addOnCompleteListener(getActivity(), loginOnCompleteListener);
+                            addOnCompleteListener(loginOnCompleteListener);
                 }
             }
 
@@ -202,11 +210,6 @@ public class LoginFragment extends Fragment {
             if (task.isSuccessful()) {
                 // Sign in success, update UI with the signed-in user's information
                 Toast.makeText(Contextor.getInstance().getContext(), "createWithEmail:success", Toast.LENGTH_SHORT).show();
-                UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-                        .setDisplayName(username)
-                        .build();
-                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                user.updateProfile(profileUpdates);
             } else {
                 // If sign in fails, display a message to the user.
                 Toast.makeText(Contextor.getInstance().getContext(), "createWithEmail:failure", Toast.LENGTH_SHORT).show();
@@ -221,20 +224,57 @@ public class LoginFragment extends Fragment {
             FirebaseUser user = firebaseAuth.getCurrentUser();
             if (user != null) {
                 // User is signed in
-                Log.e("TAG", "onAuthStateChanged:signed_in:" + user.getDisplayName());
+                Log.d("TAG", "onAuthStateChanged:signed_in:" + user.getDisplayName());
 
-                LoginFragmentListener loginFragmentListener = (LoginFragmentListener) getActivity();
-                loginFragmentListener.goToMain();
+                String userID = mAuth.getCurrentUser().getUid();
+
+                mMessagesDatabaseReference.child("groupinuser").child(userID)
+                        .addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                for(DataSnapshot data : dataSnapshot.getChildren()){
+                                    mMessagesDatabaseReference.child("groups")
+                                            .child(data.getKey().toString())
+                                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(DataSnapshot dataSnapshot) {
+                                            GroupManager gm = GroupManager.getInstance();
+                                            Group group = dataSnapshot.getValue(Group.class);
+                                            gm.addGroup(group);
+                                            gm.setCurrentGroup(gm.getGroups().get(0));
+                                            Log.d("Group Name: ", gm.getCurrentGroup().getName().toString());
+
+                                            // Go to Main
+                                            LoginFragmentListener loginFragmentListener = (LoginFragmentListener) getActivity();
+                                            loginFragmentListener.goToMain();
+
+                                        }
+
+                                        @Override
+                                        public void onCancelled(DatabaseError databaseError) {
+
+                                        }
+                                    });
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
+
 
                 // Authenticated successfully with authData
 
 
             } else {
                 // User is signed out
-                Log.e("TAG", "onAuthStateChanged:signed_out");
+                Log.d("TAG", "onAuthStateChanged:signed_out");
             }
         }
     };
+
 
 
     /***********************************************************************************************
