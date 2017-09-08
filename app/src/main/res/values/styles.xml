@@ -15,8 +15,24 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <!-- Login  -->
+
     <style name="LoginTheme">
         <item name="android:textColor">@android:color/white</item>
     </style>
+
+    <!-- ...............................................  -->
+
+    <!--Main Shopping list  -->
+
+    <style name="FAB">
+        <item name="android:layout_margin">0dp</item>
+        <item name="fabSize">normal</item>
+        <item name="rippleColor">@android:color/white</item>
+        <item name="backgroundTint">@color/primary</item>
+    </style>
+
+    <!-- ...............................................  -->
+
 
 </resources>
