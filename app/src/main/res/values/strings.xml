@@ -13,5 +13,12 @@
     <string name="facebook_app_id">508906662779712</string>
     <string name="fb_login_protocol_scheme">fb508906662779712</string>
 
+    <!-- Shopping List -->
+    <string name="hint_add_shopping_list">Create a list</string>
+    <string name="hint_add_shopping_list_describe">Detail of your shopping list</string>
+    <string name="add_shopping_list_photo_button">Upload Photo</string>
+    <string name="add_shopping_list_add_button">Add</string>
+    <string name="add_shopping_list_cancel_button">Cancel</string>
+
 
 </resources>

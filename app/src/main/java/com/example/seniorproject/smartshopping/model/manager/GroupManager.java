@@ -3,10 +3,15 @@ package com.example.seniorproject.smartshopping.model.manager;
 import android.content.Context;
 
 import com.example.seniorproject.smartshopping.model.dao.Group;
+import com.example.seniorproject.smartshopping.model.dao.GroupMap;
+import com.example.seniorproject.smartshopping.model.dao.ShoppingList;
+import com.example.seniorproject.smartshopping.model.dao.ShoppingListMap;
 import com.example.seniorproject.smartshopping.model.dao.User;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class GroupManager {
@@ -15,8 +20,8 @@ public class GroupManager {
      *******************************************************************************************/
 
     private static GroupManager instance;
-    private ArrayList<Group> groups = new ArrayList<Group>();
-    private  Group currentGroup;
+    private ArrayList<GroupMap> groups;
+    private GroupMap currentGroup;
 
     /******************************************************************************************
      * ****************************** Methods *********************************************
@@ -34,25 +39,37 @@ public class GroupManager {
     private GroupManager() {
 
         mContext = Contextor.getInstance().getContext();
+        groups = new ArrayList<GroupMap>();
     }
 
-    public ArrayList<Group> getGroups() {
-        return groups;
+    public GroupMap getGroup(int index) {
+
+        return groups.get(index);
     }
 
-    public void setGroups(ArrayList<Group> groups) {
-        this.groups = groups;
+
+    public int getSize(){
+        return groups.size();
     }
 
-    public void addGroup(Group group){
+    public void addGroup(GroupMap group){
         groups.add(group);
     }
 
-    public Group getCurrentGroup() {
+    public GroupMap getCurrentGroup() {
         return currentGroup;
     }
 
-    public void setCurrentGroup(Group currentGroup) {
+    public void setCurrentGroup(GroupMap currentGroup) {
         this.currentGroup = currentGroup;
     }
+
+    public ArrayList<Group> getGroups(){
+        ArrayList<Group> groups = new ArrayList<Group>();
+        for(GroupMap groupMap : this.groups){
+            groups.add(groupMap.getGroup());
+        }
+        return groups;
+    }
+
 }

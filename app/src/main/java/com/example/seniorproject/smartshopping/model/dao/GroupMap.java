@@ -1,34 +1,45 @@
-package com.example.seniorproject.smartshopping.model.manager;
-
-import android.content.Context;
-
+package com.example.seniorproject.smartshopping.model.dao;
 
 /**
- * Created by nuuneoi on 11/16/2014.
+ * Created by boyburin on 9/9/2017 AD.
  */
-public class SingletonTemplate {
+
+public class GroupMap {
 
     /******************************************************************************************
      * ****************************** Variable *********************************************
      *******************************************************************************************/
 
-    private static SingletonTemplate instance;
+    private String id;
+    private Group group;
 
     /******************************************************************************************
      * ****************************** Methods *********************************************
      *******************************************************************************************/
 
+    public GroupMap(){
 
-    public static SingletonTemplate getInstance() {
-        if (instance == null)
-            instance = new SingletonTemplate();
-        return instance;
     }
 
-    private Context mContext;
+    public GroupMap(String id, Group group){
+        this.id = id;
+        this.group = group;
 
-    private SingletonTemplate() {
-        mContext = Contextor.getInstance().getContext();
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public Group getGroup() {
+        return group;
+    }
+
+    public void setGroup(Group group) {
+        this.group = group;
+    }
 }

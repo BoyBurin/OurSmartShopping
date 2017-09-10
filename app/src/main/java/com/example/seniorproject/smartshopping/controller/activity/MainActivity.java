@@ -8,14 +8,19 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.example.seniorproject.smartshopping.R;
+import com.example.seniorproject.smartshopping.controller.fragment.dialogfragment.FragmentDialogAddShoppingList;
 import com.example.seniorproject.smartshopping.controller.fragment.mainfragment.InventoryFragment;
 import com.example.seniorproject.smartshopping.controller.fragment.loginfragment.LoginFragment;
 import com.example.seniorproject.smartshopping.controller.fragment.mainfragment.ShoppingListFragment;
 import com.example.seniorproject.smartshopping.model.dao.Group;
+import com.example.seniorproject.smartshopping.model.dao.User;
+import com.example.seniorproject.smartshopping.model.manager.GroupManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -25,6 +30,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity {
@@ -39,8 +45,12 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton btnShoppingHistory;
     private ImageButton btnSetting;
 
+
     private FirebaseDatabase mRootRef;
     private DatabaseReference mGroupRef;
+
+    final String SHOPPING_LIST_FRAGMENT = "ShoppingListFragment";
+    final String  DIALOG_ADD_SHOPPING_LIST_FRAGMENT = "dialogAddShoppingListFragment";
 
 
     /***********************************************************************************************
@@ -56,6 +66,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void init(){
+
+        setTitle(GroupManager.getInstance().getCurrentGroup().getGroup().getName());
+
         btnPromotion = (ImageButton) findViewById(R.id.btnPromotion);
         btnPromotion.setOnClickListener(topBarOnClickListener);
 
@@ -66,17 +79,49 @@ public class MainActivity extends AppCompatActivity {
         btnShoppingList.setOnClickListener(topBarOnClickListener);
 
         mRootRef = FirebaseDatabase.getInstance();
+        mGroupRef = mRootRef.getReference().child("groups");
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        if(user != null) {
+            ShoppingListFragment shoppingListFragment = ShoppingListFragment.newInstance();
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.containerMain, shoppingListFragment,
+                            SHOPPING_LIST_FRAGMENT)
+                    .detach(shoppingListFragment)
+                    .commit();
+        }
+
+
+    }
+
+    private void hideKeyboard(){
+        InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+        //Find the currently focused view, so we can grab the correct window token from it.
+        View view = getCurrentFocus();
+        //If no view currently has focus, create a new one, just so we can grab a window token from it
+        if (view == null) {
+            view = new View(MainActivity.this);
+        }
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
     @Override
     protected void onPostCreate(@Nullable Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if(user == null){
-            Toast.makeText(this, "No User Login", Toast.LENGTH_LONG).show();
-            Intent intent = new Intent(this, LoginActivity.class);
-            startActivity(intent);
-        }
+
+    }
+
+    @Override
+    public void onStart() {
+
+        super.onStart();
+        //updateUI(currentUser);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
     }
 
 
@@ -92,16 +137,10 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, "Logout Success", Toast.LENGTH_SHORT).show();
             }
 
-            if(view == btnSetting){
-                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                Group myFirstGroup = new Group();
-                myFirstGroup.setName("BoyLand");
-                myFirstGroup.addMember(user.getUid());
-                mGroupRef.push().setValue(myFirstGroup);
+            if(view == btnShoppingList){
+                ShoppingListFragment shoppingListFragment = (ShoppingListFragment)
+                        getSupportFragmentManager().findFragmentByTag(SHOPPING_LIST_FRAGMENT);
 
-                Toast.makeText(MainActivity.this, "Create Group Success; " + myFirstGroup.getName(),
-                        Toast.LENGTH_SHORT).show();
-            }
 
             if(view == btnInventory){
 
@@ -109,11 +148,15 @@ public class MainActivity extends AppCompatActivity {
                         getSupportFragmentManager().findFragmentByTag("InventoryFragment");
 
                 getSupportFragmentManager().beginTransaction()
-                        .attach(inventoryFragment)
+                        .attach(shoppingListFragment)
                         .commit();
             }
+
         }
     };
+
+
+
 
 
 }

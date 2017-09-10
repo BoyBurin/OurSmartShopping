@@ -1,32 +1,30 @@
 package com.example.seniorproject.smartshopping.model.dao;
 
-import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.example.seniorproject.smartshopping.model.manager.Contextor;
+/**
+ * Created by boyburin on 9/8/2017 AD.
+ */
 
-import java.util.ArrayList;
-import java.util.StringTokenizer;
-
-
-public class Group implements Parcelable {
-
-    private static Group instance;
+public class ShoppingList implements Parcelable {
 
     /******************************************************************************************
      * ****************************** Variable *********************************************
      *******************************************************************************************/
 
     private String name;
+    private String descript;
+    private String photoURL;
 
     /******************************************************************************************
      * ****************************** Methods *********************************************
      *******************************************************************************************/
 
-    public Group(){
+    public ShoppingList(){
 
     }
+
 
     public String getName() {
         return name;
@@ -36,17 +34,38 @@ public class Group implements Parcelable {
         this.name = name;
     }
 
+    public String getDescript() {
+        return descript;
+    }
+
+    public void setDescript(String descript) {
+        this.descript = descript;
+    }
+
+    public String getPhotoURL() {
+        return photoURL;
+    }
+
+    public void setPhotoURL(String photoURL) {
+        this.photoURL = photoURL;
+    }
+
+
     /******************************************************************************************
      * ****************************** Implementation *********************************************
      *******************************************************************************************/
 
-    protected Group(Parcel in) {
+    protected ShoppingList(Parcel in) {
         name = in.readString();
+        descript = in.readString();
+        photoURL = in.readString();
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(name);
+        dest.writeString(descript);
+        dest.writeString(photoURL);
     }
 
     @Override
@@ -54,18 +73,15 @@ public class Group implements Parcelable {
         return 0;
     }
 
-    public static final Creator<Group> CREATOR = new Creator<Group>() {
+    public static final Creator<ShoppingList> CREATOR = new Creator<ShoppingList>() {
         @Override
-        public Group createFromParcel(Parcel in) {
-            return new Group(in);
+        public ShoppingList createFromParcel(Parcel in) {
+            return new ShoppingList(in);
         }
 
         @Override
-        public Group[] newArray(int size) {
-            return new Group[size];
+        public ShoppingList[] newArray(int size) {
+            return new ShoppingList[size];
         }
     };
-
-
-
 }

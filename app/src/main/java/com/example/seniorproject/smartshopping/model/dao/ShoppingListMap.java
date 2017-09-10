@@ -1,34 +1,39 @@
-package com.example.seniorproject.smartshopping.model.manager;
-
-import android.content.Context;
-
+package com.example.seniorproject.smartshopping.model.dao;
 
 /**
- * Created by nuuneoi on 11/16/2014.
+ * Created by boyburin on 9/9/2017 AD.
  */
-public class SingletonTemplate {
+
+public class ShoppingListMap {
 
     /******************************************************************************************
      * ****************************** Variable *********************************************
      *******************************************************************************************/
 
-    private static SingletonTemplate instance;
+    private String id;
+    private ShoppingList shoppingList;
 
     /******************************************************************************************
      * ****************************** Methods *********************************************
      *******************************************************************************************/
 
+    public ShoppingListMap(){
 
-    public static SingletonTemplate getInstance() {
-        if (instance == null)
-            instance = new SingletonTemplate();
-        return instance;
     }
 
-    private Context mContext;
-
-    private SingletonTemplate() {
-        mContext = Contextor.getInstance().getContext();
+    public String getId() {
+        return id;
     }
 
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public ShoppingList getShoppingList() {
+        return shoppingList;
+    }
+
+    public void setShoppingList(ShoppingList shoppingList) {
+        this.shoppingList = shoppingList;
+    }
 }
