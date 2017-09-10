@@ -180,7 +180,7 @@ public class LoginFragment extends Fragment {
             if(view == btnCreateUser){
                 FirebaseUser user = mAuth.getCurrentUser();
                 if(user == null){
-                    String email = "boyzaburin@hotmail.com";
+                    String email = "15621.smnr@gmail.com";
                     String password = "123456";
 
                     updateProfile = false;
