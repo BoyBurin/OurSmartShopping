@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import com.example.seniorproject.smartshopping.R;
 import com.example.seniorproject.smartshopping.model.dao.Group;
+import com.example.seniorproject.smartshopping.model.dao.GroupMap;
 import com.example.seniorproject.smartshopping.model.dao.User;
 import com.example.seniorproject.smartshopping.model.manager.Contextor;
 import com.example.seniorproject.smartshopping.model.manager.GroupManager;
@@ -239,10 +240,11 @@ public class LoginFragment extends Fragment {
                                         @Override
                                         public void onDataChange(DataSnapshot dataSnapshot) {
                                             GroupManager gm = GroupManager.getInstance();
+                                            String groupID = dataSnapshot.getKey();
                                             Group group = dataSnapshot.getValue(Group.class);
-                                            gm.addGroup(group);
-                                            gm.setCurrentGroup(gm.getGroups().get(0));
-                                            Log.d("Group Name: ", gm.getCurrentGroup().getName().toString());
+                                            gm.addGroup(new GroupMap(groupID, group));
+                                            gm.setCurrentGroup(gm.getGroup(0));
+                                            Log.d("Group Name: ", gm.getCurrentGroup().getId());
 
                                             // Go to Main
                                             LoginFragmentListener loginFragmentListener = (LoginFragmentListener) getActivity();
