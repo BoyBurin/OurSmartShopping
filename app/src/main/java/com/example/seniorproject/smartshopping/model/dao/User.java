@@ -3,25 +3,28 @@ package com.example.seniorproject.smartshopping.model.dao;
 import android.content.Context;
 
 import com.example.seniorproject.smartshopping.model.manager.Contextor;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
-import java.util.StringTokenizer;
 
 
-public class Group {
-
-    private static Group instance;
+public class User {
 
     /******************************************************************************************
      * ****************************** Variable *********************************************
      *******************************************************************************************/
 
     private String name;
+    private String email;
+    private String photoRef;
 
     /******************************************************************************************
      * ****************************** Methods *********************************************
      *******************************************************************************************/
 
+    public User(){
+
+    }
 
     public String getName() {
         return name;
@@ -31,4 +34,19 @@ public class Group {
         this.name = name;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPhotoRef() {
+        return photoRef;
+    }
+
+    public void setPhotoRef(String photoRef) {
+        this.photoRef = photoRef;
+    }
 }

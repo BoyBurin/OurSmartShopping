@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.seniorproject.smartshopping.R;
+import com.example.seniorproject.smartshopping.model.manager.GroupManager;
 
 
 public class ShoppingListFragment extends Fragment {
@@ -47,7 +48,7 @@ public class ShoppingListFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_main_shopping_list, container, false);
         initInstances(rootView, savedInstanceState);
         return rootView;
     }
