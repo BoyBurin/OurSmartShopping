@@ -1,12 +1,8 @@
 package com.example.seniorproject.smartshopping.controller.activity;
 
-import android.app.Dialog;
 import android.content.Intent;
-import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -19,6 +15,7 @@ import android.widget.Toast;
 
 import com.example.seniorproject.smartshopping.R;
 import com.example.seniorproject.smartshopping.controller.fragment.dialogfragment.FragmentDialogAddShoppingList;
+import com.example.seniorproject.smartshopping.controller.fragment.mainfragment.InventoryFragment;
 import com.example.seniorproject.smartshopping.controller.fragment.loginfragment.LoginFragment;
 import com.example.seniorproject.smartshopping.controller.fragment.mainfragment.ShoppingListFragment;
 import com.example.seniorproject.smartshopping.model.dao.Group;
@@ -36,8 +33,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class MainActivity extends AppCompatActivity implements ShoppingListFragment.ShoopingListFloatingButton
-, FragmentDialogAddShoppingList.DeleteAddShoppingListDialog, FragmentDialogAddShoppingList.PickImageShoppingListDialog {
+public class MainActivity extends AppCompatActivity {
     /***********************************************************************************************
      ************************************* Variable class ********************************************
      ***********************************************************************************************/
@@ -99,17 +95,15 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
 
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == FragmentDialogAddShoppingList.RC_PHOTO_PICKER){
-            if(resultCode == RESULT_OK){
-                Fragment addShoppingListDialog = getSupportFragmentManager()
-                        .findFragmentByTag(DIALOG_ADD_SHOPPING_LIST_FRAGMENT);
-
-                addShoppingListDialog.onActivityResult(requestCode, resultCode, data);
-            }
+    private void hideKeyboard(){
+        InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+        //Find the currently focused view, so we can grab the correct window token from it.
+        View view = getCurrentFocus();
+        //If no view currently has focus, create a new one, just so we can grab a window token from it
+        if (view == null) {
+            view = new View(MainActivity.this);
         }
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
     @Override
@@ -147,6 +141,12 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
                 ShoppingListFragment shoppingListFragment = (ShoppingListFragment)
                         getSupportFragmentManager().findFragmentByTag(SHOPPING_LIST_FRAGMENT);
 
+
+            if(view == btnInventory){
+
+                InventoryFragment inventoryFragment = (InventoryFragment)
+                        getSupportFragmentManager().findFragmentByTag("InventoryFragment");
+
                 getSupportFragmentManager().beginTransaction()
                         .attach(shoppingListFragment)
                         .commit();
@@ -155,47 +155,8 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
         }
     };
 
-    private void hideKeyboard(){
-        InputMethodManager imm = (InputMethodManager) getSystemService(this.INPUT_METHOD_SERVICE);
-        //Find the currently focused view, so we can grab the correct window token from it.
-        View view = getCurrentFocus();
-        //If no view currently has focus, create a new one, just so we can grab a window token from it
-        if (view == null) {
-            view = new View(this);
-        }
-        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-    }
 
 
-    /***********************************************************************************************
-     ************************************* Implement Methods ********************************************
-     ***********************************************************************************************/
 
-    @Override
-    public void setShoopingListFloatingButtonFloationgButton() {
-        DialogFragment addShoppingListDialog =
-                FragmentDialogAddShoppingList.newInstance();
-        addShoppingListDialog.show(getSupportFragmentManager(), DIALOG_ADD_SHOPPING_LIST_FRAGMENT);
-
-    }
-
-
-    @Override
-    public void delete() {
-        Fragment addShoppingListDialog = getSupportFragmentManager().findFragmentByTag(DIALOG_ADD_SHOPPING_LIST_FRAGMENT);
-        getSupportFragmentManager().beginTransaction()
-                .remove(addShoppingListDialog)
-                .commit();
-        hideKeyboard();
-    }
-
-    @Override
-    public void pickImage() {
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("image/jpeg");
-        intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
-        startActivityForResult(Intent.createChooser(intent, "Complete action using"),
-                FragmentDialogAddShoppingList.RC_PHOTO_PICKER);
-    }
 
 }
