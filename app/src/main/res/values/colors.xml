@@ -4,10 +4,13 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
 
+    <color name="overlay_color">#80000000</color>
+
     <!-- Main Shopping List -->
 
     <color name="grey">#EDEEEF</color>
     <color name="primary">#83CF1C</color>
+    <color name="dark_grey">#AEAEAE</color>
 
     <!-- ...............................................  -->
 </resources>
