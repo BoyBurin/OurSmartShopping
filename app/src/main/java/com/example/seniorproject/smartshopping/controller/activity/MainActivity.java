@@ -12,6 +12,7 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.example.seniorproject.smartshopping.R;
+import com.example.seniorproject.smartshopping.controller.fragment.mainfragment.InventoryFragment;
 import com.example.seniorproject.smartshopping.model.dao.Group;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -62,6 +63,9 @@ public class MainActivity extends AppCompatActivity {
         btnShoppingList = (ImageButton) findViewById(R.id.btnShoppingList);
         btnShoppingList.setOnClickListener(topBarOnClickListener);
 
+        btnInventory = (ImageButton) findViewById(R.id.btnInventory);
+        btnInventory.setOnClickListener(topBarOnClickListener);
+
         mRootRef = FirebaseDatabase.getInstance();
     }
 
@@ -98,6 +102,16 @@ public class MainActivity extends AppCompatActivity {
 
                 Toast.makeText(MainActivity.this, "Create Group Success; " + myFirstGroup.getName(),
                         Toast.LENGTH_SHORT).show();
+            }
+
+            if(view == btnInventory){
+
+                InventoryFragment inventoryFragment = (InventoryFragment)
+                        getSupportFragmentManager().findFragmentByTag("InventoryFragment");
+
+                getSupportFragmentManager().beginTransaction()
+                        .attach(inventoryFragment)
+                        .commit();
             }
         }
     };
