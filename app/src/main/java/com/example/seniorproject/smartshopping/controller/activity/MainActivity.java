@@ -20,6 +20,7 @@ import android.widget.Toast;
 import com.example.seniorproject.smartshopping.R;
 import com.example.seniorproject.smartshopping.controller.fragment.dialogfragment.FragmentDialogAddShoppingList;
 import com.example.seniorproject.smartshopping.controller.fragment.loginfragment.LoginFragment;
+import com.example.seniorproject.smartshopping.controller.fragment.mainfragment.InventoryFragment;
 import com.example.seniorproject.smartshopping.controller.fragment.mainfragment.ShoppingListFragment;
 import com.example.seniorproject.smartshopping.model.dao.Group;
 import com.example.seniorproject.smartshopping.model.dao.User;
@@ -55,6 +56,9 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
 
     final String SHOPPING_LIST_FRAGMENT = "ShoppingListFragment";
     final String  DIALOG_ADD_SHOPPING_LIST_FRAGMENT = "dialogAddShoppingListFragment";
+    final String INVENTORY_FRAGMENT = "inventoryFragment";
+
+    private Fragment current;
 
 
     /***********************************************************************************************
@@ -82,6 +86,9 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
         btnShoppingList = (ImageButton) findViewById(R.id.btnShoppingList);
         btnShoppingList.setOnClickListener(topBarOnClickListener);
 
+        btnInventory = (ImageButton) findViewById(R.id.btnInventory);
+        btnInventory.setOnClickListener(topBarOnClickListener);
+
         mRootRef = FirebaseDatabase.getInstance();
         mGroupRef = mRootRef.getReference().child("groups");
 
@@ -89,11 +96,17 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
 
         if(user != null) {
             ShoppingListFragment shoppingListFragment = ShoppingListFragment.newInstance();
+            InventoryFragment inventoryFragment = InventoryFragment.newInstance();
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.containerMain, shoppingListFragment,
                             SHOPPING_LIST_FRAGMENT)
+                    .add(R.id.containerMain, inventoryFragment,
+                            INVENTORY_FRAGMENT)
                     .detach(shoppingListFragment)
+                    .detach(inventoryFragment)
                     .commit();
+
+            current = shoppingListFragment;
         }
 
 
@@ -138,18 +151,33 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
     final View.OnClickListener topBarOnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
+            ShoppingListFragment shoppingListFragment = (ShoppingListFragment)
+                    getSupportFragmentManager().findFragmentByTag(SHOPPING_LIST_FRAGMENT);
+
+            InventoryFragment inventoryFragment = (InventoryFragment)
+                    getSupportFragmentManager().findFragmentByTag(INVENTORY_FRAGMENT);
+
             if(view == btnPromotion){
                 FirebaseAuth.getInstance().signOut();
                 Toast.makeText(MainActivity.this, "Logout Success", Toast.LENGTH_SHORT).show();
             }
 
             if(view == btnShoppingList){
-                ShoppingListFragment shoppingListFragment = (ShoppingListFragment)
-                        getSupportFragmentManager().findFragmentByTag(SHOPPING_LIST_FRAGMENT);
 
                 getSupportFragmentManager().beginTransaction()
+                        .detach(current)
                         .attach(shoppingListFragment)
                         .commit();
+                current = shoppingListFragment;
+            }
+
+            if(view == btnInventory){
+
+                getSupportFragmentManager().beginTransaction()
+                        .detach(current)
+                        .attach(inventoryFragment)
+                        .commit();
+                current = inventoryFragment;
             }
 
         }
