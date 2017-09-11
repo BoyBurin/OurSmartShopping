@@ -17,6 +17,7 @@ public class ItemInventory implements Parcelable {
     private String comment;
     private String photoUrl;
     private RemindItem remindItem;
+    private String unit;
 
     /******************************************************************************************
      * ****************************** Methods *********************************************
@@ -66,6 +67,14 @@ public class ItemInventory implements Parcelable {
         this.remindItem = remindItem;
     }
 
+    public String getUnit() {
+        return unit;
+    }
+
+    public void setUnit(String unit) {
+        this.unit = unit;
+    }
+
     /******************************************************************************************
      * ****************************** Implementation *********************************************
      *******************************************************************************************/
@@ -75,6 +84,7 @@ public class ItemInventory implements Parcelable {
         amount = in.readInt();
         comment = in.readString();
         photoUrl = in.readString();
+        unit = in.readString();
         remindItem = in.readParcelable(RemindItem.class.getClassLoader());
     }
 
@@ -84,6 +94,7 @@ public class ItemInventory implements Parcelable {
         dest.writeInt(amount);
         dest.writeString(comment);
         dest.writeString(photoUrl);
+        dest.writeString(unit);
         dest.writeParcelable(remindItem, flags);
     }
 

@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.GridLayout;
 import android.widget.GridView;
 import android.widget.ImageButton;
@@ -38,6 +39,10 @@ public class InventoryFragment extends Fragment{
     /***********************************************************************************************
      ************************************* Variable class ********************************************
      ***********************************************************************************************/
+    public interface MoreItemInventoryListener{
+        void goToMoreItemInventory(int position);
+    }
+
     private ImageButton btnAll;
     private ImageButton btnMeat;
     private ImageButton btnVegetandFruit;
@@ -46,10 +51,6 @@ public class InventoryFragment extends Fragment{
     private ImageButton btnbCleaningEquip;
     private FloatingActionButton fab;
 
-    private ItemView itemViewRecently1;
-    private ItemView itemViewRecently2;
-    private ItemView itemViewRecently3;
-    private ItemView itemViewRecently4;
 
     private GridView gridView;
     private ItemInventoryAdapter itemInventoryAdapter;
@@ -109,23 +110,14 @@ public class InventoryFragment extends Fragment{
 
     @SuppressWarnings("UnusedParameters")
     private void initInstances(View rootView, Bundle savedInstanceState) {
-        // Init 'View' instance(s) with rootView.findViewById here
-        itemViewRecently1 = (ItemView) rootView.findViewById(R.id.itemViewRecently1);
-        itemViewRecently2 = (ItemView) rootView.findViewById(R.id.itemViewRecently2);
-        itemViewRecently3 = (ItemView) rootView.findViewById(R.id.itemViewRecently3);
-        //itemViewRecently4 = (ItemView) rootView.findViewById(R.id.itemViewRecently4);
-
-        //itemViewRecently1.setImageUrl("https://firebasestorage.googleapis.com/v0/b/smartshopping-6d8db.appspot.com/o/shoppinglist%2Fimage%3A271706?alt=media&token=5b2c7e53-bef9-41b5-8f92-7f0cc0aa7517");
-        //itemViewRecently2.setImageUrl("https://firebasestorage.googleapis.com/v0/b/smartshopping-6d8db.appspot.com/o/shoppinglist%2Fimage%3A271706?alt=media&token=5b2c7e53-bef9-41b5-8f92-7f0cc0aa7517");
-        //itemViewRecently3.setImageUrl("https://firebasestorage.googleapis.com/v0/b/smartshopping-6d8db.appspot.com/o/shoppinglist%2Fimage%3A271706?alt=media&token=5b2c7e53-bef9-41b5-8f92-7f0cc0aa7517");
-        //itemViewRecently4.setImageUrl("https://firebasestorage.googleapis.com/v0/b/smartshopping-6d8db.appspot.com/o/shoppinglist%2Fimage%3A271706?alt=media&token=5b2c7e53-bef9-41b5-8f92-7f0cc0aa7517");
-
 
         gridView = (GridView) rootView.findViewById(R.id.gridView);
         gridView.setAdapter(itemInventoryAdapter);
 
         fab = (FloatingActionButton) rootView.findViewById(R.id.fab);
         fab.setOnClickListener(addItemListener);
+
+        gridView.setOnItemClickListener(moreItemInventoryListener);
 
 
 
@@ -230,6 +222,18 @@ public class InventoryFragment extends Fragment{
         @Override
         public void onCancelled(DatabaseError databaseError) {
 
+        }
+    };
+
+    final AdapterView.OnItemClickListener moreItemInventoryListener = new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+            if(position < ItemInventoryManager.getInstance().getSize()) {
+                MoreItemInventoryListener moreItemInventoryListener =
+                        (MoreItemInventoryListener) getActivity();
+                moreItemInventoryListener.goToMoreItemInventory(position);
+            }
         }
     };
 

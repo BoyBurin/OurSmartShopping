@@ -23,6 +23,7 @@ import com.example.seniorproject.smartshopping.controller.fragment.loginfragment
 import com.example.seniorproject.smartshopping.controller.fragment.mainfragment.InventoryFragment;
 import com.example.seniorproject.smartshopping.controller.fragment.mainfragment.ShoppingListFragment;
 import com.example.seniorproject.smartshopping.model.dao.Group;
+import com.example.seniorproject.smartshopping.model.dao.ItemInventoryMap;
 import com.example.seniorproject.smartshopping.model.dao.User;
 import com.example.seniorproject.smartshopping.model.manager.GroupManager;
 import com.google.firebase.auth.FirebaseAuth;
@@ -38,7 +39,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity implements ShoppingListFragment.ShoopingListFloatingButton
-, FragmentDialogAddShoppingList.DeleteAddShoppingListDialog, FragmentDialogAddShoppingList.PickImageShoppingListDialog {
+, FragmentDialogAddShoppingList.DeleteAddShoppingListDialog, FragmentDialogAddShoppingList.PickImageShoppingListDialog,
+        InventoryFragment.MoreItemInventoryListener{
     /***********************************************************************************************
      ************************************* Variable class ********************************************
      ***********************************************************************************************/
@@ -70,10 +72,10 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        init();
+        initInstances(savedInstanceState);
     }
 
-    private void init(){
+    private void initInstances(Bundle savedInstanceState){
 
         setTitle(GroupManager.getInstance().getCurrentGroup().getGroup().getName());
 
@@ -92,9 +94,8 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
         mRootRef = FirebaseDatabase.getInstance();
         mGroupRef = mRootRef.getReference().child("groups");
 
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
-        if(user != null) {
+        if(savedInstanceState == null) {
             ShoppingListFragment shoppingListFragment = ShoppingListFragment.newInstance();
             InventoryFragment inventoryFragment = InventoryFragment.newInstance();
             getSupportFragmentManager().beginTransaction()
@@ -226,4 +227,10 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
                 FragmentDialogAddShoppingList.RC_PHOTO_PICKER);
     }
 
+    @Override
+    public void goToMoreItemInventory(int position) {
+        Intent intent = new Intent(this, MoreItemInventoryActivity.class);
+        intent.putExtra("position", position);
+        startActivity(intent);
+    }
 }
