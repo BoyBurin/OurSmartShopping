@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -41,15 +42,18 @@ public class ShoppingListFragment extends Fragment {
          void setShoopingListFloatingButtonFloationgButton();
     }
 
+    public interface MoreShoppingListItemListener{
+        void goToMoreShoppingListItem(int position);
+    }
+
     private ListView listView;
     private ShoppingListAdapter shoppingListAdapter;
     private ShoppingListManager shoppingListManager;
     private MutableInteger lastPositionInteger;
     private FloatingActionButton fab;
 
-    private FirebaseUser user;
     private DatabaseReference mMessagesDatabaseReference;
-    DatabaseReference shoopingListRef;
+    private DatabaseReference shoopingListRef;
 
 
 
@@ -88,14 +92,15 @@ public class ShoppingListFragment extends Fragment {
 
     private void init(Bundle savedInstanceState) {
         // Init Fragment level's variable(s) here
-        user = FirebaseAuth.getInstance().getCurrentUser();
         shoppingListManager = ShoppingListManager.getInstance();
         lastPositionInteger = new MutableInteger(-1);
         mMessagesDatabaseReference = FirebaseDatabase.getInstance().getReference();
-        shoopingListRef = mMessagesDatabaseReference.child("shoppinglist");
+        shoopingListRef = mMessagesDatabaseReference.child("shoppinglistingroup")
+        .child(GroupManager.getInstance().getCurrentGroup().getId());
         shoopingListRef.addChildEventListener(modifyShoppingListListener);
         shoppingListAdapter = new ShoppingListAdapter(lastPositionInteger);
         shoppingListManager = ShoppingListManager.getInstance();
+
 
     }
 
@@ -109,6 +114,8 @@ public class ShoppingListFragment extends Fragment {
         fab.setOnClickListener(addShoppingListListener);
         shoppingListAdapter.setShoppingLists(shoppingListManager.getShoppingLists());
         listView.setAdapter(shoppingListAdapter);
+
+        listView.setOnItemClickListener(moreShoppingListItemListener);
 
 
 
@@ -153,6 +160,11 @@ public class ShoppingListFragment extends Fragment {
         }
     }*/
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        shoopingListRef.removeEventListener(modifyShoppingListListener);
+    }
 
     @Override
     public void onStart() {
@@ -199,13 +211,25 @@ public class ShoppingListFragment extends Fragment {
     final ChildEventListener modifyShoppingListListener = new ChildEventListener() {
         @Override
         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-            ShoppingListMap sMap = new ShoppingListMap();
-            sMap.setId(dataSnapshot.getKey());
-            sMap.setShoppingList(dataSnapshot.getValue(ShoppingList.class));
-            shoppingListManager.insertDaoAtTopPosition(sMap);
+            String shoppingListID = dataSnapshot.getKey();
+            mMessagesDatabaseReference.child("shoppinglist").child(shoppingListID)
+                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            ShoppingListMap sMap = new ShoppingListMap();
+                            sMap.setId(dataSnapshot.getKey());
+                            sMap.setShoppingList(dataSnapshot.getValue(ShoppingList.class));
+                            shoppingListManager.insertDaoAtTopPosition(sMap);
 
-            shoppingListAdapter.setShoppingLists(shoppingListManager.getShoppingLists());
-            shoppingListAdapter.notifyDataSetChanged();
+                            shoppingListAdapter.setShoppingLists(shoppingListManager.getShoppingLists());
+                            shoppingListAdapter.notifyDataSetChanged();
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
         }
 
         @Override
@@ -228,6 +252,19 @@ public class ShoppingListFragment extends Fragment {
 
         }
     };
+
+    final AdapterView.OnItemClickListener moreShoppingListItemListener = new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            if(position < ShoppingListManager.getInstance().getSize()) {
+                MoreShoppingListItemListener moreShoppingListItemListener =
+                        (MoreShoppingListItemListener) getActivity();
+                moreShoppingListItemListener.goToMoreShoppingListItem(position);
+            }
+
+        }
+    };
+
 
 
     /***********************************************************************************************
