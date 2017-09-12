@@ -64,5 +64,9 @@ public class ShoppingListManager {
         return shoppingLists;
     }
 
+    public void reset(){
+        shoppingListMaps = new ArrayList<ShoppingListMap>();
+    }
+
 
 }

@@ -71,4 +71,8 @@ public class ItemInventoryManager {
         return index;
     }
 
+    public void reset(){
+        itemInventoryMaps = new ArrayList<ItemInventoryMap>();
+    }
+
 }

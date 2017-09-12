@@ -72,4 +72,9 @@ public class GroupManager {
         return groups;
     }
 
+    public void reset(){
+        groups = new ArrayList<GroupMap>();
+        currentGroup = null;
+    }
+
 }

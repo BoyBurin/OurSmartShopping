@@ -15,9 +15,12 @@ import com.example.seniorproject.smartshopping.R;
 import com.example.seniorproject.smartshopping.controller.fragment.dialogfragment.FragmentDialogAddShoppingList;
 import com.example.seniorproject.smartshopping.controller.fragment.mainfragment.InventoryFragment;
 import com.example.seniorproject.smartshopping.controller.fragment.mainfragment.ShoppingListFragment;
+import com.example.seniorproject.smartshopping.model.dao.Group;
 import com.example.seniorproject.smartshopping.model.dao.ItemInventory;
 import com.example.seniorproject.smartshopping.model.dao.ItemInventoryMap;
 import com.example.seniorproject.smartshopping.model.manager.GroupManager;
+import com.example.seniorproject.smartshopping.model.manager.ItemInventoryManager;
+import com.example.seniorproject.smartshopping.model.manager.ShoppingListManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -118,6 +121,14 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
     protected void onPostCreate(@Nullable Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        ItemInventoryManager.getInstance().reset();
+        ShoppingListManager.getInstance().reset();
+        GroupManager.getInstance().reset();
     }
 
     @Override
