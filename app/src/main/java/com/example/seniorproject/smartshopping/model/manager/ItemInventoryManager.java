@@ -60,7 +60,7 @@ public class ItemInventoryManager {
         return itemInventories;
     }
 
-   /* public int getIndexByKey(String key){
+    public int getIndexByKey(String key){
         int index = -1;
         for(int i = 0 ; i < getSize() ; i++){
             if(key.equals(itemInventoryMaps.get(i).getId())){
@@ -69,6 +69,6 @@ public class ItemInventoryManager {
             }
         }
         return index;
-    } */
+    }
 
 }

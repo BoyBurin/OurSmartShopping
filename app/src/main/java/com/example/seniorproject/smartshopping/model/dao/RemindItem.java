@@ -12,8 +12,8 @@ public class RemindItem implements Parcelable{
     /******************************************************************************************
      * ****************************** Variable *********************************************
      *******************************************************************************************/
-    private int soft;
-    private int hard;
+    private long soft;
+    private long hard;
 
     /******************************************************************************************
      * ****************************** Methods *********************************************
@@ -24,19 +24,19 @@ public class RemindItem implements Parcelable{
     }
 
 
-    public int getSoft() {
+    public long getSoft() {
         return soft;
     }
 
-    public void setSoft(int soft) {
+    public void setSoft(long soft) {
         this.soft = soft;
     }
 
-    public int getHard() {
+    public long getHard() {
         return hard;
     }
 
-    public void setHard(int hard) {
+    public void setHard(long hard) {
         this.hard = hard;
     }
 
@@ -46,14 +46,14 @@ public class RemindItem implements Parcelable{
 
 
     protected RemindItem(Parcel in) {
-        soft = in.readInt();
-        hard = in.readInt();
+        soft = in.readLong();
+        hard = in.readLong();
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(soft);
-        dest.writeInt(hard);
+        dest.writeLong(soft);
+        dest.writeLong(hard);
     }
 
     @Override

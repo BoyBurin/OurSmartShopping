@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.seniorproject.smartshopping.R;
+import com.example.seniorproject.smartshopping.model.dao.ItemInventory;
 import com.example.seniorproject.smartshopping.model.dao.ItemInventoryMap;
 import com.example.seniorproject.smartshopping.model.manager.ItemInventoryManager;
 import com.example.seniorproject.smartshopping.view.specialview.SlidingTabLayout;
@@ -25,7 +26,6 @@ public class MoreItemInventoryFragment extends Fragment {
     private ViewPager viewPager;
     private ItemInventoryMap itemInventoryMap;
     private SlidingTabLayout slidingTabLayout;
-    private int position;
 
     /***********************************************************************************************
      ************************************* Method class ********************************************
@@ -36,10 +36,10 @@ public class MoreItemInventoryFragment extends Fragment {
     }
 
     @SuppressWarnings("unused")
-    public static MoreItemInventoryFragment newInstance(int position) {
+    public static MoreItemInventoryFragment newInstance(ItemInventoryMap itemInventoryMap) {
         MoreItemInventoryFragment fragment = new MoreItemInventoryFragment();
         Bundle args = new Bundle();
-        args.putInt("position", position);
+        args.putParcelable("itemInventoryMap", itemInventoryMap);
         fragment.setArguments(args);
         return fragment;
     }
@@ -48,8 +48,7 @@ public class MoreItemInventoryFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        position = getArguments().getInt("position");
-        itemInventoryMap = ItemInventoryManager.getInstance().getItemInventory(position);
+        itemInventoryMap = getArguments().getParcelable("itemInventoryMap");
         init(savedInstanceState);
 
         if (savedInstanceState != null)
@@ -78,9 +77,9 @@ public class MoreItemInventoryFragment extends Fragment {
             public Fragment getItem(int page) {
                 switch (page){
                     case 0:
-                        return MoreItemInventoryPhotoSummaryFragment.newInstance(position);
+                        return MoreItemInventoryPhotoSummaryFragment.newInstance(itemInventoryMap);
                     case 1:
-                        return MoreItemInventoryEditFragment.newInstance(position);
+                        return MoreItemInventoryEditFragment.newInstance(itemInventoryMap);
                     default:
                         return null;
 

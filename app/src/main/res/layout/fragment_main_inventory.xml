@@ -119,11 +119,20 @@
 
         </LinearLayout> -->
 
+    <TextView
+        android:id="@+id/tvInventory"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Inventory"
+        android:padding="16dp"
+        android:textColor="@android:color/black"/>
+
         <GridView
             android:id="@+id/gridView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
+            android:layout_below="@+id/tvInventory"
             android:horizontalSpacing="4dp"
             android:numColumns="auto_fit"
             android:verticalSpacing="4dp" />

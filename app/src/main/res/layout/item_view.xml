@@ -1,23 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:weightSum="3"
+    android:layout_marginLeft="8dp"
     android:layout_marginRight="8dp"
-    android:layout_marginLeft="8dp">
-
-    <ImageView
-        android:id="@+id/imgItem"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="2"
-        android:scaleType="fitXY"/>
+    android:orientation="vertical"
+    android:weightSum="3">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layout_alignParentBottom="true">
+        android:layout_weight="2">
+
+        <ImageView
+            android:id="@+id/imgItem"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="fitXY" />
+
+        <ImageView
+            android:id="@+id/ivRoundGreen"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:background="@drawable/shape_round_green"
+            android:visibility="gone" />
+
+        <ImageView
+            android:id="@+id/ivRoundYellow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:background="@drawable/shape_round_yellow"
+            android:visibility="gone" />
+
+        <ImageView
+            android:id="@+id/ivRoundRed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:background="@drawable/shape_round_red"
+            android:visibility="gone" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_alignParentBottom="true"
+        android:layout_weight="1">
 
 
         <TextView
@@ -31,7 +62,6 @@
             android:text="My Name is Burin"
             android:textColor="@android:color/black"
             android:textSize="12sp" />
-
 
 
     </RelativeLayout>

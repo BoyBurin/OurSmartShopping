@@ -21,6 +21,7 @@ import android.widget.Toast;
 import com.example.seniorproject.smartshopping.R;
 import com.example.seniorproject.smartshopping.model.dao.ItemInventory;
 import com.example.seniorproject.smartshopping.model.dao.ItemInventoryMap;
+import com.example.seniorproject.smartshopping.model.dao.RemindItem;
 import com.example.seniorproject.smartshopping.model.datatype.MutableInteger;
 import com.example.seniorproject.smartshopping.model.manager.GroupManager;
 import com.example.seniorproject.smartshopping.model.manager.ItemInventoryManager;
@@ -35,12 +36,14 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.HashMap;
+
 public class InventoryFragment extends Fragment{
     /***********************************************************************************************
      ************************************* Variable class ********************************************
      ***********************************************************************************************/
     public interface MoreItemInventoryListener{
-        void goToMoreItemInventory(int position);
+        void goToMoreItemInventory(ItemInventoryMap itemInventoryMap, int position);
     }
 
     private ImageButton btnAll;
@@ -102,6 +105,9 @@ public class InventoryFragment extends Fragment{
                 .child(GroupManager.getInstance().getCurrentGroup().getId())
                 .addChildEventListener(itemInventoryListener);
 
+        /*mDatabaseRef.child("iteminventory")
+                .addChildEventListener(itemUpdateListener);*/
+
 
 
 
@@ -122,6 +128,17 @@ public class InventoryFragment extends Fragment{
 
 
 
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mDatabaseRef.child("itemingroup")
+                .child(GroupManager.getInstance().getCurrentGroup().getId())
+                .removeEventListener(itemInventoryListener);
+
+        /*mDatabaseRef.child("iteminventory")
+                .removeEventListener(itemUpdateListener);*/
     }
 
     @Override
@@ -187,13 +204,53 @@ public class InventoryFragment extends Fragment{
                     .addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
-                            ItemInventory itemInventory = dataSnapshot.getValue(ItemInventory.class);
+                            final ItemInventory itemInventory = dataSnapshot.getValue(ItemInventory.class);
                             ItemInventoryMap itemInventoryMap = new ItemInventoryMap(itemInventoryID, itemInventory);
                             ItemInventoryManager.getInstance().addItemInventory(itemInventoryMap);
                             itemInventoryAdapter.setItemInventories(ItemInventoryManager.getInstance().getItemInventories());
                             itemInventoryAdapter.notifyDataSetChanged();
-                            Log.d("Soft", ""+ itemInventory.getRemindItem().getSoft());
-                            Log.d("Hard", ""+ itemInventory.getRemindItem().getHard());
+
+                            mDatabaseRef.child("iteminventory").orderByKey().equalTo(itemInventoryID)
+                                    .addChildEventListener(new ChildEventListener() {
+                                        @Override
+                                        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+
+                                        }
+
+                                        @Override
+                                        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                                            HashMap<String, Object> data = (HashMap<String, Object>) dataSnapshot.getValue();
+                                            HashMap<String, Object> remindItem = (HashMap<String, Object>) dataSnapshot
+                                                    .child("remindItem").getValue();
+
+                                            long soft = (Long)remindItem.get("soft");
+                                            long hard = (Long)remindItem.get("hard");
+                                            long amount = (Long) data.get("amount");
+                                            int index = ItemInventoryManager.getInstance().getIndexByKey(itemInventoryID);
+                                            ItemInventoryMap itemInventoryMap = ItemInventoryManager.getInstance().getItemInventory(index);
+                                            itemInventoryMap.getItemInventory().getRemindItem().setSoft(soft);
+                                            itemInventoryMap.getItemInventory().getRemindItem().setHard(hard);
+                                            itemInventoryMap.getItemInventory().setAmount(amount);
+                                            itemInventoryAdapter.setItemInventories(ItemInventoryManager.getInstance().getItemInventories());
+                                            itemInventoryAdapter.notifyDataSetChanged();
+
+                                        }
+
+                                        @Override
+                                        public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                                        }
+
+                                        @Override
+                                        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                                        }
+
+                                        @Override
+                                        public void onCancelled(DatabaseError databaseError) {
+
+                                        }
+                                    });
 
                         }
 
@@ -202,6 +259,7 @@ public class InventoryFragment extends Fragment{
 
                         }
                     });
+
         }
 
         @Override
@@ -230,12 +288,50 @@ public class InventoryFragment extends Fragment{
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
             if(position < ItemInventoryManager.getInstance().getSize()) {
+
+                ItemInventoryMap itemInventoryMap = ItemInventoryManager.getInstance().getItemInventory(position);
                 MoreItemInventoryListener moreItemInventoryListener =
                         (MoreItemInventoryListener) getActivity();
-                moreItemInventoryListener.goToMoreItemInventory(position);
+                moreItemInventoryListener.goToMoreItemInventory(itemInventoryMap, position);
             }
         }
     };
+
+    /*final ChildEventListener itemUpdateListener = new ChildEventListener() {
+        @Override
+        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+        }
+
+        @Override
+        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+            ItemInventory itemInventory = dataSnapshot.getValue(ItemInventory.class);
+            String itemInventoryID = dataSnapshot.getKey();
+            int index = ItemInventoryManager.getInstance().getIndexByKey(itemInventoryID);
+            if(index == -1){
+                return;
+            }
+            ItemInventoryMap itemInventoryMap = ItemInventoryManager.getInstance().getItemInventory(index);
+            itemInventoryMap.getItemInventory().getRemindItem().setSoft(itemInventory.getRemindItem().getSoft());
+            itemInventoryMap.getItemInventory().getRemindItem().setHard(itemInventory.getRemindItem().getHard());
+            itemInventoryAdapter.setItemInventories(ItemInventoryManager.getInstance().getItemInventories());
+            itemInventoryAdapter.notifyDataSetChanged();
+            Log.d("Tag: ", "Change");
+        }
+
+        @Override
+        public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+        }
+
+        @Override
+        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+    };*/
 
 
     /***********************************************************************************************

@@ -32,7 +32,6 @@ public class MoreItemInventoryPhotoSummaryFragment extends Fragment {
      ***********************************************************************************************/
 
     private ItemInventoryMap itemInventoryMap;
-    private int position;
 
     private TextView tvName;
     private TextView tvAmount;
@@ -53,10 +52,10 @@ public class MoreItemInventoryPhotoSummaryFragment extends Fragment {
     }
 
     @SuppressWarnings("unused")
-    public static MoreItemInventoryPhotoSummaryFragment newInstance(int position) {
+    public static MoreItemInventoryPhotoSummaryFragment newInstance(ItemInventoryMap itemInventoryMap) {
         MoreItemInventoryPhotoSummaryFragment fragment = new MoreItemInventoryPhotoSummaryFragment();
         Bundle args = new Bundle();
-        args.putInt("position", position);
+        args.putParcelable("itemInventoryMap", itemInventoryMap);
         fragment.setArguments(args);
         return fragment;
     }
@@ -64,8 +63,7 @@ public class MoreItemInventoryPhotoSummaryFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        position = getArguments().getInt("position");
-        itemInventoryMap = ItemInventoryManager.getInstance().getItemInventory(position);
+        itemInventoryMap = getArguments().getParcelable("itemInventoryMap");
         init(savedInstanceState);
 
         if (savedInstanceState != null)
@@ -114,6 +112,13 @@ public class MoreItemInventoryPhotoSummaryFragment extends Fragment {
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mDatabaseRef.child("iteminventory").child(itemInventoryMap.getId())
+                .removeEventListener(updateItemInventory);
+    }
+
+    @Override
     public void onStart() {
         super.onStart();
     }
@@ -148,9 +153,7 @@ public class MoreItemInventoryPhotoSummaryFragment extends Fragment {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
             ItemInventory itemInventory = dataSnapshot.getValue(ItemInventory.class);
-            ItemInventoryManager im = ItemInventoryManager.getInstance();
-            ItemInventoryMap itemMap = im.getItemInventory(position);
-            itemMap.setItemInventory(itemInventory);
+
 
             tvAmount.setText(itemInventory.getAmount() + "");
             tvComment.setText(itemInventory.getComment());

@@ -1,46 +1,30 @@
 package com.example.seniorproject.smartshopping.controller.activity;
 
-import android.app.Dialog;
 import android.content.Intent;
-import android.net.Uri;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
-import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.example.seniorproject.smartshopping.R;
 import com.example.seniorproject.smartshopping.controller.fragment.dialogfragment.FragmentDialogAddShoppingList;
-import com.example.seniorproject.smartshopping.controller.fragment.loginfragment.LoginFragment;
 import com.example.seniorproject.smartshopping.controller.fragment.mainfragment.InventoryFragment;
 import com.example.seniorproject.smartshopping.controller.fragment.mainfragment.ShoppingListFragment;
-import com.example.seniorproject.smartshopping.model.dao.Group;
+import com.example.seniorproject.smartshopping.model.dao.ItemInventory;
 import com.example.seniorproject.smartshopping.model.dao.ItemInventoryMap;
-import com.example.seniorproject.smartshopping.model.dao.User;
 import com.example.seniorproject.smartshopping.model.manager.GroupManager;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-
-import java.util.ArrayList;
-import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity implements ShoppingListFragment.ShoopingListFloatingButton
 , FragmentDialogAddShoppingList.DeleteAddShoppingListDialog, FragmentDialogAddShoppingList.PickImageShoppingListDialog,
-        InventoryFragment.MoreItemInventoryListener{
+        InventoryFragment.MoreItemInventoryListener, ShoppingListFragment.MoreShoppingListItemListener {
     /***********************************************************************************************
      ************************************* Variable class ********************************************
      ***********************************************************************************************/
@@ -61,6 +45,8 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
     final String INVENTORY_FRAGMENT = "inventoryFragment";
 
     private Fragment current;
+    private ImageButton currentBtn;
+
 
 
     /***********************************************************************************************
@@ -79,8 +65,8 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
 
         setTitle(GroupManager.getInstance().getCurrentGroup().getGroup().getName());
 
-        btnPromotion = (ImageButton) findViewById(R.id.btnPromotion);
-        btnPromotion.setOnClickListener(topBarOnClickListener);
+        /*btnPromotion = (ImageButton) findViewById(R.id.btnPromotion);
+        btnPromotion.setOnClickListener(topBarOnClickListener);*/
 
         btnSetting = (ImageButton) findViewById(R.id.btnSetting);
         btnSetting.setOnClickListener(topBarOnClickListener);
@@ -104,10 +90,12 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
                     .add(R.id.containerMain, inventoryFragment,
                             INVENTORY_FRAGMENT)
                     .detach(shoppingListFragment)
-                    .detach(inventoryFragment)
+                    .attach(inventoryFragment)
                     .commit();
 
-            current = shoppingListFragment;
+            current = inventoryFragment;
+            currentBtn = btnInventory;
+            currentBtn.setBackgroundResource(R.drawable.shape_rect_overlay);
         }
 
 
@@ -165,20 +153,30 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
 
             if(view == btnShoppingList){
 
+                if(current == shoppingListFragment) return;
+
                 getSupportFragmentManager().beginTransaction()
-                        .detach(current)
                         .attach(shoppingListFragment)
+                        .detach(current)
                         .commit();
                 current = shoppingListFragment;
+                currentBtn.setBackgroundResource(android.R.color.transparent);
+                currentBtn = btnShoppingList;
+                currentBtn.setBackgroundResource(R.drawable.shape_rect_overlay);
             }
 
             if(view == btnInventory){
 
+                if(current == inventoryFragment) return;
+
                 getSupportFragmentManager().beginTransaction()
-                        .detach(current)
                         .attach(inventoryFragment)
+                        .detach(current)
                         .commit();
                 current = inventoryFragment;
+                currentBtn.setBackgroundResource(android.R.color.transparent);
+                currentBtn = btnInventory;
+                currentBtn.setBackgroundResource(R.drawable.shape_rect_overlay);
             }
 
         }
@@ -228,8 +226,16 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
     }
 
     @Override
-    public void goToMoreItemInventory(int position) {
+    public void goToMoreItemInventory(ItemInventoryMap itemInventoryMap, int position) {
         Intent intent = new Intent(this, MoreItemInventoryActivity.class);
+        intent.putExtra("itemInventoryMap", itemInventoryMap);
+        intent.putExtra("position", position);
+        startActivity(intent);
+    }
+
+    @Override
+    public void goToMoreShoppingListItem(int position) {
+        Intent intent = new Intent(this, MoreShoppingListItemActivity.class);
         intent.putExtra("position", position);
         startActivity(intent);
     }

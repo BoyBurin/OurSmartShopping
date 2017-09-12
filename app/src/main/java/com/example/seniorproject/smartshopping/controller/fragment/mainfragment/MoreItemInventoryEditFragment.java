@@ -32,7 +32,6 @@ public class MoreItemInventoryEditFragment extends Fragment {
 
 
     private ItemInventoryMap itemInventoryMap;
-    private int position;
 
     private EditText edtComment;
     private EditText edtAmount;
@@ -57,10 +56,10 @@ public class MoreItemInventoryEditFragment extends Fragment {
     }
 
     @SuppressWarnings("unused")
-    public static MoreItemInventoryEditFragment newInstance(int position) {
+    public static MoreItemInventoryEditFragment newInstance(ItemInventoryMap itemInventoryMap) {
         MoreItemInventoryEditFragment fragment = new MoreItemInventoryEditFragment();
         Bundle args = new Bundle();
-        args.putInt("position", position);
+        args.putParcelable("itemInventoryMap", itemInventoryMap);
         fragment.setArguments(args);
         return fragment;
     }
@@ -68,8 +67,7 @@ public class MoreItemInventoryEditFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        position = getArguments().getInt("position");
-        itemInventoryMap = ItemInventoryManager.getInstance().getItemInventory(position);
+        itemInventoryMap = getArguments().getParcelable("itemInventoryMap");
         init(savedInstanceState);
 
         if (savedInstanceState != null)
@@ -149,8 +147,8 @@ public class MoreItemInventoryEditFragment extends Fragment {
             ItemInventory itemInventory = itemInventoryMap.getItemInventory();
             String itemInventoryID = itemInventoryMap.getId();
             itemInventory.setAmount(Integer.parseInt(edtAmount.getText().toString()));
-            itemInventory.getRemindItem().setSoft(Integer.parseInt(edtSoft.getText().toString()));
-            itemInventory.getRemindItem().setHard(Integer.parseInt(edtHard.getText().toString()));
+            itemInventory.getRemindItem().setSoft(Long.parseLong(edtSoft.getText().toString()));
+            itemInventory.getRemindItem().setHard(Long.parseLong(edtHard.getText().toString()));
             itemInventory.setComment(edtComment.getText().toString());
 
             mDatabaseRef.child("iteminventory").child(itemInventoryID)

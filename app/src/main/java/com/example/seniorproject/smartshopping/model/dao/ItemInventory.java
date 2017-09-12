@@ -13,7 +13,7 @@ public class ItemInventory implements Parcelable {
      *******************************************************************************************/
 
     private String name;
-    private int amount;
+    private long amount;
     private String comment;
     private String photoUrl;
     private RemindItem remindItem;
@@ -35,11 +35,11 @@ public class ItemInventory implements Parcelable {
         this.name = name;
     }
 
-    public int getAmount() {
+    public long getAmount() {
         return amount;
     }
 
-    public void setAmount(int amount) {
+    public void setAmount(long amount) {
         this.amount = amount;
     }
 
@@ -81,7 +81,7 @@ public class ItemInventory implements Parcelable {
 
     protected ItemInventory(Parcel in) {
         name = in.readString();
-        amount = in.readInt();
+        amount = in.readLong();
         comment = in.readString();
         photoUrl = in.readString();
         unit = in.readString();
@@ -91,7 +91,7 @@ public class ItemInventory implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(name);
-        dest.writeInt(amount);
+        dest.writeLong(amount);
         dest.writeString(comment);
         dest.writeString(photoUrl);
         dest.writeString(unit);

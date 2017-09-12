@@ -2,7 +2,9 @@ package com.example.seniorproject.smartshopping.controller.activity;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.example.seniorproject.smartshopping.R;
 import com.example.seniorproject.smartshopping.controller.fragment.mainfragment.MoreItemInventoryFragment;
@@ -30,12 +32,13 @@ public class MoreItemInventoryActivity extends AppCompatActivity {
             setContentView(R.layout.activity_more_item_inventory);
 
             position = getIntent().getIntExtra("position", 0);
-            itemInventoryMap = ItemInventoryManager.getInstance().getItemInventory(position);
+            itemInventoryMap = getIntent().getParcelableExtra("itemInventoryMap");
+
 
             initInstances();
 
             if(savedInstanceState == null){
-                MoreItemInventoryFragment moreItemInventoryFragment = MoreItemInventoryFragment.newInstance(position);
+                MoreItemInventoryFragment moreItemInventoryFragment = MoreItemInventoryFragment.newInstance(itemInventoryMap);
                 getSupportFragmentManager()
                         .beginTransaction()
                         .add(R.id.containerMoreItemInventory, moreItemInventoryFragment,
