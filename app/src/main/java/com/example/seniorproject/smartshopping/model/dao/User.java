@@ -16,7 +16,7 @@ public class User {
 
     private String name;
     private String email;
-    private String photoRef;
+    private String photoUrl;
 
     /******************************************************************************************
      * ****************************** Methods *********************************************
@@ -42,11 +42,11 @@ public class User {
         this.email = email;
     }
 
-    public String getPhotoRef() {
-        return photoRef;
+    public String getPhotoUrl() {
+        return photoUrl;
     }
 
-    public void setPhotoRef(String photoRef) {
-        this.photoRef = photoRef;
+    public void setPhotoUrl(String photoRef) {
+        this.photoUrl = photoRef;
     }
 }

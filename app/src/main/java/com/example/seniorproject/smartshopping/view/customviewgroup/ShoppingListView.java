@@ -129,7 +129,7 @@ public class ShoppingListView extends BaseCustomViewGroup {
         storageReference = FirebaseStorage.getInstance().getReference();
         Glide.with(getContext())
                 .load(url)
-                .placeholder(R.drawable.bg_small) //default pic
+                .placeholder(R.drawable.loading) //default pic
                 .centerCrop()
                 //.error(Drawable pic)  picture has problem
                 //.transform() Cool !!!

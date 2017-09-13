@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 import com.example.seniorproject.smartshopping.R;
 import com.example.seniorproject.smartshopping.controller.fragment.dialogfragment.FragmentDialogAddShoppingList;
+import com.example.seniorproject.smartshopping.controller.fragment.mainfragment.GroupFragment;
 import com.example.seniorproject.smartshopping.controller.fragment.mainfragment.InventoryFragment;
 import com.example.seniorproject.smartshopping.controller.fragment.mainfragment.ShoppingListFragment;
 import com.example.seniorproject.smartshopping.model.dao.Group;
@@ -48,6 +49,7 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
     final String SHOPPING_LIST_FRAGMENT = "ShoppingListFragment";
     final String  DIALOG_ADD_SHOPPING_LIST_FRAGMENT = "dialogAddShoppingListFragment";
     final String INVENTORY_FRAGMENT = "inventoryFragment";
+    final String GROUP_FRAGMENT = "groupFragment";
 
     private Fragment current;
     private ImageButton currentBtn;
@@ -73,6 +75,9 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
         btnPromotion = (ImageButton) findViewById(R.id.btnPromotion);
         btnPromotion.setOnClickListener(topBarOnClickListener);
 
+        btnGroup = (ImageButton) findViewById(R.id.btnGroup);
+        btnGroup.setOnClickListener(topBarOnClickListener);
+
         btnSetting = (ImageButton) findViewById(R.id.btnSetting);
         btnSetting.setOnClickListener(topBarOnClickListener);
 
@@ -89,13 +94,18 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
         if(savedInstanceState == null) {
             ShoppingListFragment shoppingListFragment = ShoppingListFragment.newInstance();
             InventoryFragment inventoryFragment = InventoryFragment.newInstance();
+            GroupFragment groupFragment = GroupFragment.newInstance();
+
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.containerMain, shoppingListFragment,
                             SHOPPING_LIST_FRAGMENT)
                     .add(R.id.containerMain, inventoryFragment,
                             INVENTORY_FRAGMENT)
-                    .detach(shoppingListFragment)
-                    .attach(inventoryFragment)
+                    .add(R.id.containerMain, groupFragment,
+                            GROUP_FRAGMENT)
+                    .hide(groupFragment)
+                    .hide(shoppingListFragment)
+                    .show(inventoryFragment)
                     .commit();
 
             current = inventoryFragment;
@@ -159,6 +169,9 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
             InventoryFragment inventoryFragment = (InventoryFragment)
                     getSupportFragmentManager().findFragmentByTag(INVENTORY_FRAGMENT);
 
+            GroupFragment groupFragment = (GroupFragment)
+                    getSupportFragmentManager().findFragmentByTag(GROUP_FRAGMENT);
+
             if(view == btnPromotion){
                 Intent intent = new Intent(MainActivity.this, SuperUserItemActivity.class);
                 startActivity(intent);
@@ -169,8 +182,8 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
                 if(current == shoppingListFragment) return;
 
                 getSupportFragmentManager().beginTransaction()
-                        .attach(shoppingListFragment)
-                        .detach(current)
+                        .show(shoppingListFragment)
+                        .hide(current)
                         .commit();
                 current = shoppingListFragment;
                 currentBtn.setBackgroundResource(android.R.color.transparent);
@@ -183,12 +196,26 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
                 if(current == inventoryFragment) return;
 
                 getSupportFragmentManager().beginTransaction()
-                        .attach(inventoryFragment)
-                        .detach(current)
+                        .show(inventoryFragment)
+                        .hide(current)
                         .commit();
                 current = inventoryFragment;
                 currentBtn.setBackgroundResource(android.R.color.transparent);
                 currentBtn = btnInventory;
+                currentBtn.setBackgroundResource(R.drawable.shape_rect_overlay);
+            }
+
+            if(view == btnGroup){
+
+                if(current == groupFragment) return;
+
+                getSupportFragmentManager().beginTransaction()
+                        .show(groupFragment)
+                        .hide(current)
+                        .commit();
+                current = groupFragment;
+                currentBtn.setBackgroundResource(android.R.color.transparent);
+                currentBtn = btnGroup;
                 currentBtn.setBackgroundResource(R.drawable.shape_rect_overlay);
             }
 
