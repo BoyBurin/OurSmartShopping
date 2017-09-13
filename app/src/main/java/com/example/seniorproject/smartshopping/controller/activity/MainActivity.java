@@ -18,9 +18,11 @@ import com.example.seniorproject.smartshopping.controller.fragment.mainfragment.
 import com.example.seniorproject.smartshopping.model.dao.Group;
 import com.example.seniorproject.smartshopping.model.dao.ItemInventory;
 import com.example.seniorproject.smartshopping.model.dao.ItemInventoryMap;
+import com.example.seniorproject.smartshopping.model.dao.ShoppingListMap;
 import com.example.seniorproject.smartshopping.model.manager.GroupManager;
 import com.example.seniorproject.smartshopping.model.manager.ItemInventoryManager;
 import com.example.seniorproject.smartshopping.model.manager.ShoppingListManager;
+import com.example.seniorproject.smartshopping.superuser.SuperUserItemActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -68,8 +70,8 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
 
         setTitle(GroupManager.getInstance().getCurrentGroup().getGroup().getName());
 
-        /*btnPromotion = (ImageButton) findViewById(R.id.btnPromotion);
-        btnPromotion.setOnClickListener(topBarOnClickListener);*/
+        btnPromotion = (ImageButton) findViewById(R.id.btnPromotion);
+        btnPromotion.setOnClickListener(topBarOnClickListener);
 
         btnSetting = (ImageButton) findViewById(R.id.btnSetting);
         btnSetting.setOnClickListener(topBarOnClickListener);
@@ -158,8 +160,8 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
                     getSupportFragmentManager().findFragmentByTag(INVENTORY_FRAGMENT);
 
             if(view == btnPromotion){
-                FirebaseAuth.getInstance().signOut();
-                Toast.makeText(MainActivity.this, "Logout Success", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(MainActivity.this, SuperUserItemActivity.class);
+                startActivity(intent);
             }
 
             if(view == btnShoppingList){
@@ -245,9 +247,10 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
     }
 
     @Override
-    public void goToMoreShoppingListItem(int position) {
+    public void goToMoreShoppingListItem(ShoppingListMap shoppingListMap, int position) {
         Intent intent = new Intent(this, MoreShoppingListItemActivity.class);
         intent.putExtra("position", position);
+        intent.putExtra("shoppingListMap", shoppingListMap);
         startActivity(intent);
     }
 }
