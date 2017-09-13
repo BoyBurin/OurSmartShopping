@@ -109,15 +109,13 @@ public class InventoryFragment extends Fragment{
                 .addChildEventListener(itemUpdateListener);*/
 
 
-
-
-
     }
 
     @SuppressWarnings("UnusedParameters")
     private void initInstances(View rootView, Bundle savedInstanceState) {
 
         gridView = (GridView) rootView.findViewById(R.id.gridView);
+        itemInventoryAdapter.setItemInventories(ItemInventoryManager.getInstance().getItemInventories());
         gridView.setAdapter(itemInventoryAdapter);
 
         fab = (FloatingActionButton) rootView.findViewById(R.id.fab);
@@ -210,6 +208,7 @@ public class InventoryFragment extends Fragment{
                             itemInventoryAdapter.setItemInventories(ItemInventoryManager.getInstance().getItemInventories());
                             itemInventoryAdapter.notifyDataSetChanged();
 
+
                             mDatabaseRef.child("iteminventory").orderByKey().equalTo(itemInventoryID)
                                     .addChildEventListener(new ChildEventListener() {
                                         @Override
@@ -226,13 +225,16 @@ public class InventoryFragment extends Fragment{
                                             long soft = (Long)remindItem.get("soft");
                                             long hard = (Long)remindItem.get("hard");
                                             long amount = (Long) data.get("amount");
+                                            String comment = (String) data.get("comment");
                                             int index = ItemInventoryManager.getInstance().getIndexByKey(itemInventoryID);
                                             ItemInventoryMap itemInventoryMap = ItemInventoryManager.getInstance().getItemInventory(index);
                                             itemInventoryMap.getItemInventory().getRemindItem().setSoft(soft);
                                             itemInventoryMap.getItemInventory().getRemindItem().setHard(hard);
                                             itemInventoryMap.getItemInventory().setAmount(amount);
+                                            itemInventoryMap.getItemInventory().setComment(comment);
                                             itemInventoryAdapter.setItemInventories(ItemInventoryManager.getInstance().getItemInventories());
                                             itemInventoryAdapter.notifyDataSetChanged();
+
 
                                         }
 

@@ -3,11 +3,25 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <com.example.seniorproject.smartshopping.view.customviewgroup.CustomViewGroupShoppingListItemAdd
+        android:id="@+id/addedItemBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"/>
+
+
     <ListView
         android:id="@+id/shoppingListItem"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_below="@+id/addedItemBar"
         android:scrollbars="none" />
+
+    <FrameLayout
+        android:id="@+id/containerMoreShoppingListItem"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/addedItemBar"/>
 
     <android.support.design.widget.FloatingActionButton xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/fab"

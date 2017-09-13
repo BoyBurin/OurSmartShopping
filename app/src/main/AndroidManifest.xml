@@ -29,7 +29,8 @@
         <activity
             android:name=".controller.activity.MoreItemInventoryActivity"
             android:windowSoftInputMode="adjustResize|stateHidden" />
-        <activity android:name=".controller.activity.MoreShoppingListItemActivity"></activity>
+        <activity android:name=".controller.activity.MoreShoppingListItemActivity" />
+        <activity android:name=".superuser.SuperUserItemActivity"></activity>
     </application>
 
 </manifest>

@@ -43,7 +43,7 @@ public class ShoppingListFragment extends Fragment {
     }
 
     public interface MoreShoppingListItemListener{
-        void goToMoreShoppingListItem(int position);
+        void goToMoreShoppingListItem(ShoppingListMap shoppingListMap, int position);
     }
 
     private ListView listView;
@@ -259,7 +259,8 @@ public class ShoppingListFragment extends Fragment {
             if(position < ShoppingListManager.getInstance().getSize()) {
                 MoreShoppingListItemListener moreShoppingListItemListener =
                         (MoreShoppingListItemListener) getActivity();
-                moreShoppingListItemListener.goToMoreShoppingListItem(position);
+                ShoppingListMap shoppingListMap = shoppingListManager.getShoppingList(position);
+                moreShoppingListItemListener.goToMoreShoppingListItem(shoppingListMap,position);
             }
 
         }

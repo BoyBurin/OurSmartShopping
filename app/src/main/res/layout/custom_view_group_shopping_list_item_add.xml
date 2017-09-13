@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:weightSum="7">
+
+    <TextView
+        android:id="@+id/tvAddedItemName"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:layout_weight="5"
+        android:layout_marginLeft="8dp"
+        android:gravity="center_vertical"
+        android:hint="Item Name"
+        android:background="@drawable/custom_blanck_backgroud"/>
+
+    <EditText
+        android:id="@+id/tvAddedAmount"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:layout_weight="1"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:gravity="center"
+        android:hint="Amount"
+        android:inputType="number"
+        android:textSize="12sp"
+        android:background="@drawable/custom_blanck_backgroud"/>
+
+
+    <ImageButton
+        android:id="@+id/imgBtnAdded"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:layout_weight="1"
+        android:layout_marginRight="8dp"
+        android:src="@drawable/check"
+        android:maxLines="1" />
+
+
+</LinearLayout>

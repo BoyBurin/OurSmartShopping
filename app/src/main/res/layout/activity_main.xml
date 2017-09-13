@@ -13,16 +13,16 @@
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:orientation="horizontal"
-        android:weightSum="5">
+        android:weightSum="6">
 
-       <!-- <ImageButton
+        <ImageButton
             android:id="@+id/btnPromotion"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:scaleType="center"
             android:src="@drawable/ic_launcher_round"
             android:background="@android:color/transparent"
-            android:layout_weight="1"/> -->
+            android:layout_weight="1"/>
         <ImageButton
             android:id="@+id/btnGroup"
             android:layout_width="0dp"

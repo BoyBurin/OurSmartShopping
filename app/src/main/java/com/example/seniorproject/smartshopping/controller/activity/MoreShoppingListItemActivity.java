@@ -32,12 +32,12 @@ public class MoreShoppingListItemActivity extends AppCompatActivity {
         setContentView(R.layout.activity_more_shopping_list_item);
 
         position = getIntent().getIntExtra("position", 0);
-        shoppingListMap = ShoppingListManager.getInstance().getShoppingList(position);
+        shoppingListMap = getIntent().getParcelableExtra("shoppingListMap");
 
         initInstances();
 
         if(savedInstanceState == null){
-            MoreShoppingListItemFragment moreShoppingListItemFragment = MoreShoppingListItemFragment.newInstance(position);
+            MoreShoppingListItemFragment moreShoppingListItemFragment = MoreShoppingListItemFragment.newInstance(shoppingListMap, position);
             getSupportFragmentManager()
                     .beginTransaction()
                     .add(R.id.containerMoreShoppingListItem, moreShoppingListItemFragment,

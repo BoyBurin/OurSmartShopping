@@ -4,34 +4,52 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ListView;
 
 import com.example.seniorproject.smartshopping.R;
+import com.example.seniorproject.smartshopping.model.dao.ItemInventory;
+import com.example.seniorproject.smartshopping.model.dao.ItemInventoryMap;
+import com.example.seniorproject.smartshopping.model.dao.ItemShoppingList;
 import com.example.seniorproject.smartshopping.model.dao.ShoppingListMap;
 import com.example.seniorproject.smartshopping.model.datatype.MutableInteger;
+import com.example.seniorproject.smartshopping.model.manager.ItemInventoryManager;
+import com.example.seniorproject.smartshopping.model.manager.ItemShoppingListManager;
 import com.example.seniorproject.smartshopping.model.manager.ShoppingListManager;
+import com.example.seniorproject.smartshopping.view.adapter.ItemShoppingListAdapter;
 import com.example.seniorproject.smartshopping.view.adapter.ShoppingListAdapter;
+import com.example.seniorproject.smartshopping.view.customviewgroup.CustomViewGroupShoppingListItemAdd;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 
-public class MoreShoppingListItemUpdateFragment extends Fragment {
+public class MoreShoppingListItemUpdateFragment extends Fragment implements
+        MoreShoppingListItemSelectorFragment.AddShoppingListItemListener,
+        MoreShoppingListItemSelectorFragment.FinishAddShoppingListItemListener {
 
     /***********************************************************************************************
      ************************************* Variable class ********************************************
      ***********************************************************************************************/
 
-    private int position;
     ShoppingListMap shoppingListMap;
 
     private ListView listView;
-    //private ShoppingListAdapter shoppingListItemAdapter;
+    private ItemShoppingListAdapter itemShoppingListAdapter;
     private MutableInteger lastPositionInteger;
     private FloatingActionButton fab;
-    private DatabaseReference mMessagesDatabaseRef;
+    private DatabaseReference mDatabaseRef;
+
+    private ItemShoppingListManager itemShoppingListManager;
+    private CustomViewGroupShoppingListItemAdd customViewGroupShoppingListItemAdd;
+
 
 
 
@@ -44,10 +62,10 @@ public class MoreShoppingListItemUpdateFragment extends Fragment {
     }
 
     @SuppressWarnings("unused")
-    public static MoreShoppingListItemUpdateFragment newInstance(int position) {
+    public static MoreShoppingListItemUpdateFragment newInstance(ShoppingListMap shoppingListMap) {
         MoreShoppingListItemUpdateFragment fragment = new MoreShoppingListItemUpdateFragment();
         Bundle args = new Bundle();
-        args.putInt("position", position);
+        args.putParcelable("shoppingListMap", shoppingListMap);
         fragment.setArguments(args);
         return fragment;
     }
@@ -55,8 +73,7 @@ public class MoreShoppingListItemUpdateFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        position = getArguments().getInt("position");
-        shoppingListMap = ShoppingListManager.getInstance().getShoppingList(position);
+        shoppingListMap = getArguments().getParcelable("shoppingListMap");
 
         init(savedInstanceState);
 
@@ -74,14 +91,26 @@ public class MoreShoppingListItemUpdateFragment extends Fragment {
 
     private void init(Bundle savedInstanceState) {
         lastPositionInteger = new MutableInteger(-1);
-        mMessagesDatabaseRef = FirebaseDatabase.getInstance().getReference();
-        //shoppingListItemAdapter = new ShoppingListAdapter(lastPositionInteger);
+        mDatabaseRef = FirebaseDatabase.getInstance().getReference();
+        itemShoppingListAdapter = new ItemShoppingListAdapter(lastPositionInteger);
+        itemShoppingListManager = new ItemShoppingListManager();
+        mDatabaseRef.child("iteminshoppinglist").child(shoppingListMap.getId())
+                .addChildEventListener(updateItemShoppingListListener);
 
     }
 
     @SuppressWarnings("UnusedParameters")
     private void initInstances(View rootView, Bundle savedInstanceState) {
-        // Init 'View' instance(s) with rootView.findViewById here
+        fab = (FloatingActionButton) rootView.findViewById(R.id.fab);
+        fab.setOnClickListener(addedShoppingListItemListener);
+
+        listView = (ListView) rootView.findViewById(R.id.shoppingListItem);
+        itemShoppingListAdapter.setItemShoppingLists(itemShoppingListManager.getItemShoppingLists());
+        listView.setAdapter(itemShoppingListAdapter);
+
+        customViewGroupShoppingListItemAdd = (CustomViewGroupShoppingListItemAdd) rootView
+                .findViewById(R.id.addedItemBar);
+
     }
 
     @Override
@@ -114,6 +143,106 @@ public class MoreShoppingListItemUpdateFragment extends Fragment {
     /***********************************************************************************************
      ************************************* Listener variables ********************************************
      ***********************************************************************************************/
+
+    final ChildEventListener updateItemShoppingListListener = new ChildEventListener() {
+        @Override
+        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+            final String itemInventoryID = dataSnapshot.getKey();
+            final Long amount = dataSnapshot.getValue(Long.class);
+
+            mDatabaseRef.child("iteminventory").child(itemInventoryID)
+                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            ItemInventory itemInventory = dataSnapshot.getValue(ItemInventory.class);
+                            String itemName = itemInventory.getName();
+                            ItemInventoryMap itemInventoryMap = new ItemInventoryMap(itemInventoryID, itemInventory);
+                            ItemShoppingList itemShoppingList = new ItemShoppingList(amount, itemInventoryMap);
+
+                            itemShoppingListManager.addItemShoppingList(itemShoppingList);
+                            itemShoppingListAdapter.setItemShoppingLists(itemShoppingListManager.getItemShoppingLists());
+                            itemShoppingListAdapter.notifyDataSetChanged();
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+        }
+
+        @Override
+        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+        }
+
+        @Override
+        public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+        }
+
+        @Override
+        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+    };
+
+    final View.OnClickListener addedShoppingListItemListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            MoreShoppingListItemSelectorFragment moreShoppingListItemSelectorFragment =
+                    MoreShoppingListItemSelectorFragment.newInstance(shoppingListMap);
+
+            getChildFragmentManager().beginTransaction()
+                    .add(R.id.containerMoreShoppingListItem, moreShoppingListItemSelectorFragment,
+                            "moreShoppingListItemSelectorFragment")
+                    .commit();
+
+            customViewGroupShoppingListItemAdd.setVisibility(View.VISIBLE);
+            listView.setVisibility(View.GONE);
+        }
+    };
+
+    /***********************************************************************************************
+     ************************************* Implementation ********************************************
+     ***********************************************************************************************/
+
+
+
+    @Override
+    public void setName(String name) {
+        customViewGroupShoppingListItemAdd.setItemName(name);
+    }
+
+    @Override
+    public long getAmount() {
+        return customViewGroupShoppingListItemAdd.getAmount();
+    }
+
+    @Override
+    public ImageButton getButton() {
+        return customViewGroupShoppingListItemAdd.getAddedButton();
+    }
+
+    @Override
+    public void finishAdded() {
+        MoreShoppingListItemSelectorFragment moreShoppingListItemSelectorFragment =
+                (MoreShoppingListItemSelectorFragment)
+                        getChildFragmentManager().findFragmentByTag("moreShoppingListItemSelectorFragment");
+
+        getChildFragmentManager().beginTransaction()
+                .remove(moreShoppingListItemSelectorFragment)
+                .commit();
+
+        customViewGroupShoppingListItemAdd.setVisibility(View.GONE);
+        listView.setVisibility(View.VISIBLE);
+
+    }
 
 
     /***********************************************************************************************

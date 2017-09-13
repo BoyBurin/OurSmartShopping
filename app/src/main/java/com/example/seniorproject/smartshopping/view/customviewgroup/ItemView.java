@@ -5,6 +5,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -130,6 +131,20 @@ public class ItemView extends BaseCustomViewGroup {
         this.tvName.setText(text);
     }
 
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int width = MeasureSpec.getSize(widthMeasureSpec); // width is pixel
+        int height = width;
+        int newHeightMeasureSpec = MeasureSpec.makeMeasureSpec(
+                height,
+                MeasureSpec.EXACTLY
+        );
+        super.onMeasure(widthMeasureSpec, newHeightMeasureSpec);
+
+        setMeasuredDimension(width, height);
+
+    }
+
 
     public void setImageUrl(String url) {
         storageReference = FirebaseStorage.getInstance().getReference();
@@ -141,6 +156,7 @@ public class ItemView extends BaseCustomViewGroup {
                 .transform(new CircleTransform(getContext())) //Cool !!!
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .into(imgItem);
+
     }
 
     public void setRemainder(long soft, long hard, long amount){

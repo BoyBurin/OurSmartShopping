@@ -37,10 +37,11 @@ public class MoreShoppingListItemFragment extends Fragment {
     }
 
     @SuppressWarnings("unused")
-    public static MoreShoppingListItemFragment newInstance(int position) {
+    public static MoreShoppingListItemFragment newInstance(ShoppingListMap shoppingListMap, int position) {
         MoreShoppingListItemFragment fragment = new MoreShoppingListItemFragment();
         Bundle args = new Bundle();
         args.putInt("position", position);
+        args.putParcelable("shoppingListMap", shoppingListMap);
         fragment.setArguments(args);
         return fragment;
     }
@@ -49,7 +50,7 @@ public class MoreShoppingListItemFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         position = getArguments().getInt("position");
-        shoppingListMap = ShoppingListManager.getInstance().getShoppingList(position);
+        shoppingListMap = getArguments().getParcelable("shoppingListMap");
         init(savedInstanceState);
 
         if (savedInstanceState != null)
@@ -77,7 +78,7 @@ public class MoreShoppingListItemFragment extends Fragment {
             public Fragment getItem(int page) {
                 switch (page){
                     case 0:
-                        return MoreShoppingListItemUpdateFragment.newInstance(position);
+                        return MoreShoppingListItemUpdateFragment.newInstance(shoppingListMap);
                    // case 1:
                    //     return MoreItemInventoryEditFragment.newInstance(position);
                     default:
