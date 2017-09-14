@@ -221,7 +221,7 @@ public class DialogAddItemInventoryFragment extends DialogFragment {
 
             RemindItem remindItem = new RemindItem();
             remindItem.setSoft(Long.parseLong(edtSoft.getText().toString()));
-            remindItem.setSoft(Long.parseLong(edtHard.getText().toString()));
+            remindItem.setHard(Long.parseLong(edtHard.getText().toString()));
 
             ItemInventory itemInventory = new ItemInventory(name, amount, comment,
                     photoUrl, remindItem, unit, barcodeId);
