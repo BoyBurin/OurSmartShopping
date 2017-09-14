@@ -183,7 +183,9 @@ public class MoreShoppingListItemSelectorFragment extends Fragment {
                                     (FinishAddShoppingListItemListener) getParentFragment();
 
                             finishAddShoppingListItemListener.finishAdded();
-                            Toast.makeText(getContext(), "Added Item into Shopping List Success", Toast.LENGTH_SHORT);
+                            String itemName = currentItemInventoryMap.getItemInventory().getName();
+                            Toast.makeText(getContext(), "Added " +itemName +" Item into Shopping List Success", Toast.LENGTH_SHORT)
+                                    .show();
                         }
                     });
                 }

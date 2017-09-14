@@ -100,6 +100,11 @@ public class CustomViewGroupShoppingListItemAdd extends BaseCustomViewGroup {
         return Long.parseLong(tvAddedAmount.getText().toString());
     }
 
+    public void clearAll(){
+        this.tvAddedAmount.setText("1");
+        this.tvAddedItemName.setText("");
+    }
+
     public ImageButton getAddedButton(){
         return imgBtnAdded;
     }

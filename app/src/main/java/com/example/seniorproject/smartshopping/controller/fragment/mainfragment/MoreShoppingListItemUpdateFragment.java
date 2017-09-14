@@ -1,6 +1,7 @@
 package com.example.seniorproject.smartshopping.controller.fragment.mainfragment;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
@@ -10,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.example.seniorproject.smartshopping.R;
 import com.example.seniorproject.smartshopping.model.dao.ItemInventory;
@@ -23,12 +25,16 @@ import com.example.seniorproject.smartshopping.model.manager.ShoppingListManager
 import com.example.seniorproject.smartshopping.view.adapter.ItemShoppingListAdapter;
 import com.example.seniorproject.smartshopping.view.adapter.ShoppingListAdapter;
 import com.example.seniorproject.smartshopping.view.customviewgroup.CustomViewGroupShoppingListItemAdd;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
 
 
 public class MoreShoppingListItemUpdateFragment extends Fragment implements
@@ -49,6 +55,8 @@ public class MoreShoppingListItemUpdateFragment extends Fragment implements
 
     private ItemShoppingListManager itemShoppingListManager;
     private CustomViewGroupShoppingListItemAdd customViewGroupShoppingListItemAdd;
+
+    private ArrayList<View.OnClickListener> deleteListener;
 
 
 
@@ -94,6 +102,7 @@ public class MoreShoppingListItemUpdateFragment extends Fragment implements
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
         itemShoppingListAdapter = new ItemShoppingListAdapter(lastPositionInteger);
         itemShoppingListManager = new ItemShoppingListManager();
+        deleteListener = new ArrayList<View.OnClickListener>();
         mDatabaseRef.child("iteminshoppinglist").child(shoppingListMap.getId())
                 .addChildEventListener(updateItemShoppingListListener);
 
@@ -105,7 +114,8 @@ public class MoreShoppingListItemUpdateFragment extends Fragment implements
         fab.setOnClickListener(addedShoppingListItemListener);
 
         listView = (ListView) rootView.findViewById(R.id.shoppingListItem);
-        itemShoppingListAdapter.setItemShoppingLists(itemShoppingListManager.getItemShoppingLists());
+        itemShoppingListAdapter.setItemShoppingLists(itemShoppingListManager.getItemShoppingLists(),
+                deleteListener);
         listView.setAdapter(itemShoppingListAdapter);
 
         customViewGroupShoppingListItemAdd = (CustomViewGroupShoppingListItemAdd) rootView
@@ -155,12 +165,27 @@ public class MoreShoppingListItemUpdateFragment extends Fragment implements
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             ItemInventory itemInventory = dataSnapshot.getValue(ItemInventory.class);
-                            String itemName = itemInventory.getName();
+                            final String itemName = itemInventory.getName();
                             ItemInventoryMap itemInventoryMap = new ItemInventoryMap(itemInventoryID, itemInventory);
                             ItemShoppingList itemShoppingList = new ItemShoppingList(amount, itemInventoryMap);
 
+                            View.OnClickListener onClickDeleteListener = new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    mDatabaseRef.child("iteminshoppinglist").child(shoppingListMap.getId())
+                                            .child(itemInventoryID).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            Toast.makeText(getContext(), "Delete " + itemName+  " Success", Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                                }
+                            };
+
+                            deleteListener.add(onClickDeleteListener);
                             itemShoppingListManager.addItemShoppingList(itemShoppingList);
-                            itemShoppingListAdapter.setItemShoppingLists(itemShoppingListManager.getItemShoppingLists());
+                            itemShoppingListAdapter.setItemShoppingLists(itemShoppingListManager.getItemShoppingLists(),
+                                    deleteListener);
                             itemShoppingListAdapter.notifyDataSetChanged();
                         }
 
@@ -178,6 +203,15 @@ public class MoreShoppingListItemUpdateFragment extends Fragment implements
 
         @Override
         public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            String itemInventoryID = dataSnapshot.getKey();
+            int index = itemShoppingListManager.getIndexByKey(itemInventoryID);
+
+            itemShoppingListManager.getItemShoppingLists().remove(index);
+            deleteListener.remove(index);
+
+            itemShoppingListAdapter.setItemShoppingLists(itemShoppingListManager.getItemShoppingLists(), deleteListener);
+            itemShoppingListAdapter.notifyDataSetChanged();
 
         }
 
@@ -240,6 +274,7 @@ public class MoreShoppingListItemUpdateFragment extends Fragment implements
                 .commit();
 
         customViewGroupShoppingListItemAdd.setVisibility(View.GONE);
+        customViewGroupShoppingListItemAdd.clearAll();
         listView.setVisibility(View.VISIBLE);
 
     }

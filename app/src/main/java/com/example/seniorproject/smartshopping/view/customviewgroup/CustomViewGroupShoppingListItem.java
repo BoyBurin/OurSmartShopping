@@ -101,4 +101,8 @@ public class CustomViewGroupShoppingListItem extends BaseCustomViewGroup {
         this.tvCustomViewGroupAmount.setText(tvCustomViewGroupAmount + "");
     }
 
+    public void setDeleteListener(OnClickListener onClickListener){
+        imgBtnCustomViewGroupDelete.setOnClickListener(onClickListener);
+    }
+
 }
