@@ -16,6 +16,7 @@ import com.example.seniorproject.smartshopping.controller.fragment.dialogfragmen
 import com.example.seniorproject.smartshopping.controller.fragment.mainfragment.GroupFragment;
 import com.example.seniorproject.smartshopping.controller.fragment.mainfragment.InventoryFragment;
 import com.example.seniorproject.smartshopping.controller.fragment.mainfragment.ShoppingListFragment;
+import com.example.seniorproject.smartshopping.controller.fragment.mainfragment.ShoppingHistoryFragment;
 import com.example.seniorproject.smartshopping.model.dao.Group;
 import com.example.seniorproject.smartshopping.model.dao.ItemInventory;
 import com.example.seniorproject.smartshopping.model.dao.ItemInventoryMap;
@@ -50,6 +51,7 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
     final String  DIALOG_ADD_SHOPPING_LIST_FRAGMENT = "dialogAddShoppingListFragment";
     final String INVENTORY_FRAGMENT = "inventoryFragment";
     final String GROUP_FRAGMENT = "groupFragment";
+    final String SHOPPING_HISTORY_FRAGMENT = "shoppingHistoryFragment";
 
     private Fragment current;
     private ImageButton currentBtn;
@@ -87,6 +89,9 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
         btnInventory = (ImageButton) findViewById(R.id.btnInventory);
         btnInventory.setOnClickListener(topBarOnClickListener);
 
+        btnShoppingHistory = (ImageButton) findViewById(R.id.btnShoppingHistory);
+        btnShoppingHistory.setOnClickListener(topBarOnClickListener);
+
         mRootRef = FirebaseDatabase.getInstance();
         mGroupRef = mRootRef.getReference().child("groups");
 
@@ -95,6 +100,8 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
             ShoppingListFragment shoppingListFragment = ShoppingListFragment.newInstance();
             InventoryFragment inventoryFragment = InventoryFragment.newInstance();
             GroupFragment groupFragment = GroupFragment.newInstance();
+            ShoppingHistoryFragment shoppingHistoryFragment = ShoppingHistoryFragment.newInstance();
+
 
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.containerMain, shoppingListFragment,
@@ -103,6 +110,8 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
                             INVENTORY_FRAGMENT)
                     .add(R.id.containerMain, groupFragment,
                             GROUP_FRAGMENT)
+                    .add(R.id.containerMain, shoppingHistoryFragment,
+                            SHOPPING_HISTORY_FRAGMENT)
                     .hide(groupFragment)
                     .hide(shoppingListFragment)
                     .show(inventoryFragment)
@@ -172,6 +181,9 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
             GroupFragment groupFragment = (GroupFragment)
                     getSupportFragmentManager().findFragmentByTag(GROUP_FRAGMENT);
 
+            ShoppingHistoryFragment shoppingHistoryFragment = (ShoppingHistoryFragment)
+                    getSupportFragmentManager().findFragmentByTag(SHOPPING_HISTORY_FRAGMENT);
+
             if(view == btnPromotion){
                 Intent intent = new Intent(MainActivity.this, SuperUserItemActivity.class);
                 startActivity(intent);
@@ -219,6 +231,21 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
                 currentBtn.setBackgroundResource(R.drawable.shape_rect_overlay);
             }
 
+            if(view == btnShoppingHistory){
+
+                if(current == shoppingHistoryFragment) return;
+
+                getSupportFragmentManager().beginTransaction()
+                        .show(shoppingHistoryFragment)
+                        .hide(current)
+                        .commit();
+
+                current = shoppingHistoryFragment;
+                currentBtn.setBackgroundResource(android.R.color.transparent);
+                currentBtn = btnShoppingHistory;
+                currentBtn.setBackgroundResource(R.drawable.shape_rect_overlay);
+
+            }
         }
     };
 
