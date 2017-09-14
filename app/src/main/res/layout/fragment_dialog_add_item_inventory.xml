@@ -74,7 +74,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/activity_vertical_margin"
-        android:layout_below="@+id/edtHard"
+        android:layout_below="@+id/edtListDescribe"
         android:layout_centerHorizontal="true"
         android:hint="Detail of your Item"
         android:inputType="textCapWords"
