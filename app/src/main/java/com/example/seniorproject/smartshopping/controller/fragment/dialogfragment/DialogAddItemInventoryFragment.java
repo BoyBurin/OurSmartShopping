@@ -197,6 +197,7 @@ public class DialogAddItemInventoryFragment extends DialogFragment {
             edtListDescribe.setVisibility(View.VISIBLE);
             btnCancel.setVisibility(View.VISIBLE);
             btnAdd.setVisibility(View.VISIBLE);
+            edtUnit.setVisibility(View.VISIBLE);
 
 
 
