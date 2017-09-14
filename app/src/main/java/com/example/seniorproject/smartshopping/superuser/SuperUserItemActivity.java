@@ -68,6 +68,7 @@ public class SuperUserItemActivity extends AppCompatActivity {
         mStorageRef = FirebaseStorage.getInstance().getReference();
 
         btnUploadImage.setOnClickListener(uploadImageListener);
+        //fab.setOnClickListener();
     }
 
     @Override
@@ -98,6 +99,13 @@ public class SuperUserItemActivity extends AppCompatActivity {
                 tvURI.setVisibility(View.VISIBLE);
             }
         }
+        if(requestCode == 0){
+            if(requestCode == RESULT_OK) {
+                String contents = data.getStringExtra("SCAN_RESULT");
+                tvShowBarcode.setText(contents);
+            }
+
+        }
     }
 
     /***********************************************************************************************
@@ -112,6 +120,23 @@ public class SuperUserItemActivity extends AppCompatActivity {
             intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
             startActivityForResult(Intent.createChooser(intent, "Complete action using"),
                     RC_PHOTO_PICKER);
+        }
+    };
+
+    final View.OnClickListener addBarcodeListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            Intent intent = new Intent();
+            intent.setAction("com.google.zxing.client.android.SCAN");
+            intent.putExtra("SAVE_HISTORY", false);
+            startActivityForResult(intent, 0);
+        }
+    };
+
+    final View.OnClickListener savedDataListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+
         }
     };
 }
