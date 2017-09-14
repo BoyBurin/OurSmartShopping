@@ -59,7 +59,7 @@ public class SuperUserItemActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         fab = (FloatingActionButton)findViewById(R.id.fab);
-        fab.setOnClickListener(addItemListener);
+        fab.setOnClickListener(savedDataListener);
 
         tvShowBarcode = (TextView) findViewById(R.id.tvShowBarcode);
         btnAddBarcode = (Button) findViewById(R.id.btnAddBarcode);
@@ -75,7 +75,8 @@ public class SuperUserItemActivity extends AppCompatActivity {
         mStorageRef = FirebaseStorage.getInstance().getReference();
 
         btnUploadImage.setOnClickListener(uploadImageListener);
-        fab.setOnClickListener(savedDataListener);
+
+        btnAddBarcode.setOnClickListener(addBarcodeListener);
     }
 
     @Override
@@ -113,6 +114,15 @@ public class SuperUserItemActivity extends AppCompatActivity {
             }
 
         }
+    }
+
+    private void clearProductData(){
+        tvShowBarcode.setText("");
+        edtName.setText("");
+        edtRetailPrice.setText("");
+        edtType.setText("");
+        edtUnit.setText("");
+        tvURI.setText("");
     }
 
     /***********************************************************************************************
@@ -163,10 +173,11 @@ public class SuperUserItemActivity extends AppCompatActivity {
 
 
             String barcodeID = tvShowBarcode.getText().toString();
-            DatabaseReference ref =  mDatabaseRef.child(barcodeID);
+            DatabaseReference ref =  mDatabaseRef.child("productlist").child(barcodeID);
             ref.setValue(productList).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
+                    clearProductData();
                     Toast.makeText(SuperUserItemActivity.this, "Added Product Success", Toast.LENGTH_SHORT).show();
                 }
             });
