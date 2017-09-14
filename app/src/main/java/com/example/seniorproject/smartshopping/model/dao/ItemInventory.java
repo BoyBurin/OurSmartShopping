@@ -18,6 +18,7 @@ public class ItemInventory implements Parcelable {
     private String photoUrl;
     private RemindItem remindItem;
     private String unit;
+    private String barcodeId;
 
     /******************************************************************************************
      * ****************************** Methods *********************************************
@@ -26,6 +27,18 @@ public class ItemInventory implements Parcelable {
     public ItemInventory(){
 
     }
+
+    public ItemInventory(String name, long amount, String comment, String photoUrl, RemindItem remindItem, String unit, String barcodeId){
+
+        this.name = name;
+        this.amount = amount;
+        this.comment = comment;
+        this.photoUrl = photoUrl;
+        this.remindItem = remindItem;
+        this.unit = unit;
+        this.barcodeId = barcodeId;
+    }
+
 
     public String getName() {
         return name;
@@ -75,17 +88,28 @@ public class ItemInventory implements Parcelable {
         this.unit = unit;
     }
 
+    public String getBarcodeId() {
+        return barcodeId;
+    }
+
+    public void setBarcodeId(String barcodeId) {
+        this.barcodeId = barcodeId;
+    }
+
     /******************************************************************************************
      * ****************************** Implementation *********************************************
      *******************************************************************************************/
+
+
 
     protected ItemInventory(Parcel in) {
         name = in.readString();
         amount = in.readLong();
         comment = in.readString();
         photoUrl = in.readString();
-        unit = in.readString();
         remindItem = in.readParcelable(RemindItem.class.getClassLoader());
+        unit = in.readString();
+        barcodeId = in.readString();
     }
 
     @Override
@@ -94,8 +118,9 @@ public class ItemInventory implements Parcelable {
         dest.writeLong(amount);
         dest.writeString(comment);
         dest.writeString(photoUrl);
-        dest.writeString(unit);
         dest.writeParcelable(remindItem, flags);
+        dest.writeString(unit);
+        dest.writeString(barcodeId);
     }
 
     @Override
@@ -114,7 +139,6 @@ public class ItemInventory implements Parcelable {
             return new ItemInventory[size];
         }
     };
-
 
 
 

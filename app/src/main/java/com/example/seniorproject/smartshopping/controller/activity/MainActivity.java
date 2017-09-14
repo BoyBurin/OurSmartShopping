@@ -33,7 +33,8 @@ import com.google.firebase.database.FirebaseDatabase;
 public class MainActivity extends AppCompatActivity implements ShoppingListFragment.ShoopingListFloatingButton
 , FragmentDialogAddShoppingList.DeleteAddShoppingListDialog, FragmentDialogAddShoppingList.PickImageShoppingListDialog,
         InventoryFragment.MoreItemInventoryListener, ShoppingListFragment.MoreShoppingListItemListener,
-        DialogAddItemInventoryFragment.BarcodeListener, InventoryFragment.ItemInventoryFloatingButton {
+        DialogAddItemInventoryFragment.BarcodeListener, InventoryFragment.ItemInventoryFloatingButton,
+        DialogAddItemInventoryFragment.DeleteItemInventoryDialog{
     /***********************************************************************************************
      ************************************* Variable class ********************************************
      ***********************************************************************************************/
@@ -336,5 +337,14 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
         DialogFragment addItemInventory =
                 DialogAddItemInventoryFragment.newInstance();
         addItemInventory.show(getSupportFragmentManager(), DIALOG_ADD_ITEM_INVENATORY_FRAGMENT);
+    }
+
+    @Override
+    public void deleteAddItemInventoryDialog() {
+        Fragment addItemInventory = getSupportFragmentManager().findFragmentByTag(DIALOG_ADD_ITEM_INVENATORY_FRAGMENT);
+        getSupportFragmentManager().beginTransaction()
+                .remove(addItemInventory)
+                .commit();
+        hideKeyboard();
     }
 }
