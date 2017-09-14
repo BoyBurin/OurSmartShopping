@@ -1,14 +1,26 @@
 [
     {
-        "merged": "C:\\Users\\thamm\\StudioProjects\\SmartShopping\\android\\build\\intermediates\\res\\merged\\androidTest\\debug\\menu\\encode.xml",
-        "source": "C:\\Users\\thamm\\StudioProjects\\SmartShopping\\android\\build\\intermediates\\bundles\\debug\\res\\menu\\encode.xml"
+        "merged": "/Users/boyburin/AndroidStudioProjects/SmartShopping/android/build/intermediates/res/merged/androidTest/debug/menu/encode.xml",
+        "source": "/Users/boyburin/AndroidStudioProjects/SmartShopping/android/build/intermediates/bundles/debug/res/menu/encode.xml"
     },
     {
-        "merged": "C:\\Users\\thamm\\StudioProjects\\SmartShopping\\android\\build\\intermediates\\res\\merged\\androidTest\\debug\\menu\\capture.xml",
-        "source": "C:\\Users\\thamm\\StudioProjects\\SmartShopping\\android\\build\\intermediates\\bundles\\debug\\res\\menu\\capture.xml"
+        "merged": "/Users/boyburin/AndroidStudioProjects/SmartShopping/C:\\Users\\thamm\\StudioProjects\\SmartShopping\\android\\build\\intermediates\\res\\merged\\androidTest\\debug\\menu\\encode.xml",
+        "source": "/Users/boyburin/AndroidStudioProjects/SmartShopping/C:\\Users\\thamm\\StudioProjects\\SmartShopping\\android\\build\\intermediates\\bundles\\debug\\res\\menu\\encode.xml"
     },
     {
-        "merged": "C:\\Users\\thamm\\StudioProjects\\SmartShopping\\android\\build\\intermediates\\res\\merged\\androidTest\\debug\\menu\\history.xml",
-        "source": "C:\\Users\\thamm\\StudioProjects\\SmartShopping\\android\\build\\intermediates\\bundles\\debug\\res\\menu\\history.xml"
+        "merged": "/Users/boyburin/AndroidStudioProjects/SmartShopping/android/build/intermediates/res/merged/androidTest/debug/menu/history.xml",
+        "source": "/Users/boyburin/AndroidStudioProjects/SmartShopping/android/build/intermediates/bundles/debug/res/menu/history.xml"
+    },
+    {
+        "merged": "/Users/boyburin/AndroidStudioProjects/SmartShopping/C:\\Users\\thamm\\StudioProjects\\SmartShopping\\android\\build\\intermediates\\res\\merged\\androidTest\\debug\\menu\\capture.xml",
+        "source": "/Users/boyburin/AndroidStudioProjects/SmartShopping/C:\\Users\\thamm\\StudioProjects\\SmartShopping\\android\\build\\intermediates\\bundles\\debug\\res\\menu\\capture.xml"
+    },
+    {
+        "merged": "/Users/boyburin/AndroidStudioProjects/SmartShopping/C:\\Users\\thamm\\StudioProjects\\SmartShopping\\android\\build\\intermediates\\res\\merged\\androidTest\\debug\\menu\\history.xml",
+        "source": "/Users/boyburin/AndroidStudioProjects/SmartShopping/C:\\Users\\thamm\\StudioProjects\\SmartShopping\\android\\build\\intermediates\\bundles\\debug\\res\\menu\\history.xml"
+    },
+    {
+        "merged": "/Users/boyburin/AndroidStudioProjects/SmartShopping/android/build/intermediates/res/merged/androidTest/debug/menu/capture.xml",
+        "source": "/Users/boyburin/AndroidStudioProjects/SmartShopping/android/build/intermediates/bundles/debug/res/menu/capture.xml"
     }
 ]

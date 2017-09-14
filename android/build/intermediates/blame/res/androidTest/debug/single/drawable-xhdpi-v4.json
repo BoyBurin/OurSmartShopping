@@ -1,6 +1,10 @@
 [
     {
-        "merged": "C:\\Users\\thamm\\StudioProjects\\SmartShopping\\android\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable-xhdpi-v4\\launcher_icon.png",
-        "source": "C:\\Users\\thamm\\StudioProjects\\SmartShopping\\android\\build\\intermediates\\bundles\\debug\\res\\drawable-xhdpi-v4\\launcher_icon.png"
+        "merged": "/Users/boyburin/AndroidStudioProjects/SmartShopping/android/build/intermediates/res/merged/androidTest/debug/drawable-xhdpi-v4/launcher_icon.png",
+        "source": "/Users/boyburin/AndroidStudioProjects/SmartShopping/android/build/intermediates/bundles/debug/res/drawable-xhdpi-v4/launcher_icon.png"
+    },
+    {
+        "merged": "/Users/boyburin/AndroidStudioProjects/SmartShopping/C:\\Users\\thamm\\StudioProjects\\SmartShopping\\android\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable-xhdpi-v4\\launcher_icon.png",
+        "source": "/Users/boyburin/AndroidStudioProjects/SmartShopping/C:\\Users\\thamm\\StudioProjects\\SmartShopping\\android\\build\\intermediates\\bundles\\debug\\res\\drawable-xhdpi-v4\\launcher_icon.png"
     }
 ]
