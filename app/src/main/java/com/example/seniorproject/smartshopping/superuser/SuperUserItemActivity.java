@@ -3,21 +3,28 @@ package com.example.seniorproject.smartshopping.superuser;
 import android.content.Intent;
 import android.net.Uri;
 import android.provider.ContactsContract;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.seniorproject.smartshopping.R;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 public class SuperUserItemActivity extends AppCompatActivity {
 
@@ -68,7 +75,7 @@ public class SuperUserItemActivity extends AppCompatActivity {
         mStorageRef = FirebaseStorage.getInstance().getReference();
 
         btnUploadImage.setOnClickListener(uploadImageListener);
-        //fab.setOnClickListener();
+        fab.setOnClickListener(savedDataListener);
     }
 
     @Override
@@ -100,7 +107,7 @@ public class SuperUserItemActivity extends AppCompatActivity {
             }
         }
         if(requestCode == 0){
-            if(requestCode == RESULT_OK) {
+            if(resultCode == RESULT_OK) {
                 String contents = data.getStringExtra("SCAN_RESULT");
                 tvShowBarcode.setText(contents);
             }
@@ -136,7 +143,33 @@ public class SuperUserItemActivity extends AppCompatActivity {
     final View.OnClickListener savedDataListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
+            StorageReference mProductListStorageRef = FirebaseStorage.getInstance().getReference()
+                    .child("productlist");
+            StorageReference photRef = mProductListStorageRef.child(selectedImageUri.getLastPathSegment());
+            photRef.putFile(selectedImageUri).addOnSuccessListener(uploadSuccessListener);
+        }
+    };
 
+    final OnSuccessListener<UploadTask.TaskSnapshot> uploadSuccessListener = new OnSuccessListener<UploadTask.TaskSnapshot>() {
+        @Override
+        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+            Log.d("Tag", "Success");
+            Uri downloadUrl = taskSnapshot.getDownloadUrl();
+            String name = edtName.getText().toString();
+            double retailPrice = Double.parseDouble(edtRetailPrice.getText().toString());
+            String type = edtType.getText().toString();
+            String unit = edtUnit.getText().toString();
+            ProductList productList = new ProductList(name,retailPrice,type,unit);
+
+
+            String barcodeID = tvShowBarcode.getText().toString();
+            DatabaseReference ref =  mDatabaseRef.child(barcodeID);
+            ref.setValue(productList).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    Toast.makeText(SuperUserItemActivity.this, "Added Product Success", Toast.LENGTH_SHORT).show();
+                }
+            });
         }
     };
 }

@@ -114,6 +114,7 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
                             SHOPPING_HISTORY_FRAGMENT)
                     .hide(groupFragment)
                     .hide(shoppingListFragment)
+                    .hide(shoppingHistoryFragment)
                     .show(inventoryFragment)
                     .commit();
 
