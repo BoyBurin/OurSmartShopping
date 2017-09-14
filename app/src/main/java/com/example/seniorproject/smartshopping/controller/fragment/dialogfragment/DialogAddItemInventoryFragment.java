@@ -56,11 +56,11 @@ public class DialogAddItemInventoryFragment extends DialogFragment {
     private  Button btnScanBarcode;
     private Button btnCancel;
     private Button btnAdd;
-    private EditText edtUnit;
 
 
     private String photoUrl;
 
+    private String unit;
     private String barcodeId;
 
 
@@ -116,7 +116,6 @@ public class DialogAddItemInventoryFragment extends DialogFragment {
         btnScanBarcode = (Button) rootView.findViewById(R.id.btnScanBarcode);
         btnCancel = (Button) rootView.findViewById(R.id.btnCancel);
         btnAdd = (Button) rootView.findViewById(R.id.btnAdd);
-        edtUnit = (EditText) rootView.findViewById(R.id.edtUnit);
 
         btnScanBarcode.setOnClickListener(addBarcodeListener);
 
@@ -190,6 +189,7 @@ public class DialogAddItemInventoryFragment extends DialogFragment {
 
             tvName.setText(productList.getName());
             photoUrl = productList.getPhotoUrl().toString();
+            unit = productList.getUnit();
 
             edtAmount.setVisibility(View.VISIBLE);
             edtSoft.setVisibility(View.VISIBLE);
@@ -197,7 +197,6 @@ public class DialogAddItemInventoryFragment extends DialogFragment {
             edtListDescribe.setVisibility(View.VISIBLE);
             btnCancel.setVisibility(View.VISIBLE);
             btnAdd.setVisibility(View.VISIBLE);
-            edtUnit.setVisibility(View.VISIBLE);
 
 
 
@@ -218,7 +217,6 @@ public class DialogAddItemInventoryFragment extends DialogFragment {
             final String itemInventoryID = itemInventoryRef.push().getKey();
             String name = tvName.getText().toString();
             long amount = Long.parseLong(edtAmount.getText().toString());
-            String unit = edtUnit.getText().toString();
             String comment = edtListDescribe.getText().toString();
 
             RemindItem remindItem = new RemindItem();
