@@ -12,6 +12,7 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.example.seniorproject.smartshopping.R;
+import com.example.seniorproject.smartshopping.controller.fragment.dialogfragment.DialogAddItemInventoryFragment;
 import com.example.seniorproject.smartshopping.controller.fragment.dialogfragment.FragmentDialogAddShoppingList;
 import com.example.seniorproject.smartshopping.controller.fragment.mainfragment.GroupFragment;
 import com.example.seniorproject.smartshopping.controller.fragment.mainfragment.InventoryFragment;
@@ -31,7 +32,8 @@ import com.google.firebase.database.FirebaseDatabase;
 
 public class MainActivity extends AppCompatActivity implements ShoppingListFragment.ShoopingListFloatingButton
 , FragmentDialogAddShoppingList.DeleteAddShoppingListDialog, FragmentDialogAddShoppingList.PickImageShoppingListDialog,
-        InventoryFragment.MoreItemInventoryListener, ShoppingListFragment.MoreShoppingListItemListener {
+        InventoryFragment.MoreItemInventoryListener, ShoppingListFragment.MoreShoppingListItemListener,
+        DialogAddItemInventoryFragment.BarcodeListener, InventoryFragment.ItemInventoryFloatingButton {
     /***********************************************************************************************
      ************************************* Variable class ********************************************
      ***********************************************************************************************/
@@ -52,6 +54,7 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
     final String INVENTORY_FRAGMENT = "inventoryFragment";
     final String GROUP_FRAGMENT = "groupFragment";
     final String SHOPPING_HISTORY_FRAGMENT = "shoppingHistoryFragment";
+    final String DIALOG_ADD_ITEM_INVENATORY_FRAGMENT = "dialogAddItemInventoryFragment";
 
     private Fragment current;
     private ImageButton currentBtn;
@@ -136,6 +139,17 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
 
                 addShoppingListDialog.onActivityResult(requestCode, resultCode, data);
             }
+        }
+
+        if(requestCode == 0){
+            if(resultCode == RESULT_OK) {
+                String contents = data.getStringExtra("SCAN_RESULT");
+                Fragment dialogAddItemInventoryFragment = getSupportFragmentManager()
+                        .findFragmentByTag(DIALOG_ADD_ITEM_INVENATORY_FRAGMENT);
+
+                dialogAddItemInventoryFragment.onActivityResult(requestCode, resultCode, data);
+            }
+
         }
     }
 
@@ -307,5 +321,20 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
         intent.putExtra("position", position);
         intent.putExtra("shoppingListMap", shoppingListMap);
         startActivity(intent);
+    }
+
+    @Override
+    public void scanBarcode() {
+        Intent intent = new Intent();
+        intent.setAction("com.google.zxing.client.android.SCAN");
+        intent.putExtra("SAVE_HISTORY", false);
+        startActivityForResult(intent, 0);
+    }
+
+    @Override
+    public void setItemInventoryFloationgButton() {
+        DialogFragment addItemInventory =
+                DialogAddItemInventoryFragment.newInstance();
+        addItemInventory.show(getSupportFragmentManager(), DIALOG_ADD_ITEM_INVENATORY_FRAGMENT);
     }
 }

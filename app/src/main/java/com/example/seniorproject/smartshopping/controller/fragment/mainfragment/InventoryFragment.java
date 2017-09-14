@@ -46,6 +46,10 @@ public class InventoryFragment extends Fragment{
         void goToMoreItemInventory(ItemInventoryMap itemInventoryMap, int position);
     }
 
+    public interface ItemInventoryFloatingButton{
+        void setItemInventoryFloationgButton();
+    }
+
     private ImageButton btnAll;
     private ImageButton btnMeat;
     private ImageButton btnVegetandFruit;
@@ -173,24 +177,9 @@ public class InventoryFragment extends Fragment{
     final View.OnClickListener addItemListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            DatabaseReference itemInventoryRef = mDatabaseRef.child("iteminventory");
-            final String itemInventoryID = itemInventoryRef.push().getKey();
-            itemInventoryRef.child(itemInventoryID).child("name").setValue("")
-                    .addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            DatabaseReference itemInGroup = mDatabaseRef.child("itemingroup");
-
-                            itemInGroup.child(GroupManager.getInstance().getCurrentGroup().getId()).child(itemInventoryID)
-                                    .setValue(true).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    Toast.makeText(getActivity(), "Add Item Success", Toast.LENGTH_SHORT).show();
-                                }
-                            });
-
-                        }
-                    });
+            ItemInventoryFloatingButton itemInventoryFloatingButton = (ItemInventoryFloatingButton)
+                    getActivity();
+            itemInventoryFloatingButton.setItemInventoryFloationgButton();
         }
     };
 

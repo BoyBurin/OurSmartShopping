@@ -9,16 +9,18 @@ public class ProductList {
     private double retailprice;
     private String type;
     private String unit;
+    private String photoUrl;
 
     public ProductList(){
 
     }
 
-    public ProductList(String name, double retailprice, String type, String unit) {
+    public ProductList(String name, double retailprice, String type, String unit, String photoUrl) {
         this.name = name;
         this.retailprice = retailprice;
         this.type = type;
         this.unit = unit;
+        this.photoUrl = photoUrl;
     }
 
     public String getName() {
@@ -51,5 +53,13 @@ public class ProductList {
 
     public void setUnit(String unit) {
         this.unit = unit;
+    }
+
+    public String getPhotoUrl() {
+        return photoUrl;
+    }
+
+    public void setPhotoUrl(String photoUrl) {
+        this.photoUrl = photoUrl;
     }
 }

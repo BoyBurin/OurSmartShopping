@@ -1,8 +1,10 @@
 package com.example.seniorproject.smartshopping.controller.fragment.dialogfragment;
 
+import android.content.Intent;
 import android.media.Image;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,16 +14,25 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.seniorproject.smartshopping.R;
+import com.example.seniorproject.smartshopping.superuser.ProductList;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 
-public class DialogAddItemInventoryFragment extends Fragment {
+public class DialogAddItemInventoryFragment extends DialogFragment {
 
     /***********************************************************************************************
      ************************************* Variable class ********************************************
      ***********************************************************************************************/
+    public interface BarcodeListener{
+        public void scanBarcode();
+    }
 
     DatabaseReference mDatabaseRef;
 
@@ -32,9 +43,13 @@ public class DialogAddItemInventoryFragment extends Fragment {
     private EditText edtHard;
     private EditText edtListDescribe;
     private  Button btnScanBarcode;
-    private Button btnUploadImage;
     private Button btnCancel;
     private Button btnAdd;
+
+
+    private String photoUrl;
+
+    String barcodeId;
 
 
 
@@ -85,9 +100,19 @@ public class DialogAddItemInventoryFragment extends Fragment {
         edtHard = (EditText) rootView.findViewById(R.id.edtHard);
         edtListDescribe = (EditText) rootView.findViewById(R.id.edtListDescribe);
         btnScanBarcode = (Button) rootView.findViewById(R.id.btnScanBarcode);
-        btnUploadImage = (Button) rootView.findViewById(R.id.btnUploadImage);
         btnCancel = (Button) rootView.findViewById(R.id.btnCancel);
         btnAdd = (Button) rootView.findViewById(R.id.btnAdd);
+
+        btnScanBarcode.setOnClickListener(addBarcodeListener);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        String contents = data.getStringExtra("SCAN_RESULT");
+        barcodeId = contents;
+        mDatabaseRef.child("productlist").child(barcodeId).addListenerForSingleValueEvent(retriveProductListListener);
     }
 
     @Override
@@ -120,6 +145,46 @@ public class DialogAddItemInventoryFragment extends Fragment {
     /***********************************************************************************************
      ************************************* Listener variables ********************************************
      ***********************************************************************************************/
+
+    final View.OnClickListener addBarcodeListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            BarcodeListener barcodeListener = (BarcodeListener) getActivity();
+            barcodeListener.scanBarcode();
+        }
+    };
+
+    final ValueEventListener retriveProductListListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            ProductList productList = dataSnapshot.getValue(ProductList.class);
+            Glide.with(getContext())
+                    .load(productList.getPhotoUrl())
+                    .placeholder(R.drawable.bg_small) //default pic
+                    .centerCrop()
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .into(imgItem);
+
+            tvName.setText(productList.getName());
+            photoUrl = productList.getPhotoUrl().toString();
+
+            edtAmount.setVisibility(View.VISIBLE);
+            edtSoft.setVisibility(View.VISIBLE);
+            edtHard.setVisibility(View.VISIBLE);
+            edtListDescribe.setVisibility(View.VISIBLE);
+            btnCancel.setVisibility(View.VISIBLE);
+            btnAdd.setVisibility(View.VISIBLE);
+
+
+
+
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+    };
 
 
     /***********************************************************************************************

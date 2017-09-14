@@ -31,7 +31,8 @@
         android:inputType="textCapWords"
         android:textColor="@android:color/black"
         android:textColorHint="@color/dark_grey"
-        android:layout_below="@+id/tvName"/>
+        android:layout_below="@+id/tvName"
+        android:visibility="gone"/>
 
     <EditText
         android:id="@+id/edtSoft"
@@ -41,7 +42,8 @@
         android:hint="Soft remainder"
         android:inputType="number"
         android:layout_below="@+id/edtAmount"
-        android:textColorHint="@color/dark_grey"/>
+        android:textColorHint="@color/dark_grey"
+        android:visibility="gone"/>
 
     <EditText
         android:id="@+id/edtHard"
@@ -51,7 +53,8 @@
         android:hint="Hard remainder"
         android:inputType="number"
         android:layout_below="@+id/edtSoft"
-        android:textColorHint="@color/dark_grey"/>
+        android:textColorHint="@color/dark_grey"
+        android:visibility="gone"/>
 
     <EditText
         android:id="@+id/edtListDescribe"
@@ -63,7 +66,8 @@
         android:hint="Detail of your Item"
         android:inputType="textCapWords"
         android:textColor="@android:color/black"
-        android:textColorHint="@color/dark_grey" />
+        android:textColorHint="@color/dark_grey"
+        android:visibility="gone"/>
 
     <Button
         android:id="@+id/btnScanBarcode"
@@ -86,20 +90,23 @@
         <View
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"/>
+            android:layout_weight="1"
+            />
 
         <Button
             android:id="@+id/btnCancel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="36dp"
-            android:text="@string/add_shopping_list_cancel_button" />
+            android:text="@string/add_shopping_list_cancel_button"
+            android:visibility="gone"/>
 
         <Button
             android:id="@+id/btnAdd"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/add_shopping_list_add_button" />
+            android:text="@string/add_shopping_list_add_button"
+            android:visibility="gone"/>
         <View
             android:layout_width="0dp"
             android:layout_height="wrap_content"

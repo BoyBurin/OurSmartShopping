@@ -169,7 +169,7 @@ public class SuperUserItemActivity extends AppCompatActivity {
             double retailPrice = Double.parseDouble(edtRetailPrice.getText().toString());
             String type = edtType.getText().toString();
             String unit = edtUnit.getText().toString();
-            ProductList productList = new ProductList(name,retailPrice,type,unit);
+            ProductList productList = new ProductList(name,retailPrice,type,unit, downloadUrl.toString());
 
 
             String barcodeID = tvShowBarcode.getText().toString();
