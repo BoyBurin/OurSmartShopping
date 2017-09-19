@@ -43,7 +43,7 @@ public class MoreShoppingListItemSelectorFragment extends Fragment {
     public interface AddShoppingListItemListener{
         public void setName(String name);
         public long getAmount();
-        public ImageButton getButton();
+        public void setButton(View.OnClickListener onClick);
     }
 
     public interface FinishAddShoppingListItemListener{
@@ -118,8 +118,7 @@ public class MoreShoppingListItemSelectorFragment extends Fragment {
 
         gridView.setOnItemClickListener(clickItemListener);
 
-        addedButton = ((AddShoppingListItemListener) getParentFragment()).getButton();
-        addedButton.setOnClickListener(savedShoppingListItem);
+        ((AddShoppingListItemListener) getParentFragment()).setButton(savedShoppingListItem);
 
     }
 

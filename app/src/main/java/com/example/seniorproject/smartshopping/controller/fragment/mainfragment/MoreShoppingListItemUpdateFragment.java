@@ -259,8 +259,8 @@ public class MoreShoppingListItemUpdateFragment extends Fragment implements
     }
 
     @Override
-    public ImageButton getButton() {
-        return customViewGroupShoppingListItemAdd.getAddedButton();
+    public void setButton(View.OnClickListener onClick) {
+        customViewGroupShoppingListItemAdd.setAddedButton(onClick);
     }
 
     @Override

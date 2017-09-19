@@ -105,8 +105,8 @@ public class CustomViewGroupShoppingListItemAdd extends BaseCustomViewGroup {
         this.tvAddedItemName.setText("");
     }
 
-    public ImageButton getAddedButton(){
-        return imgBtnAdded;
+    public void setAddedButton(OnClickListener onClickListener){
+        imgBtnAdded.setOnClickListener(onClickListener);
     }
 
 
