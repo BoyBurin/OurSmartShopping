@@ -6,9 +6,7 @@ import android.provider.Settings;
 
 import com.example.seniorproject.smartshopping.model.manager.Contextor;
 
-/**
- * Created by nuuneoi on 10/16/2014.
- */
+
 public class Utils {
 
     private static Utils instance;

@@ -79,8 +79,8 @@ public class MoreShoppingListItemFragment extends Fragment {
                 switch (page){
                     case 0:
                         return MoreShoppingListItemUpdateFragment.newInstance(shoppingListMap);
-                   // case 1:
-                   //     return MoreItemInventoryEditFragment.newInstance(position);
+                    case 1:
+                        return MoreShoppingListItemOptimizeFragment.newInstance();
                     default:
                         return null;
 
@@ -88,7 +88,7 @@ public class MoreShoppingListItemFragment extends Fragment {
             }
             @Override
             public int getCount() {
-                return 1;
+                return 2;
             }
 
             @Override
@@ -96,8 +96,8 @@ public class MoreShoppingListItemFragment extends Fragment {
                 switch (position){
                     case 0:
                         return "Items";
-                    //case 1:
-                    //    return "Update Item";
+                    case 1:
+                        return "Optimize";
                     default:
                         return "";
                 }

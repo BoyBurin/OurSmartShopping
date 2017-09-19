@@ -120,6 +120,8 @@ public class DialogAddItemInventoryFragment extends DialogFragment {
         btnScanBarcode.setOnClickListener(addBarcodeListener);
 
         btnAdd.setOnClickListener(addItemListener);
+
+        btnCancel.setOnClickListener(cancelDialogListener);
     }
 
     @Override
@@ -167,6 +169,13 @@ public class DialogAddItemInventoryFragment extends DialogFragment {
     /***********************************************************************************************
      ************************************* Listener variables ********************************************
      ***********************************************************************************************/
+
+    final View.OnClickListener cancelDialogListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            closeDialog();
+        }
+    };
 
     final View.OnClickListener addBarcodeListener = new View.OnClickListener() {
         @Override

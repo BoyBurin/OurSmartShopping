@@ -201,7 +201,7 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
                     getSupportFragmentManager().findFragmentByTag(SHOPPING_HISTORY_FRAGMENT);
 
             if(view == btnPromotion){
-                Intent intent = new Intent(MainActivity.this, SuperUserItemActivity.class);
+                Intent intent = new Intent(MainActivity.this, OCRActivity.class);
                 startActivity(intent);
             }
 
