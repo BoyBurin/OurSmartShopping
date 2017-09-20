@@ -5,10 +5,8 @@ import android.os.Bundle;
 import android.view.MenuItem;
 
 import com.example.seniorproject.smartshopping.R;
-import com.example.seniorproject.smartshopping.controller.fragment.mainfragment.MoreItemInventoryFragment;
-import com.example.seniorproject.smartshopping.controller.fragment.mainfragment.MoreShoppingListItemFragment;
+import com.example.seniorproject.smartshopping.controller.fragment.shoppinglistfragment.MoreShoppingListItemFragment;
 import com.example.seniorproject.smartshopping.model.dao.ShoppingListMap;
-import com.example.seniorproject.smartshopping.model.manager.ShoppingListManager;
 
 public class MoreShoppingListItemActivity extends AppCompatActivity {
 

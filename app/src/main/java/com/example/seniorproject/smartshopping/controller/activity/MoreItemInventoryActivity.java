@@ -2,14 +2,11 @@ package com.example.seniorproject.smartshopping.controller.activity;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import com.example.seniorproject.smartshopping.R;
-import com.example.seniorproject.smartshopping.controller.fragment.mainfragment.MoreItemInventoryFragment;
+import com.example.seniorproject.smartshopping.controller.fragment.inventoryfragment.MoreItemInventoryFragment;
 import com.example.seniorproject.smartshopping.model.dao.ItemInventoryMap;
-import com.example.seniorproject.smartshopping.model.manager.ItemInventoryManager;
 
 public class MoreItemInventoryActivity extends AppCompatActivity {
 

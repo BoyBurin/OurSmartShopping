@@ -1,15 +1,13 @@
-package com.example.seniorproject.smartshopping.controller.fragment.mainfragment;
+package com.example.seniorproject.smartshopping.controller.fragment.shoppinglistfragment;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -19,11 +17,8 @@ import com.example.seniorproject.smartshopping.model.dao.ItemInventoryMap;
 import com.example.seniorproject.smartshopping.model.dao.ItemShoppingList;
 import com.example.seniorproject.smartshopping.model.dao.ShoppingListMap;
 import com.example.seniorproject.smartshopping.model.datatype.MutableInteger;
-import com.example.seniorproject.smartshopping.model.manager.ItemInventoryManager;
 import com.example.seniorproject.smartshopping.model.manager.ItemShoppingListManager;
-import com.example.seniorproject.smartshopping.model.manager.ShoppingListManager;
 import com.example.seniorproject.smartshopping.view.adapter.ItemShoppingListAdapter;
-import com.example.seniorproject.smartshopping.view.adapter.ShoppingListAdapter;
 import com.example.seniorproject.smartshopping.view.customviewgroup.CustomViewGroupShoppingListItemAdd;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;

@@ -1,53 +1,57 @@
-package com.example.seniorproject.smartshopping.controller.fragment.mainfragment;
+package com.example.seniorproject.smartshopping.controller.fragment.inventoryfragment;
 
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.seniorproject.smartshopping.R;
-import com.example.seniorproject.smartshopping.model.dao.ProductCrowd;
-import com.example.seniorproject.smartshopping.superuser.ProductList;
+import com.example.seniorproject.smartshopping.model.dao.ItemInventory;
+import com.example.seniorproject.smartshopping.model.dao.ItemInventoryMap;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.ArrayList;
 
-
-public class MoreShoppingListItemOptimizeFragment extends Fragment {
+public class MoreItemInventoryPhotoSummaryFragment extends Fragment {
 
     /***********************************************************************************************
      ************************************* Variable class ********************************************
      ***********************************************************************************************/
 
+    private ItemInventoryMap itemInventoryMap;
 
-    private Button optimizePrice;
-    private Button optimizeTime;
+    private TextView tvName;
+    private TextView tvAmount;
+    private TextView tvComment;
+    private ImageView ivImg;
+    private TextView tvUnit;
 
     private DatabaseReference mDatabaseRef;
 
-    private ArrayList<ProductCrowd> productCrowdArrayList;
 
 
     /***********************************************************************************************
      ************************************* Method class ********************************************
      ***********************************************************************************************/
 
-    public MoreShoppingListItemOptimizeFragment() {
+    public MoreItemInventoryPhotoSummaryFragment() {
         super();
     }
 
     @SuppressWarnings("unused")
-    public static MoreShoppingListItemOptimizeFragment newInstance() {
-        MoreShoppingListItemOptimizeFragment fragment = new MoreShoppingListItemOptimizeFragment();
+    public static MoreItemInventoryPhotoSummaryFragment newInstance(ItemInventoryMap itemInventoryMap) {
+        MoreItemInventoryPhotoSummaryFragment fragment = new MoreItemInventoryPhotoSummaryFragment();
         Bundle args = new Bundle();
+        args.putParcelable("itemInventoryMap", itemInventoryMap);
         fragment.setArguments(args);
         return fragment;
     }
@@ -55,6 +59,7 @@ public class MoreShoppingListItemOptimizeFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        itemInventoryMap = getArguments().getParcelable("itemInventoryMap");
         init(savedInstanceState);
 
         if (savedInstanceState != null)
@@ -64,23 +69,49 @@ public class MoreShoppingListItemOptimizeFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_more_shopping_list_optimize, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_main_more_item_inventory_photo_summary, container, false);
         initInstances(rootView, savedInstanceState);
         return rootView;
     }
 
     private void init(Bundle savedInstanceState) {
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
-        productCrowdArrayList = new ArrayList<ProductCrowd>();
+        mDatabaseRef.child("iteminventory").child(itemInventoryMap.getId())
+                .addValueEventListener(updateItemInventory);
 
     }
 
     @SuppressWarnings("UnusedParameters")
     private void initInstances(View rootView, Bundle savedInstanceState) {
-        optimizePrice = (Button) rootView.findViewById(R.id.price);
-        optimizeTime = (Button) rootView.findViewById(R.id.time);
+        tvName = (TextView) rootView.findViewById(R.id.tvName);
+        tvAmount = (TextView) rootView.findViewById(R.id.tvAmount);
+        tvComment = (TextView) rootView.findViewById(R.id.tvComment);
+        tvUnit = (TextView) rootView.findViewById(R.id.tvUnit);
+        ivImg = (ImageView) rootView.findViewById(R.id.ivImg);
 
-        //optimizePrice.setOnClickListener();
+        setValueOfItem();
+    }
+
+    private void setValueOfItem(){
+        ItemInventory itemInventory = itemInventoryMap.getItemInventory();
+        tvName.setText(itemInventory.getName().toString());
+        tvAmount.setText(""+ itemInventory.getAmount());
+        tvComment.setText(itemInventory.getComment());
+        tvUnit.setText(itemInventory.getUnit());
+
+        Glide.with(getContext())
+                .load(itemInventory.getPhotoUrl())
+                .placeholder(R.drawable.bg_small) //default pic
+                .centerCrop()
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .into(ivImg);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mDatabaseRef.child("iteminventory").child(itemInventoryMap.getId())
+                .removeEventListener(updateItemInventory);
     }
 
     @Override
@@ -114,29 +145,15 @@ public class MoreShoppingListItemOptimizeFragment extends Fragment {
      ************************************* Listener variables ********************************************
      ***********************************************************************************************/
 
-    final View.OnClickListener optimizePriceListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            //mDatabaseRef.child("productcrowd").addListenerForSingleValueEvent();
-        }
-    };
-
-
-    final ValueEventListener getProductListener = new ValueEventListener() {
+    final ValueEventListener updateItemInventory = new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
-            ProductCrowd productCrowd1 = new ProductCrowd();
-            ProductCrowd productCrowd2 = new ProductCrowd();
+            ItemInventory itemInventory = dataSnapshot.getValue(ItemInventory.class);
 
-            productCrowd1.setBarcode("8850188243308");
-            productCrowd1.setName("โฟร์โมสต์รสช็อคโกแลต");
-            productCrowd1.setPrice(35);
-            productCrowd1.setStore("1");
 
-            productCrowd2.setBarcode("8850425007830");
-            productCrowd2.setName("ยูโร่เค้กใบเตย");
-            productCrowd2.setPrice(36);
-            productCrowd2.setStore("2");
+            tvAmount.setText(itemInventory.getAmount() + "");
+            tvComment.setText(itemInventory.getComment());
+
         }
 
         @Override

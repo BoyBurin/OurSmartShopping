@@ -9,24 +9,20 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageButton;
-import android.widget.Toast;
 
 import com.example.seniorproject.smartshopping.R;
 import com.example.seniorproject.smartshopping.controller.fragment.dialogfragment.DialogAddItemInventoryFragment;
 import com.example.seniorproject.smartshopping.controller.fragment.dialogfragment.FragmentDialogAddShoppingList;
-import com.example.seniorproject.smartshopping.controller.fragment.mainfragment.GroupFragment;
-import com.example.seniorproject.smartshopping.controller.fragment.mainfragment.InventoryFragment;
-import com.example.seniorproject.smartshopping.controller.fragment.mainfragment.ShoppingListFragment;
-import com.example.seniorproject.smartshopping.controller.fragment.mainfragment.ShoppingHistoryFragment;
-import com.example.seniorproject.smartshopping.model.dao.Group;
-import com.example.seniorproject.smartshopping.model.dao.ItemInventory;
+import com.example.seniorproject.smartshopping.controller.fragment.groupfragment.GroupFragment;
+import com.example.seniorproject.smartshopping.controller.fragment.inventoryfragment.InventoryFragment;
+import com.example.seniorproject.smartshopping.controller.fragment.settingfragment.SettingFragment;
+import com.example.seniorproject.smartshopping.controller.fragment.shoppinglistfragment.ShoppingListFragment;
+import com.example.seniorproject.smartshopping.controller.fragment.shoppinghistoryfragment.ShoppingHistoryFragment;
 import com.example.seniorproject.smartshopping.model.dao.ItemInventoryMap;
 import com.example.seniorproject.smartshopping.model.dao.ShoppingListMap;
 import com.example.seniorproject.smartshopping.model.manager.GroupManager;
 import com.example.seniorproject.smartshopping.model.manager.ItemInventoryManager;
 import com.example.seniorproject.smartshopping.model.manager.ShoppingListManager;
-import com.example.seniorproject.smartshopping.superuser.SuperUserItemActivity;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -56,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
     final String GROUP_FRAGMENT = "groupFragment";
     final String SHOPPING_HISTORY_FRAGMENT = "shoppingHistoryFragment";
     final String DIALOG_ADD_ITEM_INVENATORY_FRAGMENT = "dialogAddItemInventoryFragment";
+    final String SETTINGFRAGMENT = "settingFragment";
 
     private Fragment current;
     private ImageButton currentBtn;
@@ -105,6 +102,7 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
             InventoryFragment inventoryFragment = InventoryFragment.newInstance();
             GroupFragment groupFragment = GroupFragment.newInstance();
             ShoppingHistoryFragment shoppingHistoryFragment = ShoppingHistoryFragment.newInstance();
+            SettingFragment settingFragment = SettingFragment.newInstance();
 
 
             getSupportFragmentManager().beginTransaction()
@@ -116,9 +114,12 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
                             GROUP_FRAGMENT)
                     .add(R.id.containerMain, shoppingHistoryFragment,
                             SHOPPING_HISTORY_FRAGMENT)
+                    .add(R.id.containerMain, settingFragment,
+                            SETTINGFRAGMENT)
                     .hide(groupFragment)
                     .hide(shoppingListFragment)
                     .hide(shoppingHistoryFragment)
+                    .hide(settingFragment)
                     .show(inventoryFragment)
                     .commit();
 
@@ -200,6 +201,9 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
             ShoppingHistoryFragment shoppingHistoryFragment = (ShoppingHistoryFragment)
                     getSupportFragmentManager().findFragmentByTag(SHOPPING_HISTORY_FRAGMENT);
 
+            SettingFragment settingFragment = (SettingFragment)
+                    getSupportFragmentManager().findFragmentByTag(SETTINGFRAGMENT);
+
             if(view == btnPromotion){
                 Intent intent = new Intent(MainActivity.this, OCRActivity.class);
                 startActivity(intent);
@@ -259,6 +263,22 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
                 current = shoppingHistoryFragment;
                 currentBtn.setBackgroundResource(android.R.color.transparent);
                 currentBtn = btnShoppingHistory;
+                currentBtn.setBackgroundResource(R.drawable.shape_rect_overlay);
+
+            }
+
+            if(view == btnSetting){
+
+                if(current == settingFragment) return;
+
+                getSupportFragmentManager().beginTransaction()
+                        .show(settingFragment)
+                        .hide(current)
+                        .commit();
+
+                current = settingFragment;
+                currentBtn.setBackgroundResource(android.R.color.transparent);
+                currentBtn = btnSetting;
                 currentBtn.setBackgroundResource(R.drawable.shape_rect_overlay);
 
             }

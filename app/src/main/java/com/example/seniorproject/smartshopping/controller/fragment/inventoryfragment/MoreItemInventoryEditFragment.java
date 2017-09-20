@@ -1,45 +1,46 @@
-package com.example.seniorproject.smartshopping.controller.fragment.mainfragment;
+package com.example.seniorproject.smartshopping.controller.fragment.inventoryfragment;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ProgressBar;
+import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.seniorproject.smartshopping.R;
 import com.example.seniorproject.smartshopping.model.dao.ItemInventory;
 import com.example.seniorproject.smartshopping.model.dao.ItemInventoryMap;
-import com.example.seniorproject.smartshopping.model.manager.ItemInventoryManager;
-import com.example.seniorproject.smartshopping.view.transformation.CircleTransform;
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 
-public class MoreItemInventoryPhotoSummaryFragment extends Fragment {
+public class MoreItemInventoryEditFragment extends Fragment {
 
     /***********************************************************************************************
      ************************************* Variable class ********************************************
      ***********************************************************************************************/
 
+
     private ItemInventoryMap itemInventoryMap;
 
-    private TextView tvName;
-    private TextView tvAmount;
-    private TextView tvComment;
-    private ImageView ivImg;
-    private TextView tvUnit;
+    private EditText edtComment;
+    private EditText edtAmount;
+    private EditText edtSoft;
+    private EditText edtHard;
+    private Button btnSave;
 
     private DatabaseReference mDatabaseRef;
+
+    private ProgressBar progressBar;
+    private View backgroundLoading;
+
 
 
 
@@ -47,13 +48,13 @@ public class MoreItemInventoryPhotoSummaryFragment extends Fragment {
      ************************************* Method class ********************************************
      ***********************************************************************************************/
 
-    public MoreItemInventoryPhotoSummaryFragment() {
+    public MoreItemInventoryEditFragment() {
         super();
     }
 
     @SuppressWarnings("unused")
-    public static MoreItemInventoryPhotoSummaryFragment newInstance(ItemInventoryMap itemInventoryMap) {
-        MoreItemInventoryPhotoSummaryFragment fragment = new MoreItemInventoryPhotoSummaryFragment();
+    public static MoreItemInventoryEditFragment newInstance(ItemInventoryMap itemInventoryMap) {
+        MoreItemInventoryEditFragment fragment = new MoreItemInventoryEditFragment();
         Bundle args = new Bundle();
         args.putParcelable("itemInventoryMap", itemInventoryMap);
         fragment.setArguments(args);
@@ -73,49 +74,34 @@ public class MoreItemInventoryPhotoSummaryFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_main_more_item_inventory_photo_summary, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_main_more_item_inventory_edit, container, false);
         initInstances(rootView, savedInstanceState);
         return rootView;
     }
 
     private void init(Bundle savedInstanceState) {
+
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
-        mDatabaseRef.child("iteminventory").child(itemInventoryMap.getId())
-                .addValueEventListener(updateItemInventory);
 
     }
 
     @SuppressWarnings("UnusedParameters")
     private void initInstances(View rootView, Bundle savedInstanceState) {
-        tvName = (TextView) rootView.findViewById(R.id.tvName);
-        tvAmount = (TextView) rootView.findViewById(R.id.tvAmount);
-        tvComment = (TextView) rootView.findViewById(R.id.tvComment);
-        tvUnit = (TextView) rootView.findViewById(R.id.tvUnit);
-        ivImg = (ImageView) rootView.findViewById(R.id.ivImg);
+        edtComment = (EditText) rootView.findViewById(R.id.edtComment);
+        edtAmount = (EditText) rootView.findViewById(R.id.edtAmount);
+        edtSoft = (EditText) rootView.findViewById(R.id.edtSoft);
+        edtHard = (EditText) rootView.findViewById(R.id.edtHard);
+        btnSave = (Button) rootView.findViewById(R.id.btnSave);
 
-        setValueOfItem();
-    }
+        edtComment.setText(itemInventoryMap.getItemInventory().getComment().toString());
+        edtAmount.setText(itemInventoryMap.getItemInventory().getAmount() + "");
+        edtSoft.setText(itemInventoryMap.getItemInventory().getRemindItem().getSoft() + "");
+        edtHard.setText(itemInventoryMap.getItemInventory().getRemindItem().getHard() + "");
 
-    private void setValueOfItem(){
-        ItemInventory itemInventory = itemInventoryMap.getItemInventory();
-        tvName.setText(itemInventory.getName().toString());
-        tvAmount.setText(""+ itemInventory.getAmount());
-        tvComment.setText(itemInventory.getComment());
-        tvUnit.setText(itemInventory.getUnit());
+        btnSave.setOnClickListener(saveItemInventoryListener);
 
-        Glide.with(getContext())
-                .load(itemInventory.getPhotoUrl())
-                .placeholder(R.drawable.bg_small) //default pic
-                .centerCrop()
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .into(ivImg);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        mDatabaseRef.child("iteminventory").child(itemInventoryMap.getId())
-                .removeEventListener(updateItemInventory);
+        progressBar = (ProgressBar) rootView.findViewById(R.id.progressBarSaveIteminventory);
+        backgroundLoading = (View) rootView.findViewById(R.id.backgroundLoading);
     }
 
     @Override
@@ -149,20 +135,29 @@ public class MoreItemInventoryPhotoSummaryFragment extends Fragment {
      ************************************* Listener variables ********************************************
      ***********************************************************************************************/
 
-    final ValueEventListener updateItemInventory = new ValueEventListener() {
+    final View.OnClickListener saveItemInventoryListener = new View.OnClickListener() {
         @Override
-        public void onDataChange(DataSnapshot dataSnapshot) {
-            ItemInventory itemInventory = dataSnapshot.getValue(ItemInventory.class);
+        public void onClick(View view) {
+            progressBar.setVisibility(View.VISIBLE);
+            backgroundLoading.setVisibility(View.VISIBLE);
+            btnSave.setVisibility(View.GONE);
+            ItemInventory itemInventory = itemInventoryMap.getItemInventory();
+            String itemInventoryID = itemInventoryMap.getId();
+            itemInventory.setAmount(Integer.parseInt(edtAmount.getText().toString()));
+            itemInventory.getRemindItem().setSoft(Long.parseLong(edtSoft.getText().toString()));
+            itemInventory.getRemindItem().setHard(Long.parseLong(edtHard.getText().toString()));
+            itemInventory.setComment(edtComment.getText().toString());
 
-
-            tvAmount.setText(itemInventory.getAmount() + "");
-            tvComment.setText(itemInventory.getComment());
-
-        }
-
-        @Override
-        public void onCancelled(DatabaseError databaseError) {
-
+            mDatabaseRef.child("iteminventory").child(itemInventoryID)
+                    .setValue(itemInventory).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    progressBar.setVisibility(View.GONE);
+                    backgroundLoading.setVisibility(View.GONE);
+                    btnSave.setVisibility(View.VISIBLE);
+                    Toast.makeText(getActivity(), "Update Item Inventory Success", Toast.LENGTH_SHORT).show();
+                }
+            });
         }
     };
 

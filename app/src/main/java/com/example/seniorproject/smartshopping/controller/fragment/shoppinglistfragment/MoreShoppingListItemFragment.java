@@ -1,9 +1,8 @@
-package com.example.seniorproject.smartshopping.controller.fragment.mainfragment;
+package com.example.seniorproject.smartshopping.controller.fragment.shoppinglistfragment;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
@@ -11,35 +10,37 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.seniorproject.smartshopping.R;
-import com.example.seniorproject.smartshopping.model.dao.ItemInventory;
-import com.example.seniorproject.smartshopping.model.dao.ItemInventoryMap;
-import com.example.seniorproject.smartshopping.model.manager.ItemInventoryManager;
+import com.example.seniorproject.smartshopping.model.dao.ShoppingListMap;
 import com.example.seniorproject.smartshopping.view.specialview.SlidingTabLayout;
 
 
-public class MoreItemInventoryFragment extends Fragment {
+public class MoreShoppingListItemFragment extends Fragment {
 
     /***********************************************************************************************
      ************************************* Variable class ********************************************
      ***********************************************************************************************/
 
     private ViewPager viewPager;
-    private ItemInventoryMap itemInventoryMap;
+    private ShoppingListMap shoppingListMap;
     private SlidingTabLayout slidingTabLayout;
+    private int position;
+
+
 
     /***********************************************************************************************
      ************************************* Method class ********************************************
      ***********************************************************************************************/
 
-    public MoreItemInventoryFragment() {
+    public MoreShoppingListItemFragment() {
         super();
     }
 
     @SuppressWarnings("unused")
-    public static MoreItemInventoryFragment newInstance(ItemInventoryMap itemInventoryMap) {
-        MoreItemInventoryFragment fragment = new MoreItemInventoryFragment();
+    public static MoreShoppingListItemFragment newInstance(ShoppingListMap shoppingListMap, int position) {
+        MoreShoppingListItemFragment fragment = new MoreShoppingListItemFragment();
         Bundle args = new Bundle();
-        args.putParcelable("itemInventoryMap", itemInventoryMap);
+        args.putInt("position", position);
+        args.putParcelable("shoppingListMap", shoppingListMap);
         fragment.setArguments(args);
         return fragment;
     }
@@ -47,8 +48,8 @@ public class MoreItemInventoryFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        itemInventoryMap = getArguments().getParcelable("itemInventoryMap");
+        position = getArguments().getInt("position");
+        shoppingListMap = getArguments().getParcelable("shoppingListMap");
         init(savedInstanceState);
 
         if (savedInstanceState != null)
@@ -58,7 +59,7 @@ public class MoreItemInventoryFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_main_more_item_inventory, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_main_more_shopping_list_item, container, false);
         initInstances(rootView, savedInstanceState);
         return rootView;
     }
@@ -70,16 +71,15 @@ public class MoreItemInventoryFragment extends Fragment {
 
     @SuppressWarnings("UnusedParameters")
     private void initInstances(View rootView, Bundle savedInstanceState) {
-
         viewPager = (ViewPager) rootView.findViewById(R.id.viewPager);
         viewPager.setAdapter(new FragmentStatePagerAdapter(getChildFragmentManager()) {
             @Override
             public Fragment getItem(int page) {
                 switch (page){
                     case 0:
-                        return MoreItemInventoryPhotoSummaryFragment.newInstance(itemInventoryMap);
+                        return MoreShoppingListItemUpdateFragment.newInstance(shoppingListMap);
                     case 1:
-                        return MoreItemInventoryEditFragment.newInstance(itemInventoryMap);
+                        return MoreShoppingListItemOptimizeFragment.newInstance();
                     default:
                         return null;
 
@@ -94,9 +94,9 @@ public class MoreItemInventoryFragment extends Fragment {
             public CharSequence getPageTitle(int position) {
                 switch (position){
                     case 0:
-                        return "Summary";
+                        return "Items";
                     case 1:
-                        return "Update Item";
+                        return "Optimize";
                     default:
                         return "";
                 }
@@ -137,27 +137,6 @@ public class MoreItemInventoryFragment extends Fragment {
     /***********************************************************************************************
      ************************************* Listener variables ********************************************
      ***********************************************************************************************/
-
-    /*final FragmentStatePagerAdapter fragmentStatePagerAdapter =
-            new FragmentStatePagerAdapter(getChildFragmentManager()) {
-                @Override
-                public Fragment getItem(int position) {
-                    switch (position){
-                        case 0:
-                            return MoreItemInventoryPhotoSummaryFragment.newInstance();
-                        case 1:
-                            return MoreItemInventoryEditFragment.newInstance();
-                        default:
-                            return null;
-
-                    }
-                }
-
-                @Override
-                public int getCount() {
-                    return 2;
-                }
-            };*/
 
 
     /***********************************************************************************************

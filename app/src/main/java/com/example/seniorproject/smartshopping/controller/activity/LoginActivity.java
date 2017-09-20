@@ -11,12 +11,14 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.seniorproject.smartshopping.R;
+import com.example.seniorproject.smartshopping.controller.fragment.loginfragment.CreateAccountFragment;
 import com.example.seniorproject.smartshopping.controller.fragment.loginfragment.LoginFragment;
 import com.google.android.gms.common.SignInButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-public class LoginActivity extends AppCompatActivity implements LoginFragment.LoginFragmentListener {
+public class LoginActivity extends AppCompatActivity implements LoginFragment.LoginFragmentListener,
+        LoginFragment.CraateAccountFragmentListener, CreateAccountFragment.SaveInfoListener {
 
     /***********************************************************************************************
      ************************************* Variable class ********************************************
@@ -24,6 +26,9 @@ public class LoginActivity extends AppCompatActivity implements LoginFragment.Lo
 
     private ImageView imageView;
     private SignInButton btnfacebook;
+
+    private final String CREATEACCOUNTFRAGMENT = "createAccountFragment";
+    private final String LOGINFRAGMENT = "loginFragment";
 
     /***********************************************************************************************
      ************************************* Methods ********************************************
@@ -46,7 +51,7 @@ public class LoginActivity extends AppCompatActivity implements LoginFragment.Lo
 
         if(savedInstanceState == null){
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.containerLogin, LoginFragment.newInstance())
+                    .add(R.id.containerLogin, LoginFragment.newInstance(), LOGINFRAGMENT)
                     .commit();
         }
     }
@@ -61,6 +66,31 @@ public class LoginActivity extends AppCompatActivity implements LoginFragment.Lo
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
         finish();
+    }
+
+    @Override
+    public void goToCreateAccount() {
+        CreateAccountFragment createAccountFragment = CreateAccountFragment.newInstance();
+        LoginFragment loginFragment = (LoginFragment) getSupportFragmentManager().findFragmentByTag(LOGINFRAGMENT);
+        getSupportFragmentManager().beginTransaction()
+                .add(R.id.containerLogin, createAccountFragment, CREATEACCOUNTFRAGMENT)
+                .hide(loginFragment)
+                .show(createAccountFragment)
+                .commit();
+    }
+
+    @Override
+    public void saveInfo() {
+        CreateAccountFragment createAccountFragment =
+                (CreateAccountFragment) getSupportFragmentManager().findFragmentByTag(CREATEACCOUNTFRAGMENT);
+
+        LoginFragment loginFragment =
+                (LoginFragment) getSupportFragmentManager().findFragmentByTag(LOGINFRAGMENT);
+
+        getSupportFragmentManager().beginTransaction()
+                .remove(createAccountFragment)
+                .show(loginFragment)
+                .commit();
     }
 
 

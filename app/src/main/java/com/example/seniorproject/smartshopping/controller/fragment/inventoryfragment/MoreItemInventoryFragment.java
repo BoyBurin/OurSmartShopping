@@ -1,4 +1,4 @@
-package com.example.seniorproject.smartshopping.controller.fragment.mainfragment;
+package com.example.seniorproject.smartshopping.controller.fragment.inventoryfragment;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -10,38 +10,33 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.seniorproject.smartshopping.R;
-import com.example.seniorproject.smartshopping.model.dao.ShoppingListMap;
-import com.example.seniorproject.smartshopping.model.manager.ShoppingListManager;
+import com.example.seniorproject.smartshopping.model.dao.ItemInventoryMap;
 import com.example.seniorproject.smartshopping.view.specialview.SlidingTabLayout;
 
 
-public class MoreShoppingListItemFragment extends Fragment {
+public class MoreItemInventoryFragment extends Fragment {
 
     /***********************************************************************************************
      ************************************* Variable class ********************************************
      ***********************************************************************************************/
 
     private ViewPager viewPager;
-    private ShoppingListMap shoppingListMap;
+    private ItemInventoryMap itemInventoryMap;
     private SlidingTabLayout slidingTabLayout;
-    private int position;
-
-
 
     /***********************************************************************************************
      ************************************* Method class ********************************************
      ***********************************************************************************************/
 
-    public MoreShoppingListItemFragment() {
+    public MoreItemInventoryFragment() {
         super();
     }
 
     @SuppressWarnings("unused")
-    public static MoreShoppingListItemFragment newInstance(ShoppingListMap shoppingListMap, int position) {
-        MoreShoppingListItemFragment fragment = new MoreShoppingListItemFragment();
+    public static MoreItemInventoryFragment newInstance(ItemInventoryMap itemInventoryMap) {
+        MoreItemInventoryFragment fragment = new MoreItemInventoryFragment();
         Bundle args = new Bundle();
-        args.putInt("position", position);
-        args.putParcelable("shoppingListMap", shoppingListMap);
+        args.putParcelable("itemInventoryMap", itemInventoryMap);
         fragment.setArguments(args);
         return fragment;
     }
@@ -49,8 +44,8 @@ public class MoreShoppingListItemFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        position = getArguments().getInt("position");
-        shoppingListMap = getArguments().getParcelable("shoppingListMap");
+
+        itemInventoryMap = getArguments().getParcelable("itemInventoryMap");
         init(savedInstanceState);
 
         if (savedInstanceState != null)
@@ -60,7 +55,7 @@ public class MoreShoppingListItemFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_main_more_shopping_list_item, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_main_more_item_inventory, container, false);
         initInstances(rootView, savedInstanceState);
         return rootView;
     }
@@ -72,15 +67,16 @@ public class MoreShoppingListItemFragment extends Fragment {
 
     @SuppressWarnings("UnusedParameters")
     private void initInstances(View rootView, Bundle savedInstanceState) {
+
         viewPager = (ViewPager) rootView.findViewById(R.id.viewPager);
         viewPager.setAdapter(new FragmentStatePagerAdapter(getChildFragmentManager()) {
             @Override
             public Fragment getItem(int page) {
                 switch (page){
                     case 0:
-                        return MoreShoppingListItemUpdateFragment.newInstance(shoppingListMap);
+                        return MoreItemInventoryPhotoSummaryFragment.newInstance(itemInventoryMap);
                     case 1:
-                        return MoreShoppingListItemOptimizeFragment.newInstance();
+                        return MoreItemInventoryEditFragment.newInstance(itemInventoryMap);
                     default:
                         return null;
 
@@ -95,9 +91,9 @@ public class MoreShoppingListItemFragment extends Fragment {
             public CharSequence getPageTitle(int position) {
                 switch (position){
                     case 0:
-                        return "Items";
+                        return "Summary";
                     case 1:
-                        return "Optimize";
+                        return "Update Item";
                     default:
                         return "";
                 }
@@ -138,6 +134,27 @@ public class MoreShoppingListItemFragment extends Fragment {
     /***********************************************************************************************
      ************************************* Listener variables ********************************************
      ***********************************************************************************************/
+
+    /*final FragmentStatePagerAdapter fragmentStatePagerAdapter =
+            new FragmentStatePagerAdapter(getChildFragmentManager()) {
+                @Override
+                public Fragment getItem(int position) {
+                    switch (position){
+                        case 0:
+                            return MoreItemInventoryPhotoSummaryFragment.newInstance();
+                        case 1:
+                            return MoreItemInventoryEditFragment.newInstance();
+                        default:
+                            return null;
+
+                    }
+                }
+
+                @Override
+                public int getCount() {
+                    return 2;
+                }
+            };*/
 
 
     /***********************************************************************************************

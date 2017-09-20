@@ -1,4 +1,4 @@
-package com.example.seniorproject.smartshopping.controller.fragment.mainfragment;
+package com.example.seniorproject.smartshopping.controller.fragment.shoppinghistoryfragment;
 
 /**
  * Created by thamm on 14/9/2560.
@@ -9,16 +9,18 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CalendarView;
 
 import com.example.seniorproject.smartshopping.R;
 
 
-public class MoreShoppingHistoryDetailFragment extends Fragment {
+public class ShoppingHistoryFragment extends Fragment {
 
     /***********************************************************************************************
      ************************************* Variable class ********************************************
      ***********************************************************************************************/
-
+    private  static final String TAG = "ShoppingHistory";
+    private CalendarView mCalendarView;
 
 
 
@@ -26,13 +28,13 @@ public class MoreShoppingHistoryDetailFragment extends Fragment {
      ************************************* Method class ********************************************
      ***********************************************************************************************/
 
-    public MoreShoppingHistoryDetailFragment() {
+    public ShoppingHistoryFragment() {
         super();
     }
 
     @SuppressWarnings("unused")
-    public static MoreShoppingHistoryDetailFragment newInstance() {
-        MoreShoppingHistoryDetailFragment fragment = new MoreShoppingHistoryDetailFragment();
+    public static ShoppingHistoryFragment newInstance() {
+        ShoppingHistoryFragment fragment = new ShoppingHistoryFragment();
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
@@ -45,12 +47,15 @@ public class MoreShoppingHistoryDetailFragment extends Fragment {
 
         if (savedInstanceState != null)
             onRestoreInstanceState(savedInstanceState);
+
+
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_history_detail, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_main_history, container, false);
         initInstances(rootView, savedInstanceState);
         return rootView;
     }
@@ -63,6 +68,8 @@ public class MoreShoppingHistoryDetailFragment extends Fragment {
     @SuppressWarnings("UnusedParameters")
     private void initInstances(View rootView, Bundle savedInstanceState) {
         // Init 'View' instance(s) with rootView.findViewById here
+
+
     }
 
     @Override

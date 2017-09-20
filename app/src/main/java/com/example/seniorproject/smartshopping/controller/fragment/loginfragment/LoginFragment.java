@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.example.seniorproject.smartshopping.R;
@@ -45,6 +46,10 @@ public class LoginFragment extends Fragment {
         void goToMain();
     }
 
+    public interface CraateAccountFragmentListener{
+        void goToCreateAccount();
+    }
+
     private CustomViewGroupEditText customGroupUserName;
     private CustomViewGroupEditText customGroupPassword;
     private Button btnLogin;
@@ -55,7 +60,7 @@ public class LoginFragment extends Fragment {
     private DatabaseReference mMessagesDatabaseReference;
 
     private String username = "BoyBurin";
-    private boolean updateProfile = true;
+
 
 
     /***********************************************************************************************
@@ -113,6 +118,7 @@ public class LoginFragment extends Fragment {
 
         btnLogin = (Button)rootView.findViewById(R.id.btnLogin);
         btnLogin.setOnClickListener(loginOnClickListener);
+
 
         btnCreateUser = (Button)rootView.findViewById(R.id.btnCreateAccount);
         btnCreateUser.setOnClickListener(loginOnClickListener);
@@ -180,12 +186,10 @@ public class LoginFragment extends Fragment {
             if(view == btnCreateUser){
                 FirebaseUser user = mAuth.getCurrentUser();
                 if(user == null){
-                    String email = "15621.smnr@gmail.com";
-                    String password = "123456";
+                    CraateAccountFragmentListener craateAccountFragmentListener =
+                            (CraateAccountFragmentListener) getActivity();
+                    craateAccountFragmentListener.goToCreateAccount();
 
-                    updateProfile = false;
-                    mAuth.createUserWithEmailAndPassword(email, password)
-                    .addOnCompleteListener(createdOnCompleteListener);
                 }
             }
         }
