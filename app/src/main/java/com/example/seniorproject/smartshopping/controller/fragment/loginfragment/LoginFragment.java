@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.example.seniorproject.smartshopping.R;
@@ -50,16 +51,21 @@ public class LoginFragment extends Fragment {
         void goToCreateAccount();
     }
 
+    public interface SelectGroupListener{
+        void gotToSelectGroupListener();
+    }
+
     private CustomViewGroupEditText customGroupUserName;
     private CustomViewGroupEditText customGroupPassword;
     private Button btnLogin;
     private Button btnCreateUser;
+    private ProgressBar progressBarLogin;
 
     private FirebaseAuth mAuth;
     private FirebaseDatabase mFirebaseDatabase;
     private DatabaseReference mMessagesDatabaseReference;
 
-    private String username = "BoyBurin";
+    //private String username = "BoyBurin";
 
 
 
@@ -108,12 +114,12 @@ public class LoginFragment extends Fragment {
         customGroupUserName = (CustomViewGroupEditText) rootView.findViewById(R.id.customGroupUserName);
         customGroupPassword = (CustomViewGroupEditText) rootView.findViewById(R.id.customGroupPassword);
 
-        customGroupUserName.setTextView("User");
+        customGroupUserName.setTextView("Username");
         customGroupUserName.setHintEditText("Username");
         customGroupUserName.setEditTextInputTypeToText();
 
         customGroupPassword.setEditTextInputTypeToPassword();
-        customGroupPassword.setTextView("Pass");
+        customGroupPassword.setTextView("Password");
         customGroupPassword.setHintEditText("Password");
 
         btnLogin = (Button)rootView.findViewById(R.id.btnLogin);
@@ -123,6 +129,8 @@ public class LoginFragment extends Fragment {
         btnCreateUser = (Button)rootView.findViewById(R.id.btnCreateAccount);
         btnCreateUser.setOnClickListener(loginOnClickListener);
 
+        progressBarLogin = (ProgressBar) rootView.findViewById(R.id.progressbarLogin);
+
     }
 
     @Override
@@ -130,14 +138,14 @@ public class LoginFragment extends Fragment {
 
         super.onStart();
         //updateUI(currentUser);
-        mAuth.addAuthStateListener(mAuthListener);
+        //mAuth.addAuthStateListener(mAuthListener);
 
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        mAuth.removeAuthStateListener(mAuthListener);
+        //mAuth.removeAuthStateListener(mAuthListener);
     }
 
     /*
@@ -178,6 +186,8 @@ public class LoginFragment extends Fragment {
                     //customGroupUserName.setTextToEditText("");
                     customGroupPassword.setTextToEditText("");
 
+                    progressBarLogin.setVisibility(View.VISIBLE);
+
                     mAuth.signInWithEmailAndPassword(email, password).
                             addOnCompleteListener(loginOnCompleteListener);
                 }
@@ -200,10 +210,63 @@ public class LoginFragment extends Fragment {
         @Override
         public void onComplete(@NonNull Task<AuthResult> task) {
             if (task.isSuccessful()) {
-                // Sign in success, update UI with the signed-in user's information
+                FirebaseUser user = mAuth.getCurrentUser();
+                if (user != null) {
+                    // User is signed in
+                    Log.d("TAG", "onAuthStateChanged:signed_in:" + user.getDisplayName());
+
+                    String userID = mAuth.getCurrentUser().getUid();
+
+                    mMessagesDatabaseReference.child("groupinuser").child(userID)
+                            .addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    for(DataSnapshot data : dataSnapshot.getChildren()){
+                                        mMessagesDatabaseReference.child("groups")
+                                                .child(data.getKey().toString())
+                                                .addListenerForSingleValueEvent(new ValueEventListener() {
+                                                    @Override
+                                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                                        GroupManager gm = GroupManager.getInstance();
+                                                        String groupID = dataSnapshot.getKey();
+                                                        Group group = dataSnapshot.getValue(Group.class);
+                                                        gm.addGroup(new GroupMap(groupID, group));
+
+
+                                                        // Go to Main
+                                                        SelectGroupListener selectGroupListener = (SelectGroupListener) getActivity();
+                                                        selectGroupListener.gotToSelectGroupListener();
+                                                        progressBarLogin.setVisibility(View.GONE);
+
+
+                                                    }
+
+                                                    @Override
+                                                    public void onCancelled(DatabaseError databaseError) {
+
+                                                    }
+                                                });
+                                    }
+
+
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+
+                                }
+
+                            });
+
+
+                    // Authenticated successfully with authData
+
+
+                }
                 Toast.makeText(Contextor.getInstance().getContext(), "signInWithEmail:success", Toast.LENGTH_SHORT).show();
             } else {
                 // If sign in fails, display a message to the user.
+                progressBarLogin.setVisibility(View.GONE);
                 Toast.makeText(Contextor.getInstance().getContext(), "signInWithEmail:failure", Toast.LENGTH_SHORT).show();
             }
         }
@@ -226,7 +289,7 @@ public class LoginFragment extends Fragment {
     final FirebaseAuth.AuthStateListener mAuthListener = new FirebaseAuth.AuthStateListener() {
         @Override
         public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-            FirebaseUser user = firebaseAuth.getCurrentUser();
+            /*FirebaseUser user = firebaseAuth.getCurrentUser();
             if (user != null) {
                 // User is signed in
                 Log.d("TAG", "onAuthStateChanged:signed_in:" + user.getDisplayName());
@@ -277,7 +340,7 @@ public class LoginFragment extends Fragment {
             } else {
                 // User is signed out
                 Log.d("TAG", "onAuthStateChanged:signed_out");
-            }
+            }*/
         }
     };
 

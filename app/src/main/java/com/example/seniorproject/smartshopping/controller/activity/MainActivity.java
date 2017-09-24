@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
 , FragmentDialogAddShoppingList.DeleteAddShoppingListDialog, FragmentDialogAddShoppingList.PickImageShoppingListDialog,
         InventoryFragment.MoreItemInventoryListener, ShoppingListFragment.MoreShoppingListItemListener,
         DialogAddItemInventoryFragment.BarcodeListener, InventoryFragment.ItemInventoryFloatingButton,
-        DialogAddItemInventoryFragment.DeleteItemInventoryDialog{
+        DialogAddItemInventoryFragment.DeleteItemInventoryDialog, SettingFragment.SignOutListener{
     /***********************************************************************************************
      ************************************* Variable class ********************************************
      ***********************************************************************************************/
@@ -366,5 +366,12 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
                 .remove(addItemInventory)
                 .commit();
         hideKeyboard();
+    }
+
+    @Override
+    public void signOut() {
+        Intent intent = new Intent(this, LoginActivity.class);
+        startActivity(intent);
+        finish();
     }
 }

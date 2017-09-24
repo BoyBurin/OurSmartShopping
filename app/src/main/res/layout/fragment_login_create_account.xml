@@ -11,7 +11,6 @@
         >
 
         <LinearLayout
-            android:id="@+id/loginVisible"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
@@ -23,14 +22,6 @@
                 android:layout_weight="1">
 
 
-                <TextView
-                    style="@style/LoginTheme"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="bottom|center"
-                    android:layout_marginBottom="40dp"
-                    android:text="@string/login_name"
-                    android:textSize="34sp"/>
 
             </FrameLayout>
 
@@ -48,12 +39,22 @@
                     android:visibility="visible">
 
                     <com.example.seniorproject.smartshopping.view.customviewgroup.CustomViewGroupEditText
-                        android:id="@+id/customGroupUserName"
+                        android:id="@+id/customEmail"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content" />
 
                     <com.example.seniorproject.smartshopping.view.customviewgroup.CustomViewGroupEditText
-                        android:id="@+id/customGroupPassword"
+                        android:id="@+id/customPassword"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+
+                    <com.example.seniorproject.smartshopping.view.customviewgroup.CustomViewGroupEditText
+                        android:id="@+id/customUsername"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+
+                    <com.example.seniorproject.smartshopping.view.customviewgroup.CustomViewGroupEditText
+                        android:id="@+id/customCreateGroup"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content" />
 
@@ -62,25 +63,6 @@
                         android:layout_height="0dp"
                         android:layout_weight="1" />
 
-                    <Button
-                        android:id="@+id/btnLogin"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:minEms="9"
-                        android:layout_gravity="center"
-                        android:layout_marginLeft="16dp"
-                        android:layout_marginRight="16dp"
-                        android:background="@drawable/selector_shape_round_rect_button_white"
-                        android:text="@string/login_text" />
-
-                    <TextView
-                        style="@style/LoginTheme"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_marginBottom="8dp"
-                        android:layout_marginTop="8dp"
-                        android:text="or" />
 
                     <Button
                         android:id="@+id/btnCreateAccount"
@@ -95,22 +77,12 @@
                         android:text="@string/create_account_text" />
 
 
-
-
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_weight="1" />
 
                 </LinearLayout>
-
-                <ProgressBar
-                    android:id="@+id/progressbarLogin"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:indeterminateTint="@color/colorAccent"
-                    android:visibility="gone"/>
 
             </RelativeLayout>
 

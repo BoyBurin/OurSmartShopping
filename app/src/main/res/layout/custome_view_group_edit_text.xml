@@ -8,7 +8,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/username_text"
-        android:layout_marginLeft="8dp" />
+        android:layout_marginLeft="8dp"
+        android:textColor="@android:color/white"/>
 
     <EditText
         android:id="@+id/edTextCustomViewGroupEditText"
@@ -16,6 +17,9 @@
         android:layout_height="wrap_content"
         android:layout_marginRight="16dp"
         android:layout_marginLeft="16dp"
-        android:maxLines="1"/>
+        android:maxLines="1"
+        android:textColorHighlight="@android:color/white"
+        android:textColor="@android:color/white"
+        android:textColorHint="@android:color/white"/>
 
 </LinearLayout>

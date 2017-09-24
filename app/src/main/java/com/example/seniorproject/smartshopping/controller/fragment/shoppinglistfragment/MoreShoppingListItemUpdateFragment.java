@@ -51,7 +51,7 @@ public class MoreShoppingListItemUpdateFragment extends Fragment implements
     private ItemShoppingListManager itemShoppingListManager;
     private CustomViewGroupShoppingListItemAdd customViewGroupShoppingListItemAdd;
 
-    private ArrayList<View.OnClickListener> deleteListener;
+    //private ArrayList<View.OnClickListener> deleteListener;
 
 
 
@@ -97,7 +97,7 @@ public class MoreShoppingListItemUpdateFragment extends Fragment implements
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
         itemShoppingListAdapter = new ItemShoppingListAdapter(lastPositionInteger);
         itemShoppingListManager = new ItemShoppingListManager();
-        deleteListener = new ArrayList<View.OnClickListener>();
+        //deleteListener = new ArrayList<View.OnClickListener>();
         mDatabaseRef.child("iteminshoppinglist").child(shoppingListMap.getId())
                 .addChildEventListener(updateItemShoppingListListener);
 
@@ -109,8 +109,6 @@ public class MoreShoppingListItemUpdateFragment extends Fragment implements
         fab.setOnClickListener(addedShoppingListItemListener);
 
         listView = (ListView) rootView.findViewById(R.id.shoppingListItem);
-        itemShoppingListAdapter.setItemShoppingLists(itemShoppingListManager.getItemShoppingLists(),
-                deleteListener);
         listView.setAdapter(itemShoppingListAdapter);
 
         customViewGroupShoppingListItemAdd = (CustomViewGroupShoppingListItemAdd) rootView
@@ -177,10 +175,9 @@ public class MoreShoppingListItemUpdateFragment extends Fragment implements
                                 }
                             };
 
-                            deleteListener.add(onClickDeleteListener);
+                            itemShoppingList.setDeleteListener(onClickDeleteListener);
                             itemShoppingListManager.addItemShoppingList(itemShoppingList);
-                            itemShoppingListAdapter.setItemShoppingLists(itemShoppingListManager.getItemShoppingLists(),
-                                    deleteListener);
+                            itemShoppingListAdapter.setItemShoppingLists(itemShoppingListManager.getItemShoppingLists());
                             itemShoppingListAdapter.notifyDataSetChanged();
                         }
 
@@ -203,9 +200,8 @@ public class MoreShoppingListItemUpdateFragment extends Fragment implements
             int index = itemShoppingListManager.getIndexByKey(itemInventoryID);
 
             itemShoppingListManager.getItemShoppingLists().remove(index);
-            deleteListener.remove(index);
 
-            itemShoppingListAdapter.setItemShoppingLists(itemShoppingListManager.getItemShoppingLists(), deleteListener);
+            itemShoppingListAdapter.setItemShoppingLists(itemShoppingListManager.getItemShoppingLists());
             itemShoppingListAdapter.notifyDataSetChanged();
 
         }

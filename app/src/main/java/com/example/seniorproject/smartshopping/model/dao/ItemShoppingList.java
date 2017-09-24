@@ -1,5 +1,7 @@
 package com.example.seniorproject.smartshopping.model.dao;
 
+import android.view.View;
+
 /**
  * Created by boyburin on 9/12/2017 AD.
  */
@@ -11,6 +13,7 @@ public class ItemShoppingList {
 
     private long amount;
     private ItemInventoryMap itemInventoryMap;
+    private View.OnClickListener deleteListener;
 
     /******************************************************************************************
      * ****************************** Methods *********************************************
@@ -39,6 +42,14 @@ public class ItemShoppingList {
 
     public void setItemInventoryMap(ItemInventoryMap itemInventoryMap) {
         this.itemInventoryMap = itemInventoryMap;
+    }
+
+    public void setDeleteListener(View.OnClickListener deleteListener){
+        this.deleteListener = deleteListener;
+    }
+
+    public View.OnClickListener getDeleteListener(){
+        return deleteListener;
     }
 
     /******************************************************************************************

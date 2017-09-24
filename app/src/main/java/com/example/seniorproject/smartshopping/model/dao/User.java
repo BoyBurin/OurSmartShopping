@@ -22,9 +22,16 @@ public class User {
      * ****************************** Methods *********************************************
      *******************************************************************************************/
 
-    public User(){
+    public User() {
 
     }
+
+    public User(String name, String email, String photoUrl) {
+        this.name = name;
+        this.email = email;
+        this.photoUrl = photoUrl;
+    }
+
 
     public String getName() {
         return name;

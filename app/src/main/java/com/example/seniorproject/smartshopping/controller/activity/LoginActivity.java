@@ -13,12 +13,14 @@ import com.bumptech.glide.Glide;
 import com.example.seniorproject.smartshopping.R;
 import com.example.seniorproject.smartshopping.controller.fragment.loginfragment.CreateAccountFragment;
 import com.example.seniorproject.smartshopping.controller.fragment.loginfragment.LoginFragment;
+import com.example.seniorproject.smartshopping.controller.fragment.loginfragment.SelectGroupFragment;
 import com.google.android.gms.common.SignInButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 public class LoginActivity extends AppCompatActivity implements LoginFragment.LoginFragmentListener,
-        LoginFragment.CraateAccountFragmentListener, CreateAccountFragment.SaveInfoListener {
+        LoginFragment.CraateAccountFragmentListener, CreateAccountFragment.SaveInfoListener,
+        LoginFragment.SelectGroupListener, SelectGroupFragment.SaveCurrentGroupListener {
 
     /***********************************************************************************************
      ************************************* Variable class ********************************************
@@ -29,6 +31,7 @@ public class LoginActivity extends AppCompatActivity implements LoginFragment.Lo
 
     private final String CREATEACCOUNTFRAGMENT = "createAccountFragment";
     private final String LOGINFRAGMENT = "loginFragment";
+    private final String SELECTGROUPFRAGMENT = "selectGroupFragment";
 
     /***********************************************************************************************
      ************************************* Methods ********************************************
@@ -47,6 +50,7 @@ public class LoginActivity extends AppCompatActivity implements LoginFragment.Lo
             container.setVisibility(View.INVISIBLE);
             ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressbarLogin);
             progressBar.setVisibility(View.VISIBLE);
+            FirebaseAuth.getInstance().signOut();
         }
 
         if(savedInstanceState == null){
@@ -91,6 +95,31 @@ public class LoginActivity extends AppCompatActivity implements LoginFragment.Lo
                 .remove(createAccountFragment)
                 .show(loginFragment)
                 .commit();
+        goToMain();
+    }
+
+    @Override
+    public void gotToSelectGroupListener() {
+        SelectGroupFragment selectGroupFragment = SelectGroupFragment.newInstance();
+        LoginFragment loginFragment = (LoginFragment) getSupportFragmentManager().findFragmentByTag(LOGINFRAGMENT);
+
+        getSupportFragmentManager().beginTransaction()
+                .add(R.id.containerLogin, selectGroupFragment, SELECTGROUPFRAGMENT)
+                .hide(loginFragment)
+                .show(selectGroupFragment)
+                .commit();
+    }
+
+    @Override
+    public void saveCurrentGroup() {
+        SelectGroupFragment selectGroupFragment =
+                (SelectGroupFragment) getSupportFragmentManager().findFragmentByTag(SELECTGROUPFRAGMENT);
+
+        getSupportFragmentManager().beginTransaction()
+                .remove(selectGroupFragment)
+                .commit();
+
+        goToMain();
     }
 
 

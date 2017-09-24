@@ -28,7 +28,7 @@ public class ItemShoppingListAdapter extends BaseAdapter{
 
     private MutableInteger lastPositionInteger;
 
-    private ArrayList<View.OnClickListener> deleteListener;
+    //private ArrayList<View.OnClickListener> deleteListener;
 
     /******************************************************************************************
      * ****************************** Methods *********************************************
@@ -40,9 +40,9 @@ public class ItemShoppingListAdapter extends BaseAdapter{
     }
 
 
-    public void setItemShoppingLists(ArrayList<ItemShoppingList> itemShoppingLists, ArrayList<View.OnClickListener> deleteListener){
+    public void setItemShoppingLists(ArrayList<ItemShoppingList> itemShoppingLists){
         this.itemShoppingLists = itemShoppingLists;
-        this.deleteListener = deleteListener;
+        //this.deleteListener = deleteListener;
     }
 
 
@@ -79,7 +79,7 @@ public class ItemShoppingListAdapter extends BaseAdapter{
                 .getItemInventory();
         item.setItemName(itemInventory.getName());
         item.setAmount(amount);
-        item.setDeleteListener(deleteListener.get(position));
+        item.setDeleteListener(itemShoppingLists.get(position).getDeleteListener());
 
         lastPositionInteger.setValue(position);
 
