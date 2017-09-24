@@ -25,19 +25,32 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.seniorproject.smartshopping.model.dao.ItemInventory;
+import com.example.seniorproject.smartshopping.model.dao.ItemInventoryMap;
+import com.example.seniorproject.smartshopping.model.dao.ItemOCR;
+import com.example.seniorproject.smartshopping.model.datatype.MutableInteger;
+import com.example.seniorproject.smartshopping.model.manager.ItemInventoryManager;
+import com.example.seniorproject.smartshopping.model.manager.ItemOCRManager;
 import com.example.seniorproject.smartshopping.model.ocrtools.LevenshteinDistance;
 import com.example.seniorproject.smartshopping.model.util.PermissionUtils;
+import com.example.seniorproject.smartshopping.view.adapter.ItemOCRAdapter;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.HttpTransport;
@@ -59,7 +72,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import com.example.seniorproject.smartshopping.R;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class OCRActivity extends AppCompatActivity {
     private static final String CLOUD_VISION_API_KEY = "AIzaSyCFC2KKqZoQ5lIWyNp00bh3wDoO4p_z7xY";
@@ -76,7 +92,16 @@ public class OCRActivity extends AppCompatActivity {
     private long startTimeMS;
     private float uploadDurationSec;
 
-    private EditText tv1,tv2,tv3,tv4,tv5,tv6,tv7,tv8,tv9,tv10,tv11,tv12,tv13,tv14,tv15,tv16,tv17,tv18,tv19,tv20,tv21,tv22;
+    private ItemOCR itemOCR;
+    private ItemOCRManager itemOCRManager;
+    private ItemOCRAdapter itemOCRAdapter;
+    private MutableInteger lastPositionInteger;
+    private ListView listView;
+    private TextView tvTotalPrice;
+    private Button btnSaveOCR;
+    private ProgressBar progressBarOCR;
+
+    private DatabaseReference mDatabaseRef;
 
 
     @Override
@@ -111,52 +136,40 @@ public class OCRActivity extends AppCompatActivity {
 
         mImageDetails = (TextView) findViewById(R.id.image_details);
         mMainImage = (ImageView) findViewById(R.id.main_image);
+        mMainImage.setVisibility(View.GONE);
 
-        tv1 = (EditText) findViewById(R.id.tv1);
-        tv2 = (EditText) findViewById(R.id.tv2);
-        tv3 = (EditText) findViewById(R.id.tv3);
-        tv4 = (EditText) findViewById(R.id.tv4);
-        tv5 = (EditText) findViewById(R.id.tv5);
-        tv6 = (EditText) findViewById(R.id.tv6);
-        tv7 = (EditText) findViewById(R.id.tv7);
-        tv8 = (EditText) findViewById(R.id.tv8);
-        tv9 = (EditText) findViewById(R.id.tv9);
-        tv10 = (EditText) findViewById(R.id.tv10);
-        tv11 = (EditText) findViewById(R.id.tv11);
-        tv12 = (EditText) findViewById(R.id.tv12);
-        tv13 = (EditText) findViewById(R.id.tv13);
-        tv14 = (EditText) findViewById(R.id.tv14);
-        tv15 = (EditText) findViewById(R.id.tv15);
-        tv16 = (EditText) findViewById(R.id.tv16);
-        tv17 = (EditText) findViewById(R.id.tv17);
-        tv18 = (EditText) findViewById(R.id.tv18);
-        tv19 = (EditText) findViewById(R.id.tv19);
-        tv20 = (EditText) findViewById(R.id.tv20);
-        tv21 = (EditText) findViewById(R.id.tv21);
-        tv22 = (EditText) findViewById(R.id.tv22);
+        init();
 
-        tv1.setVisibility(View.INVISIBLE);
-        tv2.setVisibility(View.INVISIBLE);
-        tv3.setVisibility(View.INVISIBLE);
-        tv4.setVisibility(View.INVISIBLE);
-        tv5.setVisibility(View.INVISIBLE);
-        tv6.setVisibility(View.INVISIBLE);
-        tv7.setVisibility(View.INVISIBLE);
-        tv8.setVisibility(View.INVISIBLE);
-        tv9.setVisibility(View.INVISIBLE);
-        tv10.setVisibility(View.INVISIBLE);
-        tv11.setVisibility(View.INVISIBLE);
-        tv12.setVisibility(View.INVISIBLE);
-        tv13.setVisibility(View.INVISIBLE);
-        tv14.setVisibility(View.INVISIBLE);
-        tv15.setVisibility(View.INVISIBLE);
-        tv16.setVisibility(View.INVISIBLE);
-        tv17.setVisibility(View.INVISIBLE);
-        tv18.setVisibility(View.INVISIBLE);
-        tv19.setVisibility(View.INVISIBLE);
-        tv20.setVisibility(View.INVISIBLE);
-        tv21.setVisibility(View.INVISIBLE);
-        tv22.setVisibility(View.INVISIBLE);
+    }
+
+    private void init() {
+        mDatabaseRef = FirebaseDatabase.getInstance().getReference();
+        lastPositionInteger = new MutableInteger(-1);
+        itemOCRManager = new ItemOCRManager();
+        itemOCRAdapter = new ItemOCRAdapter(lastPositionInteger);
+        tvTotalPrice = (TextView) findViewById(R.id.tvTotalPrice);
+        btnSaveOCR = (Button) findViewById(R.id.btnSaveOCR);
+        progressBarOCR = (ProgressBar) findViewById(R.id.progressBarOCR);
+
+        tvTotalPrice.setVisibility(View.GONE);
+        btnSaveOCR.setOnClickListener(saveInfoListener);
+
+
+        listView = (ListView) findViewById(R.id.listViewItemOCR);
+
+        /*Log.d("Size: ", "" + ItemInventoryManager.getInstance().getSize());
+        for (int i = 0; i < ItemInventoryManager.getInstance().getSize(); i++) {
+            ItemInventoryMap itemInventoryMap = ItemInventoryManager.getInstance().getItemInventory(i);
+            itemOCRManager.addItemOCR(new ItemOCR(itemInventoryMap, 0, 1));
+        }
+
+        Log.d("Size: ", "" + itemOCRManager.getSize()); */
+        itemOCRAdapter.setItemOCRs(itemOCRManager.getItemOCRs());
+
+
+        listView.setAdapter(itemOCRAdapter);
+
+        itemOCRAdapter.notifyDataSetChanged();
     }
 
     public void startGalleryChooser() {
@@ -226,6 +239,7 @@ public class OCRActivity extends AppCompatActivity {
                                 1200);
 
                 callCloudVision(bitmap);
+                mMainImage.setVisibility(View.VISIBLE);
                 mMainImage.setImageBitmap(bitmap);
 
             } catch (IOException e) {
@@ -310,119 +324,60 @@ public class OCRActivity extends AppCompatActivity {
             }
 
             protected void onPostExecute(String result) {
-                mImageDetails.setText("");
-                String[] resultList = result.split("\n");
-                for(int i = 2 ; i < resultList.length ; i++){
-                    if(i == 3){
-                        tv1.setVisibility(View.VISIBLE);
-                        tv1.setText(resultList[3]);
-                    }
+                //mImageDetails.setText(result);
+                String[] myResult = result.split("\n");
+                for(int i = 0 ; i < myResult.length ; i++){
+                    Log.d(i+ "", myResult[i]);
+                }
 
-                    if(i == 4){
-                        tv2.setVisibility(View.VISIBLE);
-                        tv2.setText(resultList[4]);
-                    }
+                ArrayList<String> words = new ArrayList<String>();
+                ArrayList<String> amount = new ArrayList<String>();
 
-                    if(i == 5){
-                        tv3.setVisibility(View.VISIBLE);
-                        tv3.setText(resultList[5]);
-                    }
-
-                    if(i == 6){
-                        tv4.setVisibility(View.VISIBLE);
-                        tv4.setText(resultList[6]);
-                    }
-
-                    if(i == 7){
-                        tv5.setVisibility(View.VISIBLE);
-                        tv5.setText(resultList[7]);
-                    }
-
-                    if(i == 8){
-                        tv6.setVisibility(View.VISIBLE);
-                        tv6.setText(resultList[8]);
-                    }
-
-                    if(i == 9){
-                        tv7.setVisibility(View.VISIBLE);
-                        tv7.setText(resultList[9]);
-                    }
-
-                    if(i == 10){
-                        tv8.setVisibility(View.VISIBLE);
-                        tv8.setText(resultList[10]);
-                    }
-
-                    if(i == 11){
-                        tv9.setVisibility(View.VISIBLE);
-                        tv9.setText(resultList[11]);
-                    }
-
-                    if(i == 12){
-                        tv10.setVisibility(View.VISIBLE);
-                        tv10.setText(resultList[12]);
-                    }
-
-                    if(i == 13){
-                        tv11.setVisibility(View.VISIBLE);
-                        tv11.setText(resultList[13]);
-                    }
-
-                    if(i == 14){
-                        tv12.setVisibility(View.VISIBLE);
-                        tv12.setText(resultList[14]);
-                    }
-
-                    if(i == 15){
-                        tv13.setVisibility(View.VISIBLE);
-                        tv13.setText(resultList[15]);
-                    }
-
-                    if(i == 16){
-                        tv14.setVisibility(View.VISIBLE);
-                        tv14.setText(resultList[16]);
-                    }
-
-                    if(i == 17){
-                        tv15.setVisibility(View.VISIBLE);
-                        tv15.setText(resultList[17]);
-                    }
-
-                    if(i == 18){
-                        tv16.setVisibility(View.VISIBLE);
-                        tv16.setText(resultList[18]);
-                    }
-
-                    if(i == 19){
-                        tv17.setVisibility(View.VISIBLE);
-                        tv17.setText(resultList[19]);
-                    }
-
-                    if(i == 20){
-                        tv18.setVisibility(View.VISIBLE);
-                        tv18.setText(resultList[20]);
-                    }
-
-                    if(i == 21){
-                        tv19.setVisibility(View.VISIBLE);
-                        tv19.setText(resultList[21]);
-                    }
-
-                    if(i == 22){
-                        tv20.setVisibility(View.VISIBLE);
-                        tv20.setText(resultList[22]);
-                    }
-
-                    if(i == 23){
-                        tv21.setVisibility(View.VISIBLE);
-                        tv21.setText(resultList[23]);
-                    }
-
-                    if(i == 24){
-                        tv22.setVisibility(View.VISIBLE);
-                        tv22.setText(resultList[24]);
+                for (int i = 3 ; i < myResult.length ; i++) {
+                    String line = myResult[i];
+                    if (isNumeric(line)) {
+                        amount.add(line);
+                    } else if (isWord(line)) {
+                        words.add(line);
                     }
                 }
+
+                Log.d("Word: " , words.size() + "");
+                Log.d("Amount: " , amount.size() + "");
+                double totalPrice = 0;
+                int position = 0;
+                for(int i = 0 ; i < amount.size() ; i++){
+                    double price = Double.parseDouble(amount.get(i));
+                    if(price > totalPrice){
+                        totalPrice = price;
+                        position = i;
+                    }
+                }
+                amount.remove(position);
+
+                LevenshteinDistance levenshteinDistance = new LevenshteinDistance();
+
+                ArrayList<ItemInventoryMap> itemInventoryMaps =
+                        levenshteinDistance.doLevenshteinDistance(words);
+
+                for (int i = 0; i < itemInventoryMaps.size(); i++) {
+                    ItemInventoryMap itemInventoryMap = itemInventoryMaps.get(i);
+                    double price = Double.parseDouble(amount.get(i));
+                    itemOCRManager.addItemOCR(new ItemOCR(itemInventoryMap, price, 1));
+                }
+
+                itemOCRAdapter.setItemOCRs(itemOCRManager.getItemOCRs());
+                itemOCRAdapter.notifyDataSetChanged();
+
+                tvTotalPrice.setVisibility(View.VISIBLE);
+                tvTotalPrice.setText("Total:    " + totalPrice + "   บาท");
+
+
+                mImageDetails.setVisibility(View.GONE);
+
+
+
+
             }
         }.execute();
     }
@@ -457,7 +412,7 @@ public class OCRActivity extends AppCompatActivity {
         List<EntityAnnotation> labels = response.getResponses().get(0).getTextAnnotations();
         Log.i("JackTest", "total labels:" + labels.size());
         if (labels != null) {
-            for (int i = 0; i < labels.size(); i++ ) {
+            for (int i = 0; i < labels.size(); i++) {
                 EntityAnnotation label = labels.get(i);
                 if (i == 0) {
                     //builder.append("Locale: ");
@@ -473,22 +428,25 @@ public class OCRActivity extends AppCompatActivity {
             ArrayList<String> amount = new ArrayList<String>();
 
             String[] listLabel = s.split("\n");
-            for(String line : listLabel){
-                if(isNumeric(line)){
-                    amount.add(line.split("V")[0].split("N")[0].split("v")[0].split("\\.")[0]);
-                } else
-                if(!line.contains("X") && !line.contains("14") && !line.contains("x")){
-                    words.add(line);
+            for (String line : listLabel) {
+                for (String myword : line.split("\\s+")) {
+                    if (isNumeric(myword)) {
+                        amount.add(line.split("V")[0].split("N")[0].split("v")[0]);
+                        break;
+                    } else if (isWord(myword)) {
+                        words.add(myword);
+                        break;
+                    }
                 }
             }
 
-            LevenshteinDistance levenshteinDistance = new LevenshteinDistance();
-            ArrayList<String> mywords = new ArrayList<String>();
-            mywords = levenshteinDistance.doLevenshteinDistance(words);
-            Log.i("Amount: " , "" +amount.size());
-            Log.i("Words: " , "" +words.size());
+            //LevenshteinDistance levenshteinDistance = new LevenshteinDistance();
+            //ArrayList<String> mywords = new ArrayList<String>();
+            //mywords = levenshteinDistance.doLevenshteinDistance(words);
+            Log.i("Amount: ", "" + amount.size());
+            Log.i("Words: ", "" + words.size());
 
-            int length = (mywords.size() < amount.size())? mywords.size() : amount.size();
+            /*int length = (mywords.size() < amount.size())? mywords.size() : amount.size();
 
             for(int i = 0 ; i < length ; i++){
                 if(i == length - 1 && mywords.size() > amount.size()){
@@ -497,17 +455,17 @@ public class OCRActivity extends AppCompatActivity {
                 builder.append("\n");
                 builder.append(amount.get(i));
                 builder.append("\n");
-            }
+            }*/
 
-            /*for(int i = 0 ; i < amount.size() ; i++){
+            for (int i = 0; i < amount.size(); i++) {
                 builder.append(amount.get(i));
                 builder.append("\n");
             }
-            for(int i = 0 ; i < words.size() ; i++){
-              builder.append(words.get(i));
+            for (int i = 0; i < words.size(); i++) {
+                builder.append(words.get(i));
                 builder.append("\n");
 
-            } */
+            }
 
 
         } else {
@@ -517,8 +475,46 @@ public class OCRActivity extends AppCompatActivity {
         return builder.toString();
     }
 
-    private static boolean isNumeric(String str)
-    {
+    private static boolean isNumeric(String str) {
         return str.matches("-?\\d+(\\.\\d+)?N?V?v?\\s?N?V?v?");  //match a number with optional '-' and decimal.
     }
+
+    private static boolean isWord(String str) {
+        return str.matches("[\\u0E01-\\u0E5B][\\u0E01-\\u0E5B0-9]*");  //match a number with optional '-' and decimal.
+    }
+
+
+    /******************************************************************************************
+     * ****************************** Listener variable *********************************************
+     *******************************************************************************************/
+
+    final View.OnClickListener saveInfoListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            progressBarOCR.setVisibility(View.VISIBLE);
+            for (int i = 0; i < itemOCRManager.getItemOCRs().size(); i++) {
+                ItemOCR itemOCR = itemOCRManager.getItemOCRs().get(i);
+                ItemInventory itemInventory = itemOCR.getItemInventoryMap().getItemInventory();
+                String itemInventoryID = itemOCR.getItemInventoryMap().getId();
+                //double price = itemOCR.getPrice();
+                long amount = itemOCR.getAmount();
+
+                long remainAmount = itemInventory.getAmount() + amount;
+
+                itemInventory.setAmount(remainAmount);
+
+                mDatabaseRef.child("iteminventory").child(itemInventoryID)
+                        .setValue(itemInventory).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        progressBarOCR.setVisibility(View.GONE);
+                    }
+                });
+            }
+            Toast.makeText(OCRActivity.this, "Update Item Inventory Success", Toast.LENGTH_SHORT).show();
+            finish();
+        }
+    };
+
+
 }

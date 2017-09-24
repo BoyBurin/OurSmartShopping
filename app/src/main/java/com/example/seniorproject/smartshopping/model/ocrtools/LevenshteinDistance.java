@@ -1,5 +1,7 @@
 package com.example.seniorproject.smartshopping.model.ocrtools;
 
+import com.example.seniorproject.smartshopping.model.dao.ItemInventory;
+import com.example.seniorproject.smartshopping.model.dao.ItemInventoryMap;
 import com.example.seniorproject.smartshopping.model.manager.ItemInventoryManager;
 
 import java.io.File;
@@ -9,39 +11,26 @@ import java.util.Scanner;
 
 public class LevenshteinDistance {
 
-	public ArrayList<String> doLevenshteinDistance(ArrayList<String> data){
+	public ArrayList<ItemInventoryMap> doLevenshteinDistance(ArrayList<String> data){
 
-		ArrayList<String> words = new ArrayList<String>();
-		/*for(int i = 0 ; i < ItemInventoryManager.getInstance().getSize() ; i++){
-			words.add(ItemInventoryManager.getInstance().getItemInventory(0)
-					.getItemInventory().getName());
+		ArrayList<ItemInventoryMap> itemInventoryMaps = new ArrayList<ItemInventoryMap>();
+		for(int i = 0 ; i < ItemInventoryManager.getInstance().getSize() ; i++){
+			itemInventoryMaps.add(ItemInventoryManager.getInstance().getItemInventory(i));
 
-		}*/
-
-		words.add("ชมพู่ทับทิมจันทร์");
-		words.add("ส้มสายน้ำผึ้ง");
-		words.add("สาลี่ทอง");
-		words.add("มันฝรั่งพริงเกิลส์");
-		words.add("เยลลี่โยโยพลัสสอดไส้แยมองุ่น");
-		words.add("ข้าวโพดอบกรอบคอนเน่");
-		words.add("เยลลี่โยโยพลัสสอดไส้แยมองุ่น");
-		words.add("GUYLIANCHOCOLATE");
-		words.add("ช็อกโกแลตเหรียญทอง");
-		words.add("รวมเงิน");
-		words.add("ยอดรวม");
+		}
 
 		int minScore = Integer.MAX_VALUE;
-		ArrayList<String> result = new ArrayList<String>();
+		ArrayList<ItemInventoryMap> result = new ArrayList<ItemInventoryMap>();
 		int index = 0;
 		while(index < data.size()){
 			String str1 = data.get(index);
-			String top = "";
-			result.add(index, str1);
-			for(int i = 0 ; i < words.size() ; i++){
-				int temp = editDistance(str1, words.get(i));
+			ItemInventoryMap top = itemInventoryMaps.get(0);
+			//result.add(index, str1);
+			for(int i = 0 ; i < itemInventoryMaps.size() ; i++){
+				int temp = editDistance(str1, itemInventoryMaps.get(i).getItemInventory().getName());
 				if(temp < minScore){
 					minScore = temp;
-					top = words.get(i);
+					top = itemInventoryMaps.get(i);
 				}
 			}
 			result.add(index, top);
