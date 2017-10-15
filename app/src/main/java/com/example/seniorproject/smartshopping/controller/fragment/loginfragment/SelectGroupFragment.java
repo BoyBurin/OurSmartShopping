@@ -39,6 +39,10 @@ public class SelectGroupFragment extends Fragment {
         void saveCurrentGroup();
     }
 
+    public interface VisibleSelectGroupFragmentListener{
+        void visibleSelectGroup(boolean visible);
+    }
+
     private ListView listView;
     private GroupManager gm;
     private GroupAdapter groupAdapter;
@@ -70,6 +74,11 @@ public class SelectGroupFragment extends Fragment {
 
         if (savedInstanceState != null)
             onRestoreInstanceState(savedInstanceState);
+
+        VisibleSelectGroupFragmentListener visibleSelectGroupFragmentListener =
+                (VisibleSelectGroupFragmentListener) getActivity();
+
+        visibleSelectGroupFragmentListener.visibleSelectGroup(true);
     }
 
     @Override

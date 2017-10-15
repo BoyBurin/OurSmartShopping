@@ -5,19 +5,21 @@ package com.example.seniorproject.smartshopping.model.dao;
  */
 
 public class ProductCrowd {
-    private String barcode;
     private String name;
-    private long price;
+    private double price;
     private String store;
 
+    public ProductCrowd(){
 
-    public String getBarcode() {
-        return barcode;
     }
 
-    public void setBarcode(String barcode) {
-        this.barcode = barcode;
+    public ProductCrowd(String name, double price, String store){
+        this.name = name;
+        this.price = price;
+        this.store = store;
     }
+
+
 
     public String getName() {
         return name;
@@ -27,7 +29,7 @@ public class ProductCrowd {
         this.name = name;
     }
 
-    public long getPrice() {
+    public double getPrice() {
         return price;
     }
 

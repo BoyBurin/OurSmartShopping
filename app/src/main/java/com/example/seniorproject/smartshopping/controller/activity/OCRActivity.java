@@ -44,6 +44,7 @@ import com.example.seniorproject.smartshopping.model.dao.ItemInventory;
 import com.example.seniorproject.smartshopping.model.dao.ItemInventoryMap;
 import com.example.seniorproject.smartshopping.model.dao.ItemOCR;
 import com.example.seniorproject.smartshopping.model.datatype.MutableInteger;
+import com.example.seniorproject.smartshopping.model.manager.GroupManager;
 import com.example.seniorproject.smartshopping.model.manager.ItemInventoryManager;
 import com.example.seniorproject.smartshopping.model.manager.ItemOCRManager;
 import com.example.seniorproject.smartshopping.model.ocrtools.LevenshteinDistance;
@@ -143,6 +144,8 @@ public class OCRActivity extends AppCompatActivity {
     }
 
     private void init() {
+        setTitle(GroupManager.getInstance().getCurrentGroup().getGroup().getName());
+
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
         lastPositionInteger = new MutableInteger(-1);
         itemOCRManager = new ItemOCRManager();

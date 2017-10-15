@@ -35,6 +35,7 @@
         android:layout_weight="1"
         android:layout_marginRight="16dp"
         android:src="@drawable/edit"
+        android:visibility="invisible"
         android:maxLines="1"/>
 
     <ImageButton

@@ -23,6 +23,7 @@ import com.example.seniorproject.smartshopping.model.dao.ShoppingListMap;
 import com.example.seniorproject.smartshopping.model.manager.GroupManager;
 import com.example.seniorproject.smartshopping.model.manager.ItemInventoryManager;
 import com.example.seniorproject.smartshopping.model.manager.ShoppingListManager;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 

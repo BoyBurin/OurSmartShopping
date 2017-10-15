@@ -1,20 +1,20 @@
 package com.example.seniorproject.smartshopping.controller.fragment.shoppinglistfragment;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ListView;
 
 import com.example.seniorproject.smartshopping.R;
-import com.example.seniorproject.smartshopping.model.dao.ProductCrowd;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
+
+import com.example.seniorproject.smartshopping.model.dao.ShoppingListMap;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
@@ -24,14 +24,21 @@ public class MoreShoppingListItemOptimizeFragment extends Fragment {
     /***********************************************************************************************
      ************************************* Variable class ********************************************
      ***********************************************************************************************/
+    interface OptimizePriceListener{
+        void startOptimizePrice();
+    }
 
+    interface OptimizeTimeListener{
+        void startOptimizeTime();
+    }
+
+    ShoppingListMap shoppingListMap;
 
     private Button optimizePrice;
     private Button optimizeTime;
 
     private DatabaseReference mDatabaseRef;
 
-    private ArrayList<ProductCrowd> productCrowdArrayList;
 
 
     /***********************************************************************************************
@@ -43,9 +50,10 @@ public class MoreShoppingListItemOptimizeFragment extends Fragment {
     }
 
     @SuppressWarnings("unused")
-    public static MoreShoppingListItemOptimizeFragment newInstance() {
+    public static MoreShoppingListItemOptimizeFragment newInstance(ShoppingListMap shoppingListMap) {
         MoreShoppingListItemOptimizeFragment fragment = new MoreShoppingListItemOptimizeFragment();
         Bundle args = new Bundle();
+        args.putParcelable("shoppingListMap", shoppingListMap);
         fragment.setArguments(args);
         return fragment;
     }
@@ -53,6 +61,8 @@ public class MoreShoppingListItemOptimizeFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        shoppingListMap = getArguments().getParcelable("shoppingListMap");
+
         init(savedInstanceState);
 
         if (savedInstanceState != null)
@@ -69,7 +79,6 @@ public class MoreShoppingListItemOptimizeFragment extends Fragment {
 
     private void init(Bundle savedInstanceState) {
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
-        productCrowdArrayList = new ArrayList<ProductCrowd>();
 
     }
 
@@ -77,6 +86,25 @@ public class MoreShoppingListItemOptimizeFragment extends Fragment {
     private void initInstances(View rootView, Bundle savedInstanceState) {
         optimizePrice = (Button) rootView.findViewById(R.id.price);
         optimizeTime = (Button) rootView.findViewById(R.id.time);
+
+        optimizePrice.setOnClickListener(optimizePriceListener);
+        optimizeTime.setOnClickListener(optimizeTimeListener);
+
+        MoreShoppingListItemOptimizePriceFragment moreShoppingListItemOptimizePriceFragment =
+                MoreShoppingListItemOptimizePriceFragment.newInstance(shoppingListMap);
+
+        MoreShoppingListItemOptimizeTimeFragment moreShoppingListItemOptimizeTimeFragment =
+                MoreShoppingListItemOptimizeTimeFragment.newInstance(shoppingListMap);
+
+        getChildFragmentManager().beginTransaction()
+                .add(R.id.containerMoreShoppingListOptimize, moreShoppingListItemOptimizePriceFragment,
+                        "moreShoppingListItemOptimizePriceFragment")
+                .add(R.id.containerMoreShoppingListOptimize, moreShoppingListItemOptimizeTimeFragment,
+                        "moreShoppingListItemOptimizeTimeFragment")
+                .hide(moreShoppingListItemOptimizePriceFragment)
+                .hide(moreShoppingListItemOptimizeTimeFragment)
+                .commit();
+
 
         //optimizePrice.setOnClickListener();
     }
@@ -112,36 +140,50 @@ public class MoreShoppingListItemOptimizeFragment extends Fragment {
      ************************************* Listener variables ********************************************
      ***********************************************************************************************/
 
+
     final View.OnClickListener optimizePriceListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            //mDatabaseRef.child("productcrowd").addListenerForSingleValueEvent();
+            MoreShoppingListItemOptimizePriceFragment moreShoppingListItemOptimizePriceFragment =
+                    (MoreShoppingListItemOptimizePriceFragment) getChildFragmentManager()
+                            .findFragmentByTag("moreShoppingListItemOptimizePriceFragment");
+
+            MoreShoppingListItemOptimizeTimeFragment moreShoppingListItemOptimizeTimeFragment =
+                    (MoreShoppingListItemOptimizeTimeFragment) getChildFragmentManager()
+                            .findFragmentByTag("moreShoppingListItemOptimizeTimeFragment");
+
+            getChildFragmentManager().beginTransaction()
+                    .hide(moreShoppingListItemOptimizeTimeFragment)
+                    .show(moreShoppingListItemOptimizePriceFragment)
+                    .commit();
+
+            moreShoppingListItemOptimizePriceFragment.startOptimizePrice();
+        }
+    };
+
+    final View.OnClickListener optimizeTimeListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+
+            MoreShoppingListItemOptimizePriceFragment moreShoppingListItemOptimizePriceFragment =
+                    (MoreShoppingListItemOptimizePriceFragment) getChildFragmentManager()
+                            .findFragmentByTag("moreShoppingListItemOptimizePriceFragment");
+
+            MoreShoppingListItemOptimizeTimeFragment moreShoppingListItemOptimizeTimeFragment =
+                    (MoreShoppingListItemOptimizeTimeFragment) getChildFragmentManager()
+                            .findFragmentByTag("moreShoppingListItemOptimizeTimeFragment");
+
+            getChildFragmentManager().beginTransaction()
+                    .hide(moreShoppingListItemOptimizePriceFragment)
+                    .show(moreShoppingListItemOptimizeTimeFragment)
+                    .commit();
+
+            moreShoppingListItemOptimizeTimeFragment.startOptimizeTime();
+
         }
     };
 
 
-    final ValueEventListener getProductListener = new ValueEventListener() {
-        @Override
-        public void onDataChange(DataSnapshot dataSnapshot) {
-            ProductCrowd productCrowd1 = new ProductCrowd();
-            ProductCrowd productCrowd2 = new ProductCrowd();
-
-            productCrowd1.setBarcode("8850188243308");
-            productCrowd1.setName("โฟร์โมสต์รสช็อคโกแลต");
-            productCrowd1.setPrice(35);
-            productCrowd1.setStore("1");
-
-            productCrowd2.setBarcode("8850425007830");
-            productCrowd2.setName("ยูโร่เค้กใบเตย");
-            productCrowd2.setPrice(36);
-            productCrowd2.setStore("2");
-        }
-
-        @Override
-        public void onCancelled(DatabaseError databaseError) {
-
-        }
-    };
 
 
     /***********************************************************************************************

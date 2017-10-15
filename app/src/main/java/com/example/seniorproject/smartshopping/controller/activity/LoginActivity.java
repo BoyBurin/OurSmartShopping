@@ -20,7 +20,8 @@ import com.google.firebase.auth.FirebaseUser;
 
 public class LoginActivity extends AppCompatActivity implements LoginFragment.LoginFragmentListener,
         LoginFragment.CraateAccountFragmentListener, CreateAccountFragment.SaveInfoListener,
-        LoginFragment.SelectGroupListener, SelectGroupFragment.SaveCurrentGroupListener {
+        LoginFragment.SelectGroupListener, SelectGroupFragment.SaveCurrentGroupListener,
+        LoginFragment.VisibleLoginFragmentListener, SelectGroupFragment.VisibleSelectGroupFragmentListener {
 
     /***********************************************************************************************
      ************************************* Variable class ********************************************
@@ -28,6 +29,7 @@ public class LoginActivity extends AppCompatActivity implements LoginFragment.Lo
 
     private ImageView imageView;
     private SignInButton btnfacebook;
+    private ProgressBar progressbarLogin;
 
     private final String CREATEACCOUNTFRAGMENT = "createAccountFragment";
     private final String LOGINFRAGMENT = "loginFragment";
@@ -45,13 +47,7 @@ public class LoginActivity extends AppCompatActivity implements LoginFragment.Lo
         initInstances();
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if(user != null){
-            FrameLayout container = (FrameLayout) findViewById(R.id.containerLogin);
-            container.setVisibility(View.INVISIBLE);
-            ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressbarLogin);
-            progressBar.setVisibility(View.VISIBLE);
-            FirebaseAuth.getInstance().signOut();
-        }
+
 
         if(savedInstanceState == null){
             getSupportFragmentManager().beginTransaction()
@@ -62,6 +58,7 @@ public class LoginActivity extends AppCompatActivity implements LoginFragment.Lo
 
     private void initInstances(){
 
+        progressbarLogin = (ProgressBar) findViewById(R.id.progressbarLogin);
 
     }
 
@@ -120,6 +117,30 @@ public class LoginActivity extends AppCompatActivity implements LoginFragment.Lo
                 .commit();
 
         goToMain();
+    }
+
+    @Override
+    public void visible(boolean visible) {
+        FrameLayout container = (FrameLayout) findViewById(R.id.containerLogin);
+        if(visible) {
+            container.setVisibility(View.VISIBLE);
+            progressbarLogin.setVisibility(View.INVISIBLE);
+        }else {
+            container.setVisibility(View.INVISIBLE);
+            progressbarLogin.setVisibility(View.VISIBLE);
+        }
+    }
+
+    @Override
+    public void visibleSelectGroup(boolean visible) {
+        FrameLayout container = (FrameLayout) findViewById(R.id.containerLogin);
+        if(visible) {
+            container.setVisibility(View.VISIBLE);
+            progressbarLogin.setVisibility(View.INVISIBLE);
+        }else {
+            container.setVisibility(View.INVISIBLE);
+            progressbarLogin.setVisibility(View.VISIBLE);
+        }
     }
 
 

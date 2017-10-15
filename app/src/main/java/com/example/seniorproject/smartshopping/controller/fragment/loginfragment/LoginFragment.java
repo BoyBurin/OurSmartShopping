@@ -55,6 +55,10 @@ public class LoginFragment extends Fragment {
         void gotToSelectGroupListener();
     }
 
+    public interface VisibleLoginFragmentListener{
+        void visible(boolean visible);
+    }
+
     private CustomViewGroupEditText customGroupUserName;
     private CustomViewGroupEditText customGroupPassword;
     private Button btnLogin;
@@ -91,6 +95,13 @@ public class LoginFragment extends Fragment {
 
         if (savedInstanceState != null)
             onRestoreInstanceState(savedInstanceState);
+
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if(user != null){
+
+            loginGetGroup();
+        }
     }
 
     @Override
@@ -164,6 +175,65 @@ public class LoginFragment extends Fragment {
         // Restore Instance State here
     }
 
+    private void loginGetGroup(){
+        FirebaseUser user = mAuth.getCurrentUser();
+        VisibleLoginFragmentListener visibleLoginFragmentListener =
+                (VisibleLoginFragmentListener) getActivity();
+
+        visibleLoginFragmentListener.visible(false);
+        if (user != null) {
+            // User is signed in
+            Log.d("TAG", "onAuthStateChanged:signed_in:" + user.getDisplayName());
+
+            String userID = mAuth.getCurrentUser().getUid();
+
+            mMessagesDatabaseReference.child("groupinuser").child(userID)
+                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            for(DataSnapshot data : dataSnapshot.getChildren()){
+                                mMessagesDatabaseReference.child("groups")
+                                        .child(data.getKey().toString())
+                                        .addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                                GroupManager gm = GroupManager.getInstance();
+                                                String groupID = dataSnapshot.getKey();
+                                                Group group = dataSnapshot.getValue(Group.class);
+                                                gm.addGroup(new GroupMap(groupID, group));
+
+
+                                                // Go to Main
+                                                SelectGroupListener selectGroupListener = (SelectGroupListener) getActivity();
+                                                selectGroupListener.gotToSelectGroupListener();
+
+
+                                            }
+
+                                            @Override
+                                            public void onCancelled(DatabaseError databaseError) {
+
+                                            }
+                                        });
+                            }
+
+
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+
+                    });
+
+
+            // Authenticated successfully with authData
+
+
+        }
+    }
+
 
     /***********************************************************************************************
      ************************************* Listener variables ********************************************
@@ -210,59 +280,8 @@ public class LoginFragment extends Fragment {
         @Override
         public void onComplete(@NonNull Task<AuthResult> task) {
             if (task.isSuccessful()) {
-                FirebaseUser user = mAuth.getCurrentUser();
-                if (user != null) {
-                    // User is signed in
-                    Log.d("TAG", "onAuthStateChanged:signed_in:" + user.getDisplayName());
+                loginGetGroup();
 
-                    String userID = mAuth.getCurrentUser().getUid();
-
-                    mMessagesDatabaseReference.child("groupinuser").child(userID)
-                            .addListenerForSingleValueEvent(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(DataSnapshot dataSnapshot) {
-                                    for(DataSnapshot data : dataSnapshot.getChildren()){
-                                        mMessagesDatabaseReference.child("groups")
-                                                .child(data.getKey().toString())
-                                                .addListenerForSingleValueEvent(new ValueEventListener() {
-                                                    @Override
-                                                    public void onDataChange(DataSnapshot dataSnapshot) {
-                                                        GroupManager gm = GroupManager.getInstance();
-                                                        String groupID = dataSnapshot.getKey();
-                                                        Group group = dataSnapshot.getValue(Group.class);
-                                                        gm.addGroup(new GroupMap(groupID, group));
-
-
-                                                        // Go to Main
-                                                        SelectGroupListener selectGroupListener = (SelectGroupListener) getActivity();
-                                                        selectGroupListener.gotToSelectGroupListener();
-                                                        progressBarLogin.setVisibility(View.GONE);
-
-
-                                                    }
-
-                                                    @Override
-                                                    public void onCancelled(DatabaseError databaseError) {
-
-                                                    }
-                                                });
-                                    }
-
-
-                                }
-
-                                @Override
-                                public void onCancelled(DatabaseError databaseError) {
-
-                                }
-
-                            });
-
-
-                    // Authenticated successfully with authData
-
-
-                }
                 Toast.makeText(Contextor.getInstance().getContext(), "signInWithEmail:success", Toast.LENGTH_SHORT).show();
             } else {
                 // If sign in fails, display a message to the user.

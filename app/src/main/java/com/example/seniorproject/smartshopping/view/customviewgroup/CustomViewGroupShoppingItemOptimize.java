@@ -51,6 +51,7 @@ public class CustomViewGroupShoppingItemOptimize extends BaseCustomViewGroup {
     private void initInstances() {
         name = (TextView) findViewById(R.id.name);
         price = (TextView) findViewById(R.id.price);
+        place = (TextView) findViewById(R.id.place);
     }
 
     private void initWithAttrs(AttributeSet attrs, int defStyleAttr, int defStyleRes) {
@@ -67,6 +68,7 @@ public class CustomViewGroupShoppingItemOptimize extends BaseCustomViewGroup {
         }
         */
     }
+
 
     @Override
     protected Parcelable onSaveInstanceState() {
@@ -89,4 +91,15 @@ public class CustomViewGroupShoppingItemOptimize extends BaseCustomViewGroup {
         // Restore State from bundle here
     }
 
+    public void setName(String name) {
+        this.name.setText(name);
+    }
+
+    public void setPrice(double price) {
+        this.price.setText(price + "");
+    }
+
+    public void setPlace(String place) {
+        this.place.setText(place);
+    }
 }

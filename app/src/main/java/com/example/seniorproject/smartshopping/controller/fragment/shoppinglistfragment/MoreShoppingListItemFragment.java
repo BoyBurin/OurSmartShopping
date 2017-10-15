@@ -79,7 +79,7 @@ public class MoreShoppingListItemFragment extends Fragment {
                     case 0:
                         return MoreShoppingListItemUpdateFragment.newInstance(shoppingListMap);
                     case 1:
-                        return MoreShoppingListItemOptimizeFragment.newInstance();
+                        return MoreShoppingListItemOptimizeFragment.newInstance(shoppingListMap);
                     default:
                         return null;
 
