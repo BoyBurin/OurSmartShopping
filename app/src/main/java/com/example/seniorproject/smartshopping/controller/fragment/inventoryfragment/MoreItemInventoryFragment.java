@@ -77,6 +77,8 @@ public class MoreItemInventoryFragment extends Fragment {
                         return MoreItemInventoryPhotoSummaryFragment.newInstance(itemInventoryMap);
                     case 1:
                         return MoreItemInventoryEditFragment.newInstance(itemInventoryMap);
+                    case 2:
+                        return MoreItemInventoryAlarmFragment.newInstance(itemInventoryMap);
                     default:
                         return null;
 
@@ -84,7 +86,7 @@ public class MoreItemInventoryFragment extends Fragment {
             }
             @Override
             public int getCount() {
-                return 2;
+                return 3;
             }
 
             @Override
@@ -94,6 +96,8 @@ public class MoreItemInventoryFragment extends Fragment {
                         return "Summary";
                     case 1:
                         return "Update Item";
+                    case 2:
+                        return "Item Alarm";
                     default:
                         return "";
                 }
