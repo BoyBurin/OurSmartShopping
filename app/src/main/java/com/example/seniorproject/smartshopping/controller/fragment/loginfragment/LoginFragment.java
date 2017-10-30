@@ -119,6 +119,7 @@ public class LoginFragment extends Fragment {
 
     private void init(Bundle savedInstanceState) {
         // Init Fragment level's variable(s) here
+
         mAuth = FirebaseAuth.getInstance();
 
 
@@ -259,7 +260,7 @@ public class LoginFragment extends Fragment {
 
                 Log.d("TAG", "onAuthStateChanged:signed_in:" + user.getDisplayName());
 
-                String userID = mAuth.getCurrentUser().getUid();
+                String userID = firebaseAuth.getCurrentUser().getUid();
 
                 cUsers.document(userID).collection("groups")
                         .get()

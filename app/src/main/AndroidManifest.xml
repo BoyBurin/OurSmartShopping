@@ -40,6 +40,7 @@
             android:name=".controller.activity.MoreGroupSettingActivity"
             android:windowSoftInputMode="adjustResize|stateHidden"
             />
+        <receiver android:name=".controller.boardcastreceiver.AlarmReceiver"/>
     </application>
 
 </manifest>
