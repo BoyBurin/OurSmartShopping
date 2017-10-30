@@ -42,6 +42,10 @@ public class ItemInventoryManager {
         return itemInventoryMaps.get(index);
     }
 
+    public void removeItemInventory(int index){
+        itemInventoryMaps.remove(index);
+    }
+
 
     public int getSize(){
         return itemInventoryMaps.size();
@@ -59,6 +63,7 @@ public class ItemInventoryManager {
         }
         return itemInventories;
     }
+
 
     public int getIndexByKey(String key){
         int index = -1;

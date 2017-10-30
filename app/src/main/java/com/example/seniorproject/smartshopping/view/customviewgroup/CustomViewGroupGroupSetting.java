@@ -5,7 +5,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -20,31 +19,29 @@ import com.google.firebase.storage.StorageReference;
 /**
  * Created by nuuneoi on 11/16/2014.
  */
-public class ItemView extends BaseCustomViewGroup {
+public class CustomViewGroupGroupSetting extends BaseCustomViewGroup {
 
     TextView tvName;
     ImageView imgItem;
 
-    ImageView ivRoundGreen;
-    ImageView ivRoundYellow;
-    ImageView ivRoundRed;
+
 
     StorageReference storageReference;
 
-    public ItemView(Context context) {
+    public CustomViewGroupGroupSetting(Context context) {
         super(context);
         initInflate();
         initInstances();
     }
 
-    public ItemView(Context context, AttributeSet attrs) {
+    public CustomViewGroupGroupSetting(Context context, AttributeSet attrs) {
         super(context, attrs);
         initInflate();
         initInstances();
         initWithAttrs(attrs, 0, 0);
     }
 
-    public ItemView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public CustomViewGroupGroupSetting(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         initInflate();
         initInstances();
@@ -52,7 +49,7 @@ public class ItemView extends BaseCustomViewGroup {
     }
 
     @TargetApi(21)
-    public ItemView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public CustomViewGroupGroupSetting(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         initInflate();
         initInstances();
@@ -68,9 +65,6 @@ public class ItemView extends BaseCustomViewGroup {
         tvName = (TextView) findViewById(R.id.tvName);
         imgItem = (ImageView) findViewById(R.id.imgItem);
 
-        ivRoundGreen = (ImageView) findViewById(R.id.ivRoundGreen);
-        ivRoundYellow = (ImageView) findViewById(R.id.ivRoundYellow);
-        ivRoundRed = (ImageView) findViewById(R.id.ivRoundRed);
     }
 
     private void initWithAttrs(AttributeSet attrs, int defStyleAttr, int defStyleRes) {
@@ -153,22 +147,10 @@ public class ItemView extends BaseCustomViewGroup {
                 .placeholder(R.drawable.loading) //default pic
                 .centerCrop()
                 //.error(Drawable pic)  picture has problem
-                //.transform(new CircleTransform(getContext())) //Cool !!!
+                .transform(new CircleTransform(getContext())) //Cool !!!
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .into(imgItem);
 
     }
 
-    public void setRemainder(long soft, long hard, long amount){
-        ivRoundGreen.setVisibility(GONE);
-        ivRoundYellow.setVisibility(GONE);
-        ivRoundRed.setVisibility(GONE);
-        if(amount > soft){
-            ivRoundGreen.setVisibility(VISIBLE);
-        } else if(amount < hard){
-            ivRoundRed.setVisibility(VISIBLE);
-        } else{
-            ivRoundYellow.setVisibility(VISIBLE);
-        }
-    }
 }

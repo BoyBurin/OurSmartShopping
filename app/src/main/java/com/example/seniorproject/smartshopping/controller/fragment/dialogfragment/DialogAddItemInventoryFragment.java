@@ -1,12 +1,11 @@
 package com.example.seniorproject.smartshopping.controller.fragment.dialogfragment;
 
 import android.content.Intent;
-import android.media.Image;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,7 +19,6 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.seniorproject.smartshopping.R;
 import com.example.seniorproject.smartshopping.model.dao.ItemInventory;
-import com.example.seniorproject.smartshopping.model.dao.RemindItem;
 import com.example.seniorproject.smartshopping.model.manager.GroupManager;
 import com.example.seniorproject.smartshopping.superuser.ProductList;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -30,6 +28,10 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 
 
 public class DialogAddItemInventoryFragment extends DialogFragment {
@@ -45,7 +47,9 @@ public class DialogAddItemInventoryFragment extends DialogFragment {
         void deleteAddItemInventoryDialog();
     }
 
-    DatabaseReference mDatabaseRef;
+    private FirebaseFirestore db;
+    private CollectionReference cProductList;
+    private CollectionReference cItems;
 
     private ImageView imgItem;
     private TextView tvName;
@@ -101,7 +105,11 @@ public class DialogAddItemInventoryFragment extends DialogFragment {
     private void init(Bundle savedInstanceState) {
         photoUrl = "bf";
         barcodeId = "vdf";
-        mDatabaseRef = FirebaseDatabase.getInstance().getReference();
+
+        db = FirebaseFirestore.getInstance();
+        cProductList = db.collection("productlist");
+        cItems = db.collection("groups").document(GroupManager.getInstance().getCurrentGroup().getId())
+                .collection("items");
 
     }
 
@@ -119,7 +127,7 @@ public class DialogAddItemInventoryFragment extends DialogFragment {
 
         btnScanBarcode.setOnClickListener(addBarcodeListener);
 
-        btnAdd.setOnClickListener(addItemListener);
+        btnAdd.setOnClickListener(addItemInventory);
 
         btnCancel.setOnClickListener(cancelDialogListener);
     }
@@ -130,7 +138,7 @@ public class DialogAddItemInventoryFragment extends DialogFragment {
 
         String contents = data.getStringExtra("SCAN_RESULT");
         barcodeId = contents;
-        mDatabaseRef.child("productlist").child(barcodeId).addListenerForSingleValueEvent(retriveProductListListener);
+        cProductList.whereEqualTo("barcodeId", barcodeId).get().addOnCompleteListener(getProductList);
     }
 
     private void closeDialog(){
@@ -170,6 +178,46 @@ public class DialogAddItemInventoryFragment extends DialogFragment {
      ************************************* Listener variables ********************************************
      ***********************************************************************************************/
 
+
+    final OnCompleteListener<QuerySnapshot> getProductList = new OnCompleteListener<QuerySnapshot>() {
+        @Override
+        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+
+            if (task.isSuccessful()) {
+                DocumentSnapshot document = task.getResult().getDocuments().get(0);
+                if (document != null) {
+                    ProductList productList = document.toObject(ProductList.class);
+                    Glide.with(getContext())
+                            .load(productList.getPhotoUrl())
+                            .placeholder(R.drawable.bg_small) //default pic
+                            .centerCrop()
+                            .diskCacheStrategy(DiskCacheStrategy.ALL)
+                            .into(imgItem);
+
+                    tvName.setText(productList.getName());
+                    photoUrl = productList.getPhotoUrl().toString();
+                    unit = productList.getUnit();
+
+                    edtAmount.setVisibility(View.VISIBLE);
+                    edtSoft.setVisibility(View.VISIBLE);
+                    edtHard.setVisibility(View.VISIBLE);
+                    edtListDescribe.setVisibility(View.VISIBLE);
+                    btnCancel.setVisibility(View.VISIBLE);
+                    btnAdd.setVisibility(View.VISIBLE);
+
+                } else {
+                    Toast.makeText(getContext(), "Item is not found", Toast.LENGTH_SHORT).show();
+                    Log.d("TAG", "No such document");
+                    closeDialog();
+                }
+            } else {
+                Log.d("TAG", "get failed with ", task.getException());
+                closeDialog();
+            }
+        }
+    };
+
+
     final View.OnClickListener cancelDialogListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
@@ -185,74 +233,36 @@ public class DialogAddItemInventoryFragment extends DialogFragment {
         }
     };
 
-    final ValueEventListener retriveProductListListener = new ValueEventListener() {
-        @Override
-        public void onDataChange(DataSnapshot dataSnapshot) {
-            ProductList productList = dataSnapshot.getValue(ProductList.class);
-            Glide.with(getContext())
-                    .load(productList.getPhotoUrl())
-                    .placeholder(R.drawable.bg_small) //default pic
-                    .centerCrop()
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .into(imgItem);
-
-            tvName.setText(productList.getName());
-            photoUrl = productList.getPhotoUrl().toString();
-            unit = productList.getUnit();
-
-            edtAmount.setVisibility(View.VISIBLE);
-            edtSoft.setVisibility(View.VISIBLE);
-            edtHard.setVisibility(View.VISIBLE);
-            edtListDescribe.setVisibility(View.VISIBLE);
-            btnCancel.setVisibility(View.VISIBLE);
-            btnAdd.setVisibility(View.VISIBLE);
 
 
-
-
-        }
-
-        @Override
-        public void onCancelled(DatabaseError databaseError) {
-
-        }
-    };
-
-    final View.OnClickListener addItemListener = new View.OnClickListener() {
+    final View.OnClickListener addItemInventory = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            if(photoUrl == null || barcodeId == null) return;
-            DatabaseReference itemInventoryRef = mDatabaseRef.child("iteminventory");
-            final String itemInventoryID = itemInventoryRef.push().getKey();
+
+            if(tvName.getText().toString().equals("") || tvName.getText().toString() == null ||
+                    edtAmount.getText().toString().equals("") || edtAmount.getText().toString() == null ||
+                    edtHard.getText().toString().equals("") || edtHard.getText().toString() == null ||
+                    edtSoft.getText().toString().equals("") || edtSoft.getText().toString() == null){
+
+                Toast.makeText(getContext(), "Please complete information", Toast.LENGTH_SHORT).show();
+                closeDialog();
+                return;
+            }
+
             String name = tvName.getText().toString();
             long amount = Long.parseLong(edtAmount.getText().toString());
             String comment = edtListDescribe.getText().toString();
+            long hard = Long.parseLong(edtHard.getText().toString());
+            long soft = Long.parseLong(edtSoft.getText().toString());
 
-            RemindItem remindItem = new RemindItem();
-            remindItem.setSoft(Long.parseLong(edtSoft.getText().toString()));
-            remindItem.setHard(Long.parseLong(edtHard.getText().toString()));
+            ItemInventory item = new ItemInventory(name, amount, comment,
+                    photoUrl, unit, barcodeId, hard, soft);
 
-            ItemInventory itemInventory = new ItemInventory(name, amount, comment,
-                    photoUrl, remindItem, unit, barcodeId);
-            itemInventoryRef.child(itemInventoryID).setValue(itemInventory)
-                    .addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            DatabaseReference itemInGroup = mDatabaseRef.child("itemingroup");
+            cItems.add(item);
+            Toast.makeText(getActivity(), "Add Item Success", Toast.LENGTH_SHORT).show();
 
-                            itemInGroup.child(GroupManager.getInstance().getCurrentGroup().getId()).child(itemInventoryID)
-                                    .setValue(true).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    Toast.makeText(getActivity(), "Add Item Success", Toast.LENGTH_SHORT).show();
+            closeDialog();
 
-                                    closeDialog();
-
-                                }
-                            });
-
-                        }
-                    });
         }
     };
 

@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,14 +15,24 @@ import android.widget.Toast;
 
 import com.example.seniorproject.smartshopping.R;
 import com.example.seniorproject.smartshopping.model.dao.ItemInventoryMap;
+import com.example.seniorproject.smartshopping.model.dao.ItemShoppingList;
 import com.example.seniorproject.smartshopping.model.dao.ShoppingListMap;
 import com.example.seniorproject.smartshopping.model.datatype.MutableInteger;
+import com.example.seniorproject.smartshopping.model.manager.GroupManager;
 import com.example.seniorproject.smartshopping.model.manager.ItemInventoryManager;
 import com.example.seniorproject.smartshopping.view.adapter.ItemInventoryAdapter;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class MoreShoppingListItemSelectorFragment extends Fragment {
@@ -43,10 +54,12 @@ public class MoreShoppingListItemSelectorFragment extends Fragment {
 
 
     private GridView gridView;
-    private DatabaseReference mDatabaseRef;
     private ItemInventoryAdapter itemInventoryAdapter;
     private MutableInteger lastPositionInteger;
     private ItemInventoryMap currentItemInventoryMap;
+
+    private FirebaseFirestore db;
+    private CollectionReference cItemShoppingList;
 
     private ImageButton addedButton;
 
@@ -94,7 +107,15 @@ public class MoreShoppingListItemSelectorFragment extends Fragment {
     private void init(Bundle savedInstanceState) {
         lastPositionInteger = new MutableInteger(-1);
         itemInventoryAdapter = new ItemInventoryAdapter(lastPositionInteger);
-        mDatabaseRef = FirebaseDatabase.getInstance().getReference();
+
+        String groupId = GroupManager.getInstance().getCurrentGroup().getId();
+        String shoppingListId = shoppingListMap.getId();
+
+        // Connect to Database
+        db = FirebaseFirestore.getInstance();
+        cItemShoppingList = db.collection("groups").document(groupId)
+                .collection("shoppinglists").document(shoppingListId)
+                .collection("items");
 
     }
 
@@ -160,13 +181,19 @@ public class MoreShoppingListItemSelectorFragment extends Fragment {
 
             if(currentItemInventoryMap != null){
                 if(addShoppingListItemListener.getAmount() != 0){
-                    String itemInventoryID = currentItemInventoryMap.getId();
+                    String itemBarcode = currentItemInventoryMap.getItemInventory().getBarcodeId();
+                    String itemname = currentItemInventoryMap.getItemInventory().getName();
                     long amount = addShoppingListItemListener.getAmount();
+                    Map<String, Object> newData = new HashMap<>();
 
-                    mDatabaseRef.child("iteminshoppinglist").child(shoppingListMap.getId())
-                            .child(itemInventoryID).setValue(amount).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    newData.put("amount", amount);
+                    newData.put("barcodeId", itemBarcode);
+                    newData.put("name", itemname);
+
+                    cItemShoppingList.add(newData)
+                            .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                         @Override
-                        public void onComplete(@NonNull Task<Void> task) {
+                        public void onSuccess(DocumentReference documentReference) {
                             FinishAddShoppingListItemListener finishAddShoppingListItemListener =
                                     (FinishAddShoppingListItemListener) getParentFragment();
 
@@ -175,7 +202,14 @@ public class MoreShoppingListItemSelectorFragment extends Fragment {
                             Toast.makeText(getContext(), "Added " +itemName +" Item into Shopping List Success", Toast.LENGTH_SHORT)
                                     .show();
                         }
-                    });
+                    })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.w("TAG", "Error adding document", e);
+                                    Toast.makeText(getContext(), "Add Item in Shopping List Failed", Toast.LENGTH_SHORT).show();
+                                }
+                            });
                 }
             }
         }

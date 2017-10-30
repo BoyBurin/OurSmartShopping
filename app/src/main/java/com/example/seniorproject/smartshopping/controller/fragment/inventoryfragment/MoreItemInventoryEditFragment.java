@@ -15,10 +15,14 @@ import android.widget.Toast;
 import com.example.seniorproject.smartshopping.R;
 import com.example.seniorproject.smartshopping.model.dao.ItemInventory;
 import com.example.seniorproject.smartshopping.model.dao.ItemInventoryMap;
+import com.example.seniorproject.smartshopping.model.manager.GroupManager;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.WriteBatch;
 
 
 public class MoreItemInventoryEditFragment extends Fragment {
@@ -36,7 +40,8 @@ public class MoreItemInventoryEditFragment extends Fragment {
     private EditText edtHard;
     private Button btnSave;
 
-    private DatabaseReference mDatabaseRef;
+    private FirebaseFirestore db;
+    private DocumentReference dItem;
 
     private ProgressBar progressBar;
     private View backgroundLoading;
@@ -81,7 +86,9 @@ public class MoreItemInventoryEditFragment extends Fragment {
 
     private void init(Bundle savedInstanceState) {
 
-        mDatabaseRef = FirebaseDatabase.getInstance().getReference();
+        db = FirebaseFirestore.getInstance();
+        dItem = db.collection("groups").document(GroupManager.getInstance().getCurrentGroup().getId())
+                .collection("items").document(itemInventoryMap.getId());
 
     }
 
@@ -95,8 +102,8 @@ public class MoreItemInventoryEditFragment extends Fragment {
 
         edtComment.setText(itemInventoryMap.getItemInventory().getComment().toString());
         edtAmount.setText(itemInventoryMap.getItemInventory().getAmount() + "");
-        edtSoft.setText(itemInventoryMap.getItemInventory().getRemindItem().getSoft() + "");
-        edtHard.setText(itemInventoryMap.getItemInventory().getRemindItem().getHard() + "");
+        edtSoft.setText(itemInventoryMap.getItemInventory().getSoft() + "");
+        edtHard.setText(itemInventoryMap.getItemInventory().getHard() + "");
 
         btnSave.setOnClickListener(saveItemInventoryListener);
 
@@ -131,6 +138,13 @@ public class MoreItemInventoryEditFragment extends Fragment {
         // Restore Instance State here
     }
 
+    private void clearText(){
+        edtAmount.setText("");
+        edtComment.setText("");
+        edtHard.setText("");
+        edtSoft.setText("");
+    }
+
     /***********************************************************************************************
      ************************************* Listener variables ********************************************
      ***********************************************************************************************/
@@ -141,23 +155,37 @@ public class MoreItemInventoryEditFragment extends Fragment {
             progressBar.setVisibility(View.VISIBLE);
             backgroundLoading.setVisibility(View.VISIBLE);
             btnSave.setVisibility(View.GONE);
-            ItemInventory itemInventory = itemInventoryMap.getItemInventory();
-            String itemInventoryID = itemInventoryMap.getId();
-            itemInventory.setAmount(Integer.parseInt(edtAmount.getText().toString()));
-            itemInventory.getRemindItem().setSoft(Long.parseLong(edtSoft.getText().toString()));
-            itemInventory.getRemindItem().setHard(Long.parseLong(edtHard.getText().toString()));
-            itemInventory.setComment(edtComment.getText().toString());
 
-            mDatabaseRef.child("iteminventory").child(itemInventoryID)
-                    .setValue(itemInventory).addOnCompleteListener(new OnCompleteListener<Void>() {
+            final String comment = edtComment.getText().toString();
+            final long amount = Integer.parseInt(edtAmount.getText().toString());
+            final long soft = Long.parseLong(edtSoft.getText().toString());
+            final long hard = Long.parseLong(edtHard.getText().toString());
+
+            WriteBatch batch = db.batch();
+
+            batch.update(dItem, "comment", comment);
+            batch.update(dItem, "amount", amount);
+            batch.update(dItem, "soft", soft);
+            batch.update(dItem, "hard", hard);
+
+            batch.commit().addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
-                    progressBar.setVisibility(View.GONE);
-                    backgroundLoading.setVisibility(View.GONE);
-                    btnSave.setVisibility(View.VISIBLE);
-                    Toast.makeText(getActivity(), "Update Item Inventory Success", Toast.LENGTH_SHORT).show();
+                    if(task.isSuccessful()) {
+                        progressBar.setVisibility(View.GONE);
+                        backgroundLoading.setVisibility(View.GONE);
+                        btnSave.setVisibility(View.VISIBLE);
+
+                        clearText();
+                    }
+                    else{
+                        Toast.makeText(getActivity(), "Update Item Inventory Failed", Toast.LENGTH_SHORT).show();
+                        clearText();
+                    }
                 }
             });
+
+
         }
     };
 

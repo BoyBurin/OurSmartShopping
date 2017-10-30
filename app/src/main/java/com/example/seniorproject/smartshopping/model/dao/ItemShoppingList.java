@@ -12,7 +12,8 @@ public class ItemShoppingList {
      *******************************************************************************************/
 
     private long amount;
-    private ItemInventoryMap itemInventoryMap;
+    private String name;
+    private String barcodeId;
     private View.OnClickListener deleteListener;
 
     /******************************************************************************************
@@ -23,9 +24,10 @@ public class ItemShoppingList {
 
     }
 
-    public ItemShoppingList(long amount, ItemInventoryMap itemInventoryMap){
+    public ItemShoppingList(long amount, String name, String barcodeId){
         this.amount = amount;
-        this.itemInventoryMap = itemInventoryMap;
+        this.name = name;
+        this.barcodeId = barcodeId;
     }
 
     public long getAmount() {
@@ -36,12 +38,20 @@ public class ItemShoppingList {
         this.amount = amount;
     }
 
-    public ItemInventoryMap getItemInventoryMap() {
-        return itemInventoryMap;
+    public String getName() {
+        return name;
     }
 
-    public void setItemInventoryMap(ItemInventoryMap itemInventoryMap) {
-        this.itemInventoryMap = itemInventoryMap;
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getBarcodeId() {
+        return barcodeId;
+    }
+
+    public void setBarcodeId(String barcodeId) {
+        this.barcodeId = barcodeId;
     }
 
     public void setDeleteListener(View.OnClickListener deleteListener){

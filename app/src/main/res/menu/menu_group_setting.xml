@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/action_create_group"
+        android:title="Create new Group"
+        app:showAsAction="never"
+        />
+
+    <item android:id="@+id/action_join_group"
+        android:title="Join Group"
+        app:showAsAction="never"
+        />
+
+</menu>

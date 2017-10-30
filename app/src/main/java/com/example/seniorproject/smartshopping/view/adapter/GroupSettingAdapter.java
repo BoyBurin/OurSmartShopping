@@ -1,14 +1,14 @@
 package com.example.seniorproject.smartshopping.view.adapter;
 
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
+import com.example.seniorproject.smartshopping.model.dao.Group;
+import com.example.seniorproject.smartshopping.model.dao.GroupList;
 import com.example.seniorproject.smartshopping.model.dao.ItemInventory;
-import com.example.seniorproject.smartshopping.model.dao.ItemShoppingList;
 import com.example.seniorproject.smartshopping.model.datatype.MutableInteger;
-import com.example.seniorproject.smartshopping.view.customviewgroup.CustomViewGroupShoppingListItem;
+import com.example.seniorproject.smartshopping.view.customviewgroup.CustomViewGroupGroupSetting;
 import com.example.seniorproject.smartshopping.view.customviewgroup.ItemView;
 
 import java.util.ArrayList;
@@ -18,44 +18,41 @@ import java.util.ArrayList;
  * Created by boyburin on 8/29/2017 AD.
  */
 
-public class ItemShoppingListAdapter extends BaseAdapter{
+public class GroupSettingAdapter extends BaseAdapter{
 
     /******************************************************************************************
      * ****************************** Variable *********************************************
      *******************************************************************************************/
 
-    private ArrayList<ItemShoppingList> itemShoppingLists;
+    private ArrayList<GroupList> groups;
 
     private MutableInteger lastPositionInteger;
-
-    //private ArrayList<View.OnClickListener> deleteListener;
 
     /******************************************************************************************
      * ****************************** Methods *********************************************
      *******************************************************************************************/
 
-    public ItemShoppingListAdapter(MutableInteger lastPositionInteger) {
+    public GroupSettingAdapter(MutableInteger lastPositionInteger) {
         this.lastPositionInteger = lastPositionInteger;
-        itemShoppingLists = new ArrayList<ItemShoppingList>();
+        groups = new ArrayList<GroupList>();
     }
 
 
-    public void setItemShoppingLists(ArrayList<ItemShoppingList> itemShoppingLists){
-        this.itemShoppingLists = itemShoppingLists;
-        //this.deleteListener = deleteListener;
+    public void setGroups(ArrayList<GroupList> groups){
+        this.groups = groups;
     }
 
 
     @Override
     public int getCount() {
 
-        return itemShoppingLists.size();
+        return groups.size();
     }
 
     @Override
     public Object getItem(int i) {
 
-        return itemShoppingLists.get(i);
+        return groups.get(i);
     }
 
     @Override
@@ -67,18 +64,15 @@ public class ItemShoppingListAdapter extends BaseAdapter{
     @Override
     public View getView(int position, View view, ViewGroup viewGroup) {
         //if(getItemViewType(i) == 0) {
-            CustomViewGroupShoppingListItem item;
+            CustomViewGroupGroupSetting item;
             if (view != null)
-                item = (CustomViewGroupShoppingListItem) view;
+                item = (CustomViewGroupGroupSetting) view;
             else
-                item = new CustomViewGroupShoppingListItem(viewGroup.getContext());
+                item = new CustomViewGroupGroupSetting(viewGroup.getContext());
 
-        ItemShoppingList itemShoppingList = (ItemShoppingList) getItem(position);
-        long amount = itemShoppingList.getAmount();
-        item.setItemName(itemShoppingList.getName());
-        item.setAmount(amount);
-        item.setDeleteListener(itemShoppingLists.get(position).getDeleteListener());
-
+        GroupList group = (GroupList) getItem(position);
+        item.setNameText(group.getName());
+        item.setImageUrl(group.getPhotoUrl());
         lastPositionInteger.setValue(position);
 
             return item;

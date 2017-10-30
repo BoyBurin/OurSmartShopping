@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import com.example.seniorproject.smartshopping.R;
 import com.example.seniorproject.smartshopping.model.dao.Group;
+import com.example.seniorproject.smartshopping.model.dao.GroupList;
 import com.example.seniorproject.smartshopping.model.dao.GroupMap;
 import com.example.seniorproject.smartshopping.model.dao.User;
 import com.example.seniorproject.smartshopping.model.manager.Contextor;
@@ -34,6 +35,12 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 
@@ -66,8 +73,8 @@ public class LoginFragment extends Fragment {
     private ProgressBar progressBarLogin;
 
     private FirebaseAuth mAuth;
-    private FirebaseDatabase mFirebaseDatabase;
-    private DatabaseReference mMessagesDatabaseReference;
+    private FirebaseFirestore db;
+    private CollectionReference cUsers;
 
     //private String username = "BoyBurin";
 
@@ -97,11 +104,9 @@ public class LoginFragment extends Fragment {
             onRestoreInstanceState(savedInstanceState);
 
 
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if(user != null){
+        db = FirebaseFirestore.getInstance();
+        cUsers = db.collection("users");
 
-            loginGetGroup();
-        }
     }
 
     @Override
@@ -115,8 +120,6 @@ public class LoginFragment extends Fragment {
     private void init(Bundle savedInstanceState) {
         // Init Fragment level's variable(s) here
         mAuth = FirebaseAuth.getInstance();
-        mFirebaseDatabase = FirebaseDatabase.getInstance();
-        mMessagesDatabaseReference = mFirebaseDatabase.getReference();
 
 
     }
@@ -148,15 +151,14 @@ public class LoginFragment extends Fragment {
     public void onStart() {
 
         super.onStart();
-        //updateUI(currentUser);
-        //mAuth.addAuthStateListener(mAuthListener);
+        mAuth.addAuthStateListener(mAuthListener);
 
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        //mAuth.removeAuthStateListener(mAuthListener);
+        mAuth.removeAuthStateListener(mAuthListener);
     }
 
     /*
@@ -173,65 +175,6 @@ public class LoginFragment extends Fragment {
      */
     private void onRestoreInstanceState(Bundle savedInstanceState) {
         // Restore Instance State here
-    }
-
-    private void loginGetGroup(){
-        FirebaseUser user = mAuth.getCurrentUser();
-        VisibleLoginFragmentListener visibleLoginFragmentListener =
-                (VisibleLoginFragmentListener) getActivity();
-
-        visibleLoginFragmentListener.visible(false);
-        if (user != null) {
-            // User is signed in
-            Log.d("TAG", "onAuthStateChanged:signed_in:" + user.getDisplayName());
-
-            String userID = mAuth.getCurrentUser().getUid();
-
-            mMessagesDatabaseReference.child("groupinuser").child(userID)
-                    .addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            for(DataSnapshot data : dataSnapshot.getChildren()){
-                                mMessagesDatabaseReference.child("groups")
-                                        .child(data.getKey().toString())
-                                        .addListenerForSingleValueEvent(new ValueEventListener() {
-                                            @Override
-                                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                                GroupManager gm = GroupManager.getInstance();
-                                                String groupID = dataSnapshot.getKey();
-                                                Group group = dataSnapshot.getValue(Group.class);
-                                                gm.addGroup(new GroupMap(groupID, group));
-
-
-                                                // Go to Main
-                                                SelectGroupListener selectGroupListener = (SelectGroupListener) getActivity();
-                                                selectGroupListener.gotToSelectGroupListener();
-
-
-                                            }
-
-                                            @Override
-                                            public void onCancelled(DatabaseError databaseError) {
-
-                                            }
-                                        });
-                            }
-
-
-                        }
-
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-
-                        }
-
-                    });
-
-
-            // Authenticated successfully with authData
-
-
-        }
     }
 
 
@@ -280,7 +223,6 @@ public class LoginFragment extends Fragment {
         @Override
         public void onComplete(@NonNull Task<AuthResult> task) {
             if (task.isSuccessful()) {
-                loginGetGroup();
 
                 Toast.makeText(Contextor.getInstance().getContext(), "signInWithEmail:success", Toast.LENGTH_SHORT).show();
             } else {
@@ -308,58 +250,40 @@ public class LoginFragment extends Fragment {
     final FirebaseAuth.AuthStateListener mAuthListener = new FirebaseAuth.AuthStateListener() {
         @Override
         public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-            /*FirebaseUser user = firebaseAuth.getCurrentUser();
+            FirebaseUser user = firebaseAuth.getCurrentUser();
             if (user != null) {
-                // User is signed in
+
+                VisibleLoginFragmentListener visibleLoginFragmentListener =
+                        (VisibleLoginFragmentListener) getActivity();
+                visibleLoginFragmentListener.visible(false);
+
                 Log.d("TAG", "onAuthStateChanged:signed_in:" + user.getDisplayName());
 
                 String userID = mAuth.getCurrentUser().getUid();
 
-                mMessagesDatabaseReference.child("groupinuser").child(userID)
-                        .addListenerForSingleValueEvent(new ValueEventListener() {
+                cUsers.document(userID).collection("groups")
+                        .get()
+                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                             @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                for(DataSnapshot data : dataSnapshot.getChildren()){
-                                    mMessagesDatabaseReference.child("groups")
-                                            .child(data.getKey().toString())
-                                    .addListenerForSingleValueEvent(new ValueEventListener() {
-                                        @Override
-                                        public void onDataChange(DataSnapshot dataSnapshot) {
-                                            GroupManager gm = GroupManager.getInstance();
-                                            String groupID = dataSnapshot.getKey();
-                                            Group group = dataSnapshot.getValue(Group.class);
-                                            gm.addGroup(new GroupMap(groupID, group));
-                                            gm.setCurrentGroup(gm.getGroup(0));
-                                            Log.d("Group Name: ", gm.getCurrentGroup().getId());
+                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                if (task.isSuccessful()) {
+                                    for (DocumentSnapshot document : task.getResult()) {
+                                        GroupList group = (GroupList) document.toObject(GroupList.class);
+                                        GroupManager gm = GroupManager.getInstance();
+                                        gm.addGroup(group);
+                                    }
 
-                                            // Go to Main
-                                            LoginFragmentListener loginFragmentListener = (LoginFragmentListener) getActivity();
-                                            loginFragmentListener.goToMain();
+                                    SelectGroupListener selectGroupListener = (SelectGroupListener) getActivity();
+                                    selectGroupListener.gotToSelectGroupListener();
 
-                                        }
-
-                                        @Override
-                                        public void onCancelled(DatabaseError databaseError) {
-
-                                        }
-                                    });
+                                } else {
+                                    Log.d("TAG", "Error getting documents: ", task.getException());
+                                    Toast.makeText(getContext(), "Error getting groups", Toast.LENGTH_SHORT).show();
                                 }
                             }
-
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
-
-                            }
                         });
+            }
 
-
-                // Authenticated successfully with authData
-
-
-            } else {
-                // User is signed out
-                Log.d("TAG", "onAuthStateChanged:signed_out");
-            }*/
         }
     };
 

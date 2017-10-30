@@ -3,8 +3,8 @@
     package="com.example.seniorproject.smartshopping">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <application
         android:name=".MainApplication"
@@ -27,13 +27,19 @@
         </activity>
         <activity
             android:name=".controller.activity.MainActivity"
-            android:windowSoftInputMode="adjustResize|stateHidden" />
+            android:windowSoftInputMode="adjustResize|stateHidden"/>
         <activity
             android:name=".controller.activity.MoreItemInventoryActivity"
             android:windowSoftInputMode="adjustResize|stateHidden" />
         <activity android:name=".controller.activity.MoreShoppingListItemActivity" />
         <activity android:name=".superuser.SuperUserItemActivity" />
-        <activity android:name=".controller.activity.OCRActivity" android:theme="@style/AppThemeWithNoActionBar"/>
+        <activity
+            android:name=".controller.activity.OCRActivity"
+            android:theme="@style/AppThemeWithNoActionBar" />
+        <activity
+            android:name=".controller.activity.MoreGroupSettingActivity"
+            android:windowSoftInputMode="adjustResize|stateHidden"
+            />
     </application>
 
 </manifest>

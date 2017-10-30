@@ -4,15 +4,18 @@ package com.example.seniorproject.smartshopping.controller.fragment.inventoryfra
  * Created by thamm on 9/9/2560.
  */
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
 import com.example.seniorproject.smartshopping.R;
 import com.example.seniorproject.smartshopping.model.dao.ItemInventory;
@@ -20,13 +23,24 @@ import com.example.seniorproject.smartshopping.model.dao.ItemInventoryMap;
 import com.example.seniorproject.smartshopping.model.datatype.MutableInteger;
 import com.example.seniorproject.smartshopping.model.manager.GroupManager;
 import com.example.seniorproject.smartshopping.model.manager.ItemInventoryManager;
+import com.example.seniorproject.smartshopping.model.manager.ItemShoppingListManager;
 import com.example.seniorproject.smartshopping.view.adapter.ItemInventoryAdapter;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.HashMap;
 
@@ -42,12 +56,6 @@ public class InventoryFragment extends Fragment{
         void setItemInventoryFloationgButton();
     }
 
-    private ImageButton btnAll;
-    private ImageButton btnMeat;
-    private ImageButton btnVegetandFruit;
-    private ImageButton btnFood;
-    private ImageButton btnSnack;
-    private ImageButton btnbCleaningEquip;
     private FloatingActionButton fab;
 
 
@@ -55,7 +63,9 @@ public class InventoryFragment extends Fragment{
     private ItemInventoryAdapter itemInventoryAdapter;
     private MutableInteger lastPositionInteger;
 
-    private DatabaseReference mDatabaseRef;
+    private FirebaseFirestore db;
+    private CollectionReference cItems;
+    private ListenerRegistration cItemsListener;
 
 
 
@@ -96,14 +106,13 @@ public class InventoryFragment extends Fragment{
         // Init Fragment level's variable(s) here
         lastPositionInteger = new MutableInteger(-1);
         itemInventoryAdapter = new ItemInventoryAdapter(lastPositionInteger);
-        mDatabaseRef = FirebaseDatabase.getInstance().getReference();
-        mDatabaseRef.child("itemingroup")
-                .child(GroupManager.getInstance().getCurrentGroup().getId())
-                .addChildEventListener(itemInventoryListener);
 
-        /*mDatabaseRef.child("iteminventory")
-                .addChildEventListener(itemUpdateListener);*/
+        db = FirebaseFirestore.getInstance();
+        cItems = db.collection("groups")
+                .document(GroupManager.getInstance().getCurrentGroup().getId())
+                .collection("items");
 
+        cItemsListener = cItems.addSnapshotListener(itemListener);
 
     }
 
@@ -111,7 +120,6 @@ public class InventoryFragment extends Fragment{
     private void initInstances(View rootView, Bundle savedInstanceState) {
 
         gridView = (GridView) rootView.findViewById(R.id.gridView);
-        itemInventoryAdapter.setItemInventories(ItemInventoryManager.getInstance().getItemInventories());
         gridView.setAdapter(itemInventoryAdapter);
 
         fab = (FloatingActionButton) rootView.findViewById(R.id.fab);
@@ -124,16 +132,6 @@ public class InventoryFragment extends Fragment{
 
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        mDatabaseRef.child("itemingroup")
-                .child(GroupManager.getInstance().getCurrentGroup().getId())
-                .removeEventListener(itemInventoryListener);
-
-        /*mDatabaseRef.child("iteminventory")
-                .removeEventListener(itemUpdateListener);*/
-    }
 
     @Override
     public void onStart() {
@@ -143,11 +141,21 @@ public class InventoryFragment extends Fragment{
     @Override
     public void onStop() {
         super.onStop();
+
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if(cItemsListener != null){
+            cItemsListener.remove();
+            cItemsListener = null;
+        }
     }
 
     /*
-     * Save Instance State Here
-     */
+         * Save Instance State Here
+         */
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -166,6 +174,67 @@ public class InventoryFragment extends Fragment{
      ************************************* Listener variables ********************************************
      ***********************************************************************************************/
 
+
+    final EventListener<QuerySnapshot> itemListener = new EventListener<QuerySnapshot>() {
+        @Override
+        public void onEvent(QuerySnapshot documentSnapshots, FirebaseFirestoreException e) {
+            if (e != null) {
+                Log.w("TAG", "listen:error", e);
+                return;
+            }
+
+            ItemInventoryManager gm = ItemInventoryManager.getInstance();
+
+            for (DocumentChange dc : documentSnapshots.getDocumentChanges()) {
+                switch (dc.getType()) {
+                    case ADDED:
+                        DocumentSnapshot documentSnapshot = dc.getDocument();
+                        ItemInventory item = documentSnapshot.toObject(ItemInventory.class);
+                        String id = documentSnapshot.getId();
+
+                        //Add
+                        ItemInventoryMap itemMap = new ItemInventoryMap(id, item);
+                        gm.addItemInventory(itemMap);
+                        itemInventoryAdapter.setItemInventories(gm.getItemInventories());
+                        itemInventoryAdapter.notifyDataSetChanged();
+
+                        Toast.makeText(getContext(), "Added " + item.getName(), Toast.LENGTH_SHORT).show();
+
+                        break;
+
+                    case MODIFIED:
+                        documentSnapshot = dc.getDocument();
+                        ItemInventory update = documentSnapshot.toObject(ItemInventory.class);
+                        id = documentSnapshot.getId();
+
+                        int index = gm.getIndexByKey(id);
+                        itemMap = gm.getItemInventory(index);
+
+                        //Update
+                        itemMap.setItemInventory(update);
+                        itemInventoryAdapter.setItemInventories(gm.getItemInventories());
+                        itemInventoryAdapter.notifyDataSetChanged();
+
+                        Toast.makeText(getContext(), "Update " + update.getName(), Toast.LENGTH_SHORT).show();
+                        break;
+
+                    case REMOVED:
+                        documentSnapshot = dc.getDocument();
+                        item = documentSnapshot.toObject(ItemInventory.class);
+                        id = documentSnapshot.getId();
+
+                        index = gm.getIndexByKey(id);
+                        gm.removeItemInventory(index);
+                        itemInventoryAdapter.setItemInventories(gm.getItemInventories());
+                        itemInventoryAdapter.notifyDataSetChanged();
+
+                        Toast.makeText(getContext(), "Remove " + item.getName(), Toast.LENGTH_SHORT).show();
+                        break;
+                }
+            }
+        }
+    };
+
     final View.OnClickListener addItemListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
@@ -175,96 +244,7 @@ public class InventoryFragment extends Fragment{
         }
     };
 
-    final ChildEventListener itemInventoryListener = new ChildEventListener() {
-        @Override
-        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-            final String itemInventoryID = dataSnapshot.getKey();
-            mDatabaseRef.child("iteminventory").child(itemInventoryID)
-                    .addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            final ItemInventory itemInventory = dataSnapshot.getValue(ItemInventory.class);
-                            ItemInventoryMap itemInventoryMap = new ItemInventoryMap(itemInventoryID, itemInventory);
-                            ItemInventoryManager.getInstance().addItemInventory(itemInventoryMap);
-                            itemInventoryAdapter.setItemInventories(ItemInventoryManager.getInstance().getItemInventories());
-                            itemInventoryAdapter.notifyDataSetChanged();
 
-
-                            mDatabaseRef.child("iteminventory").orderByKey().equalTo(itemInventoryID)
-                                    .addChildEventListener(new ChildEventListener() {
-                                        @Override
-                                        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-
-                                        }
-
-                                        @Override
-                                        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                                            HashMap<String, Object> data = (HashMap<String, Object>) dataSnapshot.getValue();
-                                            HashMap<String, Object> remindItem = (HashMap<String, Object>) dataSnapshot
-                                                    .child("remindItem").getValue();
-
-                                            long soft = (Long)remindItem.get("soft");
-                                            long hard = (Long)remindItem.get("hard");
-                                            long amount = (Long) data.get("amount");
-                                            String comment = (String) data.get("comment");
-                                            int index = ItemInventoryManager.getInstance().getIndexByKey(itemInventoryID);
-                                            ItemInventoryMap itemInventoryMap = ItemInventoryManager.getInstance().getItemInventory(index);
-                                            itemInventoryMap.getItemInventory().getRemindItem().setSoft(soft);
-                                            itemInventoryMap.getItemInventory().getRemindItem().setHard(hard);
-                                            itemInventoryMap.getItemInventory().setAmount(amount);
-                                            itemInventoryMap.getItemInventory().setComment(comment);
-                                            itemInventoryAdapter.setItemInventories(ItemInventoryManager.getInstance().getItemInventories());
-                                            itemInventoryAdapter.notifyDataSetChanged();
-
-
-                                        }
-
-                                        @Override
-                                        public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-                                        }
-
-                                        @Override
-                                        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-                                        }
-
-                                        @Override
-                                        public void onCancelled(DatabaseError databaseError) {
-
-                                        }
-                                    });
-
-                        }
-
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-
-                        }
-                    });
-
-        }
-
-        @Override
-        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-        }
-
-        @Override
-        public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-        }
-
-        @Override
-        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-        }
-
-        @Override
-        public void onCancelled(DatabaseError databaseError) {
-
-        }
-    };
 
     final AdapterView.OnItemClickListener moreItemInventoryListener = new AdapterView.OnItemClickListener() {
         @Override
@@ -279,42 +259,6 @@ public class InventoryFragment extends Fragment{
             }
         }
     };
-
-    /*final ChildEventListener itemUpdateListener = new ChildEventListener() {
-        @Override
-        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-        }
-
-        @Override
-        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-            ItemInventory itemInventory = dataSnapshot.getValue(ItemInventory.class);
-            String itemInventoryID = dataSnapshot.getKey();
-            int index = ItemInventoryManager.getInstance().getIndexByKey(itemInventoryID);
-            if(index == -1){
-                return;
-            }
-            ItemInventoryMap itemInventoryMap = ItemInventoryManager.getInstance().getItemInventory(index);
-            itemInventoryMap.getItemInventory().getRemindItem().setSoft(itemInventory.getRemindItem().getSoft());
-            itemInventoryMap.getItemInventory().getRemindItem().setHard(itemInventory.getRemindItem().getHard());
-            itemInventoryAdapter.setItemInventories(ItemInventoryManager.getInstance().getItemInventories());
-            itemInventoryAdapter.notifyDataSetChanged();
-            Log.d("Tag: ", "Change");
-        }
-
-        @Override
-        public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-        }
-
-        @Override
-        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-        }
-
-        @Override
-        public void onCancelled(DatabaseError databaseError) {
-
-        }
-    };*/
 
 
     /***********************************************************************************************

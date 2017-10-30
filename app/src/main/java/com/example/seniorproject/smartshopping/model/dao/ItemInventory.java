@@ -16,7 +16,8 @@ public class ItemInventory implements Parcelable {
     private long amount;
     private String comment;
     private String photoUrl;
-    private RemindItem remindItem;
+    private long hard;
+    private long soft;
     private String unit;
     private String barcodeId;
 
@@ -28,15 +29,17 @@ public class ItemInventory implements Parcelable {
 
     }
 
-    public ItemInventory(String name, long amount, String comment, String photoUrl, RemindItem remindItem, String unit, String barcodeId){
+    public ItemInventory(String name, long amount, String comment, String photoUrl, String unit, String barcodeId
+    , long hard, long soft){
 
         this.name = name;
         this.amount = amount;
         this.comment = comment;
         this.photoUrl = photoUrl;
-        this.remindItem = remindItem;
         this.unit = unit;
         this.barcodeId = barcodeId;
+        this.hard = hard;
+        this.soft = soft;
     }
 
 
@@ -72,13 +75,6 @@ public class ItemInventory implements Parcelable {
         this.photoUrl = photoUrl;
     }
 
-    public RemindItem getRemindItem() {
-        return remindItem;
-    }
-
-    public void setRemindItem(RemindItem remindItem) {
-        this.remindItem = remindItem;
-    }
 
     public String getUnit() {
         return unit;
@@ -96,6 +92,22 @@ public class ItemInventory implements Parcelable {
         this.barcodeId = barcodeId;
     }
 
+    public long getHard() {
+        return hard;
+    }
+
+    public void setHard(long hard) {
+        this.hard = hard;
+    }
+
+    public long getSoft() {
+        return soft;
+    }
+
+    public void setSoft(long soft) {
+        this.soft = soft;
+    }
+
     /******************************************************************************************
      * ****************************** Implementation *********************************************
      *******************************************************************************************/
@@ -107,9 +119,10 @@ public class ItemInventory implements Parcelable {
         amount = in.readLong();
         comment = in.readString();
         photoUrl = in.readString();
-        remindItem = in.readParcelable(RemindItem.class.getClassLoader());
         unit = in.readString();
         barcodeId = in.readString();
+        hard = in.readLong();
+        soft = in.readLong();
     }
 
     @Override
@@ -118,9 +131,10 @@ public class ItemInventory implements Parcelable {
         dest.writeLong(amount);
         dest.writeString(comment);
         dest.writeString(photoUrl);
-        dest.writeParcelable(remindItem, flags);
         dest.writeString(unit);
         dest.writeString(barcodeId);
+        dest.writeLong(hard);
+        dest.writeLong(soft);
     }
 
     @Override

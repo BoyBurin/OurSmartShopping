@@ -10,17 +10,19 @@ public class ProductList {
     private String type;
     private String unit;
     private String photoUrl;
+    private String barcodeId;
 
     public ProductList(){
 
     }
 
-    public ProductList(String name, double retailprice, String type, String unit, String photoUrl) {
+    public ProductList(String name, double retailprice, String type, String unit, String photoUrl, String barcodeId) {
         this.name = name;
         this.retailprice = retailprice;
         this.type = type;
         this.unit = unit;
         this.photoUrl = photoUrl;
+        this.barcodeId = barcodeId;
     }
 
     public String getName() {
@@ -61,5 +63,13 @@ public class ProductList {
 
     public void setPhotoUrl(String photoUrl) {
         this.photoUrl = photoUrl;
+    }
+
+    public String getBarcodeId() {
+        return barcodeId;
+    }
+
+    public void setBarcodeId(String barcodeId) {
+        this.barcodeId = barcodeId;
     }
 }

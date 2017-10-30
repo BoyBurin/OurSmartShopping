@@ -4,11 +4,13 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.example.seniorproject.smartshopping.R;
 import com.example.seniorproject.smartshopping.model.dao.ShoppingList;
@@ -23,6 +25,14 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.QuerySnapshot;
 
 
 public class ShoppingListFragment extends Fragment {
@@ -45,8 +55,9 @@ public class ShoppingListFragment extends Fragment {
     private MutableInteger lastPositionInteger;
     private FloatingActionButton fab;
 
-    private DatabaseReference mMessagesDatabaseReference;
-    private DatabaseReference shoopingListRef;
+    private FirebaseFirestore db;
+    private CollectionReference cShoppingLists;
+    private ListenerRegistration cShoppingListsListener;
 
 
 
@@ -87,12 +98,16 @@ public class ShoppingListFragment extends Fragment {
         // Init Fragment level's variable(s) here
         shoppingListManager = ShoppingListManager.getInstance();
         lastPositionInteger = new MutableInteger(-1);
-        mMessagesDatabaseReference = FirebaseDatabase.getInstance().getReference();
-        shoopingListRef = mMessagesDatabaseReference.child("shoppinglistingroup")
-        .child(GroupManager.getInstance().getCurrentGroup().getId());
-        shoopingListRef.addChildEventListener(modifyShoppingListListener);
+
         shoppingListAdapter = new ShoppingListAdapter(lastPositionInteger);
         shoppingListManager = ShoppingListManager.getInstance();
+
+        db = FirebaseFirestore.getInstance();
+        cShoppingLists = db.collection("groups").document(GroupManager.getInstance().getCurrentGroup().getId())
+                .collection("shoppinglists");
+
+        cShoppingListsListener = cShoppingLists.addSnapshotListener(shoppingListListener);
+
 
 
     }
@@ -100,7 +115,6 @@ public class ShoppingListFragment extends Fragment {
     @SuppressWarnings("UnusedParameters")
     private void initInstances(View rootView, Bundle savedInstanceState) {
         // Init 'View' instance(s) with rootView.findViewById here
-        mMessagesDatabaseReference = FirebaseDatabase.getInstance().getReference();
         fab = (FloatingActionButton) rootView.findViewById(R.id.fab);
         listView = (ListView) rootView.findViewById(R.id.listViewActiveLists);
 
@@ -114,6 +128,44 @@ public class ShoppingListFragment extends Fragment {
 
         //refreshData();
     }
+
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if(cShoppingListsListener != null){
+            cShoppingListsListener.remove();
+            cShoppingListsListener = null;
+        }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+    }
+
+    /*
+     * Save Instance State Here
+     */
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        // Save Instance State here
+    }
+
+    /*
+     * Restore Instance State Here
+     */
+    @SuppressWarnings("UnusedParameters")
+    private void onRestoreInstanceState(Bundle savedInstanceState) {
+        // Restore Instance State here
+    }
+
 
     /*private void refreshData(){
         if(shoppingListManager.getSize() == 0) {
@@ -153,40 +205,6 @@ public class ShoppingListFragment extends Fragment {
         }
     }*/
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        shoopingListRef.removeEventListener(modifyShoppingListListener);
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-    }
-
-    /*
-     * Save Instance State Here
-     */
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        // Save Instance State here
-    }
-
-    /*
-     * Restore Instance State Here
-     */
-    @SuppressWarnings("UnusedParameters")
-    private void onRestoreInstanceState(Bundle savedInstanceState) {
-        // Restore Instance State here
-    }
-
-
 
     /***********************************************************************************************
      ************************************* Listener variables ********************************************
@@ -201,50 +219,66 @@ public class ShoppingListFragment extends Fragment {
         }
     };
 
-    final ChildEventListener modifyShoppingListListener = new ChildEventListener() {
+    final EventListener<QuerySnapshot> shoppingListListener = new EventListener<QuerySnapshot>() {
         @Override
-        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-            String shoppingListID = dataSnapshot.getKey();
-            mMessagesDatabaseReference.child("shoppinglist").child(shoppingListID)
-                    .addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            ShoppingListMap sMap = new ShoppingListMap();
-                            sMap.setId(dataSnapshot.getKey());
-                            sMap.setShoppingList(dataSnapshot.getValue(ShoppingList.class));
-                            shoppingListManager.insertDaoAtTopPosition(sMap);
+        public void onEvent(QuerySnapshot documentSnapshots, FirebaseFirestoreException e) {
+            if (e != null) {
+                Log.w("TAG", "listen:error", e);
+                return;
+            }
 
-                            shoppingListAdapter.setShoppingLists(shoppingListManager.getShoppingLists());
-                            shoppingListAdapter.notifyDataSetChanged();
-                        }
 
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
+            for (DocumentChange dc : documentSnapshots.getDocumentChanges()) {
+                switch (dc.getType()) {
+                    case ADDED:
+                        DocumentSnapshot documentSnapshot = dc.getDocument();
+                        ShoppingList newShoppingList = documentSnapshot.toObject(ShoppingList.class);
+                        String id = documentSnapshot.getId();
+                        ShoppingListMap shoppingList = new ShoppingListMap(id, newShoppingList);
 
-                        }
-                    });
-        }
+                        shoppingListManager.insertDaoAtTopPosition(shoppingList);
 
-        @Override
-        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                        shoppingListAdapter.setShoppingLists(shoppingListManager.getShoppingLists());
+                        shoppingListAdapter.notifyDataSetChanged();
 
-        }
+                        Toast.makeText(getContext(), "Added " + newShoppingList.getName(), Toast.LENGTH_SHORT).show();
 
-        @Override
-        public void onChildRemoved(DataSnapshot dataSnapshot) {
+                        break;
 
-        }
+                    case MODIFIED:
 
-        @Override
-        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+                        documentSnapshot = dc.getDocument();
+                        newShoppingList = documentSnapshot.toObject(ShoppingList.class);
+                        id = documentSnapshot.getId();
+                        shoppingList = new ShoppingListMap(id, newShoppingList);
 
-        }
+                        shoppingListManager.deleteShoppingList(id);
+                        shoppingListManager.insertDaoAtTopPosition(shoppingList);
 
-        @Override
-        public void onCancelled(DatabaseError databaseError) {
+                        shoppingListAdapter.setShoppingLists(shoppingListManager.getShoppingLists());
+                        shoppingListAdapter.notifyDataSetChanged();
 
+                        Toast.makeText(getContext(), "Update " + newShoppingList.getName(), Toast.LENGTH_SHORT).show();
+                        break;
+
+                    case REMOVED:
+
+                        documentSnapshot = dc.getDocument();
+                        newShoppingList = documentSnapshot.toObject(ShoppingList.class);
+                        id = documentSnapshot.getId();
+
+                        shoppingListManager.deleteShoppingList(id);
+
+                        shoppingListAdapter.setShoppingLists(shoppingListManager.getShoppingLists());
+                        shoppingListAdapter.notifyDataSetChanged();
+
+                        Toast.makeText(getContext(), "Remove " + newShoppingList.getName(), Toast.LENGTH_SHORT).show();
+                        break;
+                }
+            }
         }
     };
+
 
     final AdapterView.OnItemClickListener moreShoppingListItemListener = new AdapterView.OnItemClickListener() {
         @Override

@@ -14,6 +14,9 @@ import com.example.seniorproject.smartshopping.R;
 import com.example.seniorproject.smartshopping.controller.fragment.loginfragment.CreateAccountFragment;
 import com.example.seniorproject.smartshopping.controller.fragment.loginfragment.LoginFragment;
 import com.example.seniorproject.smartshopping.controller.fragment.loginfragment.SelectGroupFragment;
+import com.example.seniorproject.smartshopping.model.manager.GroupManager;
+import com.example.seniorproject.smartshopping.model.manager.ItemInventoryManager;
+import com.example.seniorproject.smartshopping.model.manager.ShoppingListManager;
 import com.google.android.gms.common.SignInButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -58,6 +61,9 @@ public class LoginActivity extends AppCompatActivity implements LoginFragment.Lo
 
     private void initInstances(){
 
+        ItemInventoryManager.getInstance().reset();
+        ShoppingListManager.getInstance().reset();
+        GroupManager.getInstance().reset();
         progressbarLogin = (ProgressBar) findViewById(R.id.progressbarLogin);
 
     }

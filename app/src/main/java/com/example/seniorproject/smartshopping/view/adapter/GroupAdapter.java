@@ -5,6 +5,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
 import com.example.seniorproject.smartshopping.model.dao.Group;
+import com.example.seniorproject.smartshopping.model.dao.GroupList;
 import com.example.seniorproject.smartshopping.model.dao.GroupMap;
 import com.example.seniorproject.smartshopping.model.dao.User;
 import com.example.seniorproject.smartshopping.model.dao.UserMap;
@@ -25,7 +26,7 @@ public class GroupAdapter extends BaseAdapter{
      * ****************************** Variable *********************************************
      *******************************************************************************************/
 
-    private ArrayList<Group> groups;
+    private ArrayList<GroupList> groups;
 
     private MutableInteger lastPositionInteger;
 
@@ -35,11 +36,11 @@ public class GroupAdapter extends BaseAdapter{
 
     public GroupAdapter(MutableInteger lastPositionInteger) {
         this.lastPositionInteger = lastPositionInteger;
-        groups = new ArrayList<Group>();
+        groups = new ArrayList<GroupList>();
     }
 
 
-    public void setGroups(ArrayList<Group> groups){
+    public void setGroups(ArrayList<GroupList> groups){
         this.groups = groups;
     }
 
@@ -71,7 +72,7 @@ public class GroupAdapter extends BaseAdapter{
             else
                 item = new CustomViewGroupListGroup(viewGroup.getContext());
 
-        Group group = (Group) getItem(position);
+        GroupList group = (GroupList) getItem(position);
         item.setGroupName(group.getName());
         lastPositionInteger.setValue(position);
 

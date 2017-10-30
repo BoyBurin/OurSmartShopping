@@ -31,7 +31,7 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
 , FragmentDialogAddShoppingList.DeleteAddShoppingListDialog, FragmentDialogAddShoppingList.PickImageShoppingListDialog,
         InventoryFragment.MoreItemInventoryListener, ShoppingListFragment.MoreShoppingListItemListener,
         DialogAddItemInventoryFragment.BarcodeListener, InventoryFragment.ItemInventoryFloatingButton,
-        DialogAddItemInventoryFragment.DeleteItemInventoryDialog, SettingFragment.SignOutListener{
+        DialogAddItemInventoryFragment.DeleteItemInventoryDialog, SettingFragment.SignOutListener, SettingFragment.GroupSetting {
     /***********************************************************************************************
      ************************************* Variable class ********************************************
      ***********************************************************************************************/
@@ -44,8 +44,6 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
     private ImageButton btnSetting;
 
 
-    private FirebaseDatabase mRootRef;
-    private DatabaseReference mGroupRef;
 
     final String SHOPPING_LIST_FRAGMENT = "ShoppingListFragment";
     final String  DIALOG_ADD_SHOPPING_LIST_FRAGMENT = "dialogAddShoppingListFragment";
@@ -74,6 +72,7 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
 
     private void initInstances(Bundle savedInstanceState){
 
+
         setTitle(GroupManager.getInstance().getCurrentGroup().getGroup().getName());
 
         btnPromotion = (ImageButton) findViewById(R.id.btnPromotion);
@@ -94,15 +93,13 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
         btnShoppingHistory = (ImageButton) findViewById(R.id.btnShoppingHistory);
         btnShoppingHistory.setOnClickListener(topBarOnClickListener);
 
-        mRootRef = FirebaseDatabase.getInstance();
-        mGroupRef = mRootRef.getReference().child("groups");
 
 
         if(savedInstanceState == null) {
             ShoppingListFragment shoppingListFragment = ShoppingListFragment.newInstance();
             InventoryFragment inventoryFragment = InventoryFragment.newInstance();
-            GroupFragment groupFragment = GroupFragment.newInstance();
-            ShoppingHistoryFragment shoppingHistoryFragment = ShoppingHistoryFragment.newInstance();
+            //GroupFragment groupFragment = GroupFragment.newInstance();
+            //ShoppingHistoryFragment shoppingHistoryFragment = ShoppingHistoryFragment.newInstance();
             SettingFragment settingFragment = SettingFragment.newInstance();
 
 
@@ -111,15 +108,15 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
                             SHOPPING_LIST_FRAGMENT)
                     .add(R.id.containerMain, inventoryFragment,
                             INVENTORY_FRAGMENT)
-                    .add(R.id.containerMain, groupFragment,
-                            GROUP_FRAGMENT)
-                    .add(R.id.containerMain, shoppingHistoryFragment,
-                            SHOPPING_HISTORY_FRAGMENT)
+                    //.add(R.id.containerMain, groupFragment,
+                    //        GROUP_FRAGMENT)
+                    //.add(R.id.containerMain, shoppingHistoryFragment,
+                    //        SHOPPING_HISTORY_FRAGMENT)
                     .add(R.id.containerMain, settingFragment,
                             SETTINGFRAGMENT)
-                    .hide(groupFragment)
+                    //.hide(groupFragment)
                     .hide(shoppingListFragment)
-                    .hide(shoppingHistoryFragment)
+                    //.hide(shoppingHistoryFragment)
                     .hide(settingFragment)
                     .show(inventoryFragment)
                     .commit();
@@ -165,9 +162,6 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        ItemInventoryManager.getInstance().reset();
-        ShoppingListManager.getInstance().reset();
-        GroupManager.getInstance().reset();
     }
 
     @Override
@@ -374,5 +368,11 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
         Intent intent = new Intent(this, LoginActivity.class);
         startActivity(intent);
         finish();
+    }
+
+    @Override
+    public void goToGroupSetting() {
+        Intent intent = new Intent(this, MoreGroupSettingActivity.class);
+        startActivity(intent);
     }
 }

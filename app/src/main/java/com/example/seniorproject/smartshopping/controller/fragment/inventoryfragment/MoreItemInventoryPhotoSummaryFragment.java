@@ -3,22 +3,31 @@ package com.example.seniorproject.smartshopping.controller.fragment.inventoryfra
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.seniorproject.smartshopping.R;
 import com.example.seniorproject.smartshopping.model.dao.ItemInventory;
 import com.example.seniorproject.smartshopping.model.dao.ItemInventoryMap;
+import com.example.seniorproject.smartshopping.model.manager.GroupManager;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
 
 
 public class MoreItemInventoryPhotoSummaryFragment extends Fragment {
@@ -35,7 +44,9 @@ public class MoreItemInventoryPhotoSummaryFragment extends Fragment {
     private ImageView ivImg;
     private TextView tvUnit;
 
-    private DatabaseReference mDatabaseRef;
+    private FirebaseFirestore db;
+    private DocumentReference dItem;
+    private ListenerRegistration dItemListener;
 
 
 
@@ -75,9 +86,11 @@ public class MoreItemInventoryPhotoSummaryFragment extends Fragment {
     }
 
     private void init(Bundle savedInstanceState) {
-        mDatabaseRef = FirebaseDatabase.getInstance().getReference();
-        mDatabaseRef.child("iteminventory").child(itemInventoryMap.getId())
-                .addValueEventListener(updateItemInventory);
+        db = FirebaseFirestore.getInstance();
+        dItem = db.collection("groups").document(GroupManager.getInstance().getCurrentGroup().getId())
+                .collection("items").document(itemInventoryMap.getId());
+
+        dItemListener = dItem.addSnapshotListener(updateListener);
 
     }
 
@@ -110,8 +123,11 @@ public class MoreItemInventoryPhotoSummaryFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mDatabaseRef.child("iteminventory").child(itemInventoryMap.getId())
-                .removeEventListener(updateItemInventory);
+
+        if(dItemListener != null){
+            dItemListener.remove();
+            dItemListener = null;
+        }
     }
 
     @Override
@@ -145,20 +161,25 @@ public class MoreItemInventoryPhotoSummaryFragment extends Fragment {
      ************************************* Listener variables ********************************************
      ***********************************************************************************************/
 
-    final ValueEventListener updateItemInventory = new ValueEventListener() {
+    final EventListener<DocumentSnapshot> updateListener = new EventListener<DocumentSnapshot>() {
         @Override
-        public void onDataChange(DataSnapshot dataSnapshot) {
-            ItemInventory itemInventory = dataSnapshot.getValue(ItemInventory.class);
+        public void onEvent(DocumentSnapshot documentSnapshot, FirebaseFirestoreException e) {
+            if (e != null) {
+                Log.w("TAG", "Listen failed.", e);
+                return;
+            }
+
+            if (documentSnapshot != null && documentSnapshot.exists()) {
+                ItemInventory item = documentSnapshot.toObject(ItemInventory.class);
+
+                tvAmount.setText(item.getAmount() + "");
+                tvComment.setText(item.getComment());
 
 
-            tvAmount.setText(itemInventory.getAmount() + "");
-            tvComment.setText(itemInventory.getComment());
-
-        }
-
-        @Override
-        public void onCancelled(DatabaseError databaseError) {
-
+            }
+            else {
+                Log.d("TAG", "Current data: null");
+            }
         }
     };
 

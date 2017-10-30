@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,10 +18,12 @@ import com.example.seniorproject.smartshopping.model.dao.ItemInventoryMap;
 import com.example.seniorproject.smartshopping.model.dao.ItemShoppingList;
 import com.example.seniorproject.smartshopping.model.dao.ShoppingListMap;
 import com.example.seniorproject.smartshopping.model.datatype.MutableInteger;
+import com.example.seniorproject.smartshopping.model.manager.GroupManager;
 import com.example.seniorproject.smartshopping.model.manager.ItemShoppingListManager;
 import com.example.seniorproject.smartshopping.view.adapter.ItemShoppingListAdapter;
 import com.example.seniorproject.smartshopping.view.customviewgroup.CustomViewGroupShoppingListItemAdd;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -28,6 +31,15 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 
@@ -46,7 +58,10 @@ public class MoreShoppingListItemUpdateFragment extends Fragment implements
     private ItemShoppingListAdapter itemShoppingListAdapter;
     private MutableInteger lastPositionInteger;
     private FloatingActionButton fab;
-    private DatabaseReference mDatabaseRef;
+
+    private FirebaseFirestore db;
+    private CollectionReference cItemsShoppingList;
+    private ListenerRegistration cItemsShoppingListListener;
 
     private ItemShoppingListManager itemShoppingListManager;
     private CustomViewGroupShoppingListItemAdd customViewGroupShoppingListItemAdd;
@@ -94,12 +109,15 @@ public class MoreShoppingListItemUpdateFragment extends Fragment implements
 
     private void init(Bundle savedInstanceState) {
         lastPositionInteger = new MutableInteger(-1);
-        mDatabaseRef = FirebaseDatabase.getInstance().getReference();
         itemShoppingListAdapter = new ItemShoppingListAdapter(lastPositionInteger);
         itemShoppingListManager = new ItemShoppingListManager();
         //deleteListener = new ArrayList<View.OnClickListener>();
-        mDatabaseRef.child("iteminshoppinglist").child(shoppingListMap.getId())
-                .addChildEventListener(updateItemShoppingListListener);
+        db = FirebaseFirestore.getInstance();
+        cItemsShoppingList = db.collection("groups").document(GroupManager.getInstance().getCurrentGroup().getId())
+                .collection("shoppinglists").document(shoppingListMap.getId())
+                .collection("items");
+
+        cItemsShoppingListListener = cItemsShoppingList.addSnapshotListener(itemShoppingListListener);
 
     }
 
@@ -114,6 +132,15 @@ public class MoreShoppingListItemUpdateFragment extends Fragment implements
         customViewGroupShoppingListItemAdd = (CustomViewGroupShoppingListItemAdd) rootView
                 .findViewById(R.id.addedItemBar);
 
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if(cItemsShoppingListListener != null){
+            cItemsShoppingListListener.remove();
+            cItemsShoppingListListener = null;
+        }
     }
 
     @Override
@@ -147,75 +174,77 @@ public class MoreShoppingListItemUpdateFragment extends Fragment implements
      ************************************* Listener variables ********************************************
      ***********************************************************************************************/
 
-    final ChildEventListener updateItemShoppingListListener = new ChildEventListener() {
+    final EventListener<QuerySnapshot> itemShoppingListListener = new EventListener<QuerySnapshot>() {
         @Override
-        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-            final String itemInventoryID = dataSnapshot.getKey();
-            final Long amount = dataSnapshot.getValue(Long.class);
+        public void onEvent(QuerySnapshot documentSnapshots, FirebaseFirestoreException e) {
+            if (e != null) {
+                Log.w("TAG", "listen:error", e);
+                return;
+            }
 
-            mDatabaseRef.child("iteminventory").child(itemInventoryID)
-                    .addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            ItemInventory itemInventory = dataSnapshot.getValue(ItemInventory.class);
-                            final String itemName = itemInventory.getName();
-                            ItemInventoryMap itemInventoryMap = new ItemInventoryMap(itemInventoryID, itemInventory);
-                            ItemShoppingList itemShoppingList = new ItemShoppingList(amount, itemInventoryMap);
 
-                            View.OnClickListener onClickDeleteListener = new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    mDatabaseRef.child("iteminshoppinglist").child(shoppingListMap.getId())
-                                            .child(itemInventoryID).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<Void> task) {
-                                            Toast.makeText(getContext(), "Delete " + itemName+  " Success", Toast.LENGTH_SHORT).show();
-                                        }
-                                    });
-                                }
-                            };
+            for (DocumentChange dc : documentSnapshots.getDocumentChanges()) {
+                switch (dc.getType()) {
+                    case ADDED:
+                        final DocumentSnapshot documentSnapshot = dc.getDocument();
+                        final ItemShoppingList newItemShoppingList = documentSnapshot.toObject(ItemShoppingList.class);
 
-                            itemShoppingList.setDeleteListener(onClickDeleteListener);
-                            itemShoppingListManager.addItemShoppingList(itemShoppingList);
-                            itemShoppingListAdapter.setItemShoppingLists(itemShoppingListManager.getItemShoppingLists());
-                            itemShoppingListAdapter.notifyDataSetChanged();
-                        }
+                        View.OnClickListener onClickDeleteListener = new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                cItemsShoppingList.document(documentSnapshot.getId()).delete()
+                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                Log.d("TAG", "DocumentSnapshot successfully deleted!");
+                                                Toast.makeText(getContext(), "Delete " + newItemShoppingList.getName()+
+                                                        " Success", Toast.LENGTH_SHORT).show();
+                                            }
+                                        })
+                                        .addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                Log.w("TAG", "Error deleting document", e);
+                                            }
+                                        });
+                            }
+                        };
 
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
+                        newItemShoppingList.setDeleteListener(onClickDeleteListener);
 
-                        }
-                    });
-        }
+                        itemShoppingListManager.addItemShoppingList(newItemShoppingList);
+                        itemShoppingListAdapter.setItemShoppingLists(itemShoppingListManager.getItemShoppingLists());
+                        itemShoppingListAdapter.notifyDataSetChanged();
 
-        @Override
-        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                        Toast.makeText(getContext(), "Added " + newItemShoppingList.getName(), Toast.LENGTH_SHORT).show();
 
-        }
+                        break;
 
-        @Override
-        public void onChildRemoved(DataSnapshot dataSnapshot) {
+                    case MODIFIED:
 
-            String itemInventoryID = dataSnapshot.getKey();
-            int index = itemShoppingListManager.getIndexByKey(itemInventoryID);
+                        DocumentSnapshot documentSnapshotModified = dc.getDocument();
 
-            itemShoppingListManager.getItemShoppingLists().remove(index);
 
-            itemShoppingListAdapter.setItemShoppingLists(itemShoppingListManager.getItemShoppingLists());
-            itemShoppingListAdapter.notifyDataSetChanged();
+                        Toast.makeText(getContext(), "Update " , Toast.LENGTH_SHORT).show();
+                        break;
 
-        }
+                    case REMOVED:
 
-        @Override
-        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+                        DocumentSnapshot documentSnapshotRemove = dc.getDocument();
+                        ItemShoppingList newItemShoppingListRemove = documentSnapshotRemove.toObject(ItemShoppingList.class);
 
-        }
+                        itemShoppingListManager.removeItemShoppingList(newItemShoppingListRemove.getBarcodeId());
+                        itemShoppingListAdapter.setItemShoppingLists(itemShoppingListManager.getItemShoppingLists());
+                        itemShoppingListAdapter.notifyDataSetChanged();
 
-        @Override
-        public void onCancelled(DatabaseError databaseError) {
 
+                        Toast.makeText(getContext(), "Remove " + newItemShoppingListRemove.getName() , Toast.LENGTH_SHORT).show();
+                        break;
+                }
+            }
         }
     };
+
 
     final View.OnClickListener addedShoppingListItemListener = new View.OnClickListener() {
         @Override
@@ -238,6 +267,7 @@ public class MoreShoppingListItemUpdateFragment extends Fragment implements
      ***********************************************************************************************/
 
 
+    // AddShoppingListItemListener *******************************************************************
 
     @Override
     public void setName(String name) {
@@ -253,6 +283,9 @@ public class MoreShoppingListItemUpdateFragment extends Fragment implements
     public void setButton(View.OnClickListener onClick) {
         customViewGroupShoppingListItemAdd.setAddedButton(onClick);
     }
+
+
+    // FinishAddShoppingListItemListener ********************************************************************
 
     @Override
     public void finishAdded() {

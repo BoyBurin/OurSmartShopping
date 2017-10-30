@@ -68,5 +68,21 @@ public class ShoppingListManager {
         shoppingListMaps = new ArrayList<ShoppingListMap>();
     }
 
+    private int getIndexByKey(String key){
+        int index = -1;
+        for(int i = 0 ; i < getSize() ; i++){
+            if(key.equals(shoppingListMaps.get(i).getId())){
+                index = i;
+                return index;
+            }
+        }
+        return index;
+    }
+
+    public void deleteShoppingList(String key){
+        int index = getIndexByKey(key);
+        shoppingListMaps.remove(index);
+    }
+
 
 }

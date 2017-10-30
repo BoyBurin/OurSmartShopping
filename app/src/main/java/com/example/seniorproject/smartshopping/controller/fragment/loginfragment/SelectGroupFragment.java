@@ -9,9 +9,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.example.seniorproject.smartshopping.R;
 import com.example.seniorproject.smartshopping.model.dao.Group;
+import com.example.seniorproject.smartshopping.model.dao.GroupList;
 import com.example.seniorproject.smartshopping.model.dao.GroupMap;
 import com.example.seniorproject.smartshopping.model.dao.User;
 import com.example.seniorproject.smartshopping.model.dao.UserMap;
@@ -20,6 +22,7 @@ import com.example.seniorproject.smartshopping.model.manager.GroupManager;
 import com.example.seniorproject.smartshopping.model.manager.UserManager;
 import com.example.seniorproject.smartshopping.view.adapter.GroupAdapter;
 import com.example.seniorproject.smartshopping.view.adapter.UserAdapter;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -28,6 +31,10 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 
 public class SelectGroupFragment extends Fragment {
@@ -47,6 +54,9 @@ public class SelectGroupFragment extends Fragment {
     private GroupManager gm;
     private GroupAdapter groupAdapter;
     private MutableInteger lastPositionInteger;
+
+    private FirebaseFirestore db;
+    private CollectionReference cGroup;
 
 
 
@@ -71,6 +81,9 @@ public class SelectGroupFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         init(savedInstanceState);
+
+        db = FirebaseFirestore.getInstance();
+        cGroup = db.collection("groups");
 
         if (savedInstanceState != null)
             onRestoreInstanceState(savedInstanceState);
@@ -101,7 +114,6 @@ public class SelectGroupFragment extends Fragment {
         listView = (ListView) rootView.findViewById(R.id.listViewGroup);
         groupAdapter.setGroups(gm.getGroups());
         listView.setAdapter(groupAdapter);
-        Log.d("tag: ", gm.getGroup(0).getGroup().getName());
 
         listView.setOnItemClickListener(getCurrentGroupListener);
         groupAdapter.notifyDataSetChanged();
@@ -148,12 +160,29 @@ public class SelectGroupFragment extends Fragment {
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
 
-            GroupMap currentGroup = gm.getGroup(position);
-            gm.setCurrentGroup(currentGroup);
-            SaveCurrentGroupListener saveCurrentGroupListener =
-                    (SaveCurrentGroupListener) getActivity();
+            String groupId = gm.getGroup(position).getId();
+            cGroup.document(groupId).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                @Override
+                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                    if(documentSnapshot.exists()){
+                        Group group = documentSnapshot.toObject(Group.class);
+                        String groupId = documentSnapshot.getId();
+                        GroupMap currentGroup = new GroupMap(groupId, group);
 
-            saveCurrentGroupListener.saveCurrentGroup();
+                        gm.setCurrentGroup(currentGroup);
+
+                        SaveCurrentGroupListener saveCurrentGroupListener =
+                                (SaveCurrentGroupListener) getActivity();
+
+                        saveCurrentGroupListener.saveCurrentGroup();
+
+                        Toast.makeText(getContext(), "Welcome to " + group.getName(), Toast.LENGTH_SHORT).show();
+                    }
+                    else{
+                        Toast.makeText(getContext(), "Please select group again", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
         }
     };
 

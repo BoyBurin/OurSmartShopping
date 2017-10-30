@@ -24,11 +24,11 @@ public class MoreShoppingListItemOptimizeFragment extends Fragment {
     /***********************************************************************************************
      ************************************* Variable class ********************************************
      ***********************************************************************************************/
-    interface OptimizePriceListener{
+    interface OptimizePriceListener {
         void startOptimizePrice();
     }
 
-    interface OptimizeTimeListener{
+    interface OptimizeTimeListener {
         void startOptimizeTime();
     }
 
@@ -38,7 +38,6 @@ public class MoreShoppingListItemOptimizeFragment extends Fragment {
     private Button optimizeTime;
 
     private DatabaseReference mDatabaseRef;
-
 
 
     /***********************************************************************************************
@@ -101,12 +100,10 @@ public class MoreShoppingListItemOptimizeFragment extends Fragment {
                         "moreShoppingListItemOptimizePriceFragment")
                 .add(R.id.containerMoreShoppingListOptimize, moreShoppingListItemOptimizeTimeFragment,
                         "moreShoppingListItemOptimizeTimeFragment")
-                .hide(moreShoppingListItemOptimizePriceFragment)
-                .hide(moreShoppingListItemOptimizeTimeFragment)
+                .detach(moreShoppingListItemOptimizePriceFragment)
+                .detach(moreShoppingListItemOptimizeTimeFragment)
                 .commit();
 
-
-        //optimizePrice.setOnClickListener();
     }
 
     @Override
@@ -153,8 +150,8 @@ public class MoreShoppingListItemOptimizeFragment extends Fragment {
                             .findFragmentByTag("moreShoppingListItemOptimizeTimeFragment");
 
             getChildFragmentManager().beginTransaction()
-                    .hide(moreShoppingListItemOptimizeTimeFragment)
-                    .show(moreShoppingListItemOptimizePriceFragment)
+                    .detach(moreShoppingListItemOptimizeTimeFragment)
+                    .attach(moreShoppingListItemOptimizePriceFragment)
                     .commit();
 
             moreShoppingListItemOptimizePriceFragment.startOptimizePrice();
@@ -174,16 +171,14 @@ public class MoreShoppingListItemOptimizeFragment extends Fragment {
                             .findFragmentByTag("moreShoppingListItemOptimizeTimeFragment");
 
             getChildFragmentManager().beginTransaction()
-                    .hide(moreShoppingListItemOptimizePriceFragment)
-                    .show(moreShoppingListItemOptimizeTimeFragment)
+                    .detach(moreShoppingListItemOptimizePriceFragment)
+                    .attach(moreShoppingListItemOptimizeTimeFragment)
                     .commit();
 
             moreShoppingListItemOptimizeTimeFragment.startOptimizeTime();
 
         }
     };
-
-
 
 
     /***********************************************************************************************

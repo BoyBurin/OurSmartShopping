@@ -1,48 +1,35 @@
-package com.example.seniorproject.smartshopping.controller.fragment.settingfragment;
+package com.example.seniorproject.smartshopping.controller.fragment.inventoryfragment;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 
 import com.example.seniorproject.smartshopping.R;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 
-public class SettingFragment extends Fragment {
+public class MoreItemInventoryAlarmFragment extends Fragment {
 
     /***********************************************************************************************
      ************************************* Variable class ********************************************
      ***********************************************************************************************/
-    public interface SignOutListener{
-        void signOut();
-    }
-
-    public interface GroupSetting{
-        void goToGroupSetting();
-    }
 
 
-    private Button logout;
-    private Button btnGroups;
 
 
     /***********************************************************************************************
      ************************************* Method class ********************************************
      ***********************************************************************************************/
 
-    public SettingFragment() {
+    public MoreItemInventoryAlarmFragment() {
         super();
     }
 
     @SuppressWarnings("unused")
-    public static SettingFragment newInstance() {
-        SettingFragment fragment = new SettingFragment();
+    public static MoreItemInventoryAlarmFragment newInstance() {
+        MoreItemInventoryAlarmFragment fragment = new MoreItemInventoryAlarmFragment();
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
@@ -60,7 +47,7 @@ public class SettingFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_main_setting, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         initInstances(rootView, savedInstanceState);
         return rootView;
     }
@@ -72,11 +59,7 @@ public class SettingFragment extends Fragment {
 
     @SuppressWarnings("UnusedParameters")
     private void initInstances(View rootView, Bundle savedInstanceState) {
-        logout = (Button)rootView.findViewById(R.id.btnLogout);
-        btnGroups = (Button) rootView.findViewById(R.id.btnGroups);
-
-        logout.setOnClickListener(logoutListener);
-        btnGroups.setOnClickListener(groupSettingListener);
+        // Init 'View' instance(s) with rootView.findViewById here
     }
 
     @Override
@@ -109,28 +92,6 @@ public class SettingFragment extends Fragment {
     /***********************************************************************************************
      ************************************* Listener variables ********************************************
      ***********************************************************************************************/
-
-    final View.OnClickListener logoutListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-            if(user != null){
-                FirebaseAuth.getInstance().signOut();
-
-                SignOutListener signOutListener = (SignOutListener) getActivity();
-                signOutListener.signOut();
-
-            }
-        }
-    };
-
-    final View.OnClickListener groupSettingListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            GroupSetting groupSetting = (GroupSetting) getActivity();
-            groupSetting.goToGroupSetting();
-        }
-    };
 
 
     /***********************************************************************************************

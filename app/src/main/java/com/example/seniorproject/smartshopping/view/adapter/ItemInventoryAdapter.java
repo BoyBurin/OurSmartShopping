@@ -75,7 +75,7 @@ public class ItemInventoryAdapter extends BaseAdapter{
         ItemInventory itemInventory = (ItemInventory) getItem(position);
         item.setNameText(itemInventory.getName());
         item.setImageUrl(itemInventory.getPhotoUrl());
-        item.setRemainder(itemInventory.getRemindItem().getSoft(), itemInventory.getRemindItem().getHard(),
+        item.setRemainder(itemInventory.getSoft(), itemInventory.getHard(),
                 itemInventory.getAmount());
         lastPositionInteger.setValue(position);
 

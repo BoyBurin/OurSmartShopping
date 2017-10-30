@@ -24,6 +24,11 @@ public class ShoppingListMap implements Parcelable{
 
     }
 
+    public ShoppingListMap(String id, ShoppingList shoppingList){
+        this.id = id;
+        this.shoppingList = shoppingList;
+    }
+
 
     public String getId() {
         return id;

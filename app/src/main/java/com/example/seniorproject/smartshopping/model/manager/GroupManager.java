@@ -3,10 +3,12 @@ package com.example.seniorproject.smartshopping.model.manager;
 import android.content.Context;
 
 import com.example.seniorproject.smartshopping.model.dao.Group;
+import com.example.seniorproject.smartshopping.model.dao.GroupList;
 import com.example.seniorproject.smartshopping.model.dao.GroupMap;
 import com.example.seniorproject.smartshopping.model.dao.ShoppingList;
 import com.example.seniorproject.smartshopping.model.dao.ShoppingListMap;
 import com.example.seniorproject.smartshopping.model.dao.User;
+import com.example.seniorproject.smartshopping.superuser.ProductList;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
@@ -20,7 +22,7 @@ public class GroupManager {
      *******************************************************************************************/
 
     private static GroupManager instance;
-    private ArrayList<GroupMap> groups;
+    private ArrayList<GroupList> groups;
     private GroupMap currentGroup;
 
     /******************************************************************************************
@@ -39,10 +41,10 @@ public class GroupManager {
     private GroupManager() {
 
         mContext = Contextor.getInstance().getContext();
-        groups = new ArrayList<GroupMap>();
+        groups = new ArrayList<GroupList>();
     }
 
-    public GroupMap getGroup(int index) {
+    public GroupList getGroup(int index) {
 
         return groups.get(index);
     }
@@ -52,7 +54,7 @@ public class GroupManager {
         return groups.size();
     }
 
-    public void addGroup(GroupMap group){
+    public void addGroup(GroupList group){
         groups.add(group);
     }
 
@@ -64,17 +66,22 @@ public class GroupManager {
         this.currentGroup = currentGroup;
     }
 
-    public ArrayList<Group> getGroups(){
-        ArrayList<Group> groups = new ArrayList<Group>();
-        for(GroupMap groupMap : this.groups){
-            groups.add(groupMap.getGroup());
-        }
+    public ArrayList<GroupList> getGroups(){
         return groups;
     }
 
     public void reset(){
-        groups = new ArrayList<GroupMap>();
+        groups = new ArrayList<GroupList>();
         currentGroup = null;
+    }
+
+    public boolean isContain(GroupList newGroup){
+        for(GroupList groupList : groups){
+            if(groupList.getId().equals(newGroup.getId())){
+                return true;
+            }
+        }
+        return false;
     }
 
 }

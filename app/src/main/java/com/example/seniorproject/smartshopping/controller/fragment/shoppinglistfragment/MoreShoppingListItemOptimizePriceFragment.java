@@ -1,6 +1,7 @@
 package com.example.seniorproject.smartshopping.controller.fragment.shoppinglistfragment;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -11,24 +12,41 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.seniorproject.smartshopping.R;
+import com.example.seniorproject.smartshopping.model.dao.Group;
 import com.example.seniorproject.smartshopping.model.dao.ItemInventory;
 import com.example.seniorproject.smartshopping.model.dao.ItemInventoryMap;
 import com.example.seniorproject.smartshopping.model.dao.ItemShoppingList;
 import com.example.seniorproject.smartshopping.model.dao.ProductCrowd;
 import com.example.seniorproject.smartshopping.model.dao.ShoppingListMap;
+import com.example.seniorproject.smartshopping.model.dao.Store;
 import com.example.seniorproject.smartshopping.model.datatype.MutableInteger;
+import com.example.seniorproject.smartshopping.model.manager.GroupManager;
 import com.example.seniorproject.smartshopping.model.manager.ItemShoppingListManager;
 import com.example.seniorproject.smartshopping.model.manager.ProductCrowdManager;
 import com.example.seniorproject.smartshopping.model.util.GenerateSubSet;
+import com.example.seniorproject.smartshopping.superuser.ProductList;
 import com.example.seniorproject.smartshopping.view.adapter.ItemOptimizeAdapter;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.Transaction;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class MoreShoppingListItemOptimizePriceFragment extends Fragment implements
@@ -52,9 +70,9 @@ public class MoreShoppingListItemOptimizePriceFragment extends Fragment implemen
     private TextView tvSavePrice;
     private ListView listView;
 
-    private DatabaseReference mDatabaseRef;
-
-    private ArrayList<ProductCrowd> productCrowdArrayList;
+    private FirebaseFirestore db;
+    private CollectionReference cItemsShoppingList;
+    private CollectionReference cProductList;
 
 
     /***********************************************************************************************
@@ -94,20 +112,17 @@ public class MoreShoppingListItemOptimizePriceFragment extends Fragment implemen
     }
 
     private void init(Bundle savedInstanceState) {
-        productCrowdManager = new ProductCrowdManager();
         lastPositionInteger = new MutableInteger(-1);
         itemOptimizeAdapter = new ItemOptimizeAdapter(lastPositionInteger);
-        itemShoppingListManager = new ItemShoppingListManager();
-        mDatabaseRef = FirebaseDatabase.getInstance().getReference();
-        productCrowdArrayList = new ArrayList<ProductCrowd>();
-        mDatabaseRef.child("iteminshoppinglist").child(shoppingListMap.getId())
-                .addChildEventListener(updateItemShoppingListListener);
-        mDatabaseRef.child("storelist")
-                .addValueEventListener(getStoreListener);
 
-        stores = new ArrayList<String>();
+        db = FirebaseFirestore.getInstance();
+        cProductList = db.collection("productlist");
+        cItemsShoppingList = db.collection("groups").document(GroupManager.getInstance().getCurrentGroup().getId())
+                .collection("shoppinglists").document(shoppingListMap.getId())
+                .collection("items");
 
-        retailPrice = new ArrayList<Double>();
+
+        setStores();
 
     }
 
@@ -131,6 +146,8 @@ public class MoreShoppingListItemOptimizePriceFragment extends Fragment implemen
     @Override
     public void onStop() {
         super.onStop();
+
+
     }
 
     /*
@@ -150,157 +167,153 @@ public class MoreShoppingListItemOptimizePriceFragment extends Fragment implemen
         // Restore Instance State here
     }
 
+    private void setStores(){
+        stores = new ArrayList<String>();
+        stores.add("Big C Bangpakok");
+        stores.add("Max Value Pracha Uthit");
+        stores.add("Tesco Lotus Bangpakok");
+        stores.add("Tesco Lotus ตลาดโลตัสประชาอุทิศ");
+    }
+
+
+    final void doTransaction(){
+        db.runTransaction(new Transaction.Function<Map<String, Object>>() {
+            @Override
+            public Map<String, Object> apply(Transaction transaction) throws FirebaseFirestoreException {
+
+                Map<String, Object> data = bathReadProductListData(transaction);
+                batchWriteProductListData(transaction);
+                return data;
+            }
+        }).addOnSuccessListener(new OnSuccessListener<Map<String, Object>>() {
+            @Override
+            public void onSuccess(Map<String, Object> data) {
+                Log.d("TAG", "Transaction success!");
+
+                ArrayList<ProductCrowd> productCrowds = (ArrayList<ProductCrowd>) data.get("productStore");
+                ArrayList<Double> retailPrices = (ArrayList<Double>) data.get("retailPrice");
+
+                for(ProductCrowd productStore : productCrowds){
+                    productCrowdManager.addProductCrowd(productStore);
+                }
+
+                for(Double retail : retailPrices){
+                    retailPrice.add(retail);
+                }
+
+                optimizePrice();
+            }
+        })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w("TAG", "Transaction failure.", e);
+                    }
+                });
+    }
+
+    private Map<String, Object> bathReadProductListData(Transaction transaction) throws FirebaseFirestoreException {
+
+        ArrayList<ProductCrowd> productStores = new ArrayList<ProductCrowd>();
+
+        for(String store : stores) {
+
+            CollectionReference cProductStore = db.collection("stores").document(store)
+                    .collection("products");
+
+            for(ItemShoppingList itemShoppingList : itemShoppingListManager.getItemShoppingLists()) {
+                String barcodeId = itemShoppingList.getBarcodeId();
+                ProductCrowd productStore = transaction.get(cProductStore.document(barcodeId)).toObject(ProductCrowd.class);
+                productStores.add(productStore);
+            }
+        }
+
+        ArrayList<Double> retailPrices = new ArrayList<Double>();
+
+        for(ItemShoppingList itemShoppingList : itemShoppingListManager.getItemShoppingLists()){
+            String barcodeId = itemShoppingList.getBarcodeId();
+            double retail = transaction.get(db.collection("productlist").document(barcodeId)).getDouble("retailprice");
+            retailPrices.add(retail);
+        }
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("productStore", productStores);
+        data.put("retailPrice", retailPrices);
+
+        return data;
+    }
+
+    private void batchWriteProductListData(Transaction transaction){
+        for(String store : stores) {
+
+            CollectionReference cProductStore = db.collection("stores").document(store)
+                    .collection("products");
+
+            for(ItemShoppingList itemShoppingList : itemShoppingListManager.getItemShoppingLists()) {
+                String barcodeId = itemShoppingList.getBarcodeId();
+                Map<String, Object> update = new HashMap<>();
+                update.put("name", itemShoppingList.getName());
+                transaction.update(cProductStore.document(barcodeId), update);
+            }
+        }
+
+
+        for(ItemShoppingList itemShoppingList : itemShoppingListManager.getItemShoppingLists()){
+            String barcodeId = itemShoppingList.getBarcodeId();
+            Map<String, Object> update = new HashMap<>();
+            update.put("barcodeId", barcodeId);
+            transaction.update(db.collection("productlist").document(barcodeId), update);
+        }
+    }
+
+
+
     /***********************************************************************************************
      ************************************* Listener variables ********************************************
      ***********************************************************************************************/
 
-    final ChildEventListener updateItemShoppingListListener = new ChildEventListener() {
+
+
+    final OnCompleteListener<QuerySnapshot> getItemShoppingList = new OnCompleteListener<QuerySnapshot>() {
         @Override
-        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-            final String itemInventoryID = dataSnapshot.getKey();
-            final Long amount = dataSnapshot.getValue(Long.class);
-
-            mDatabaseRef.child("iteminventory").child(itemInventoryID)
-                    .addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            ItemInventory itemInventory = dataSnapshot.getValue(ItemInventory.class);
-                            final String itemName = itemInventory.getName();
-                            ItemInventoryMap itemInventoryMap = new ItemInventoryMap(itemInventoryID, itemInventory);
-                            final ItemShoppingList itemShoppingList = new ItemShoppingList(amount, itemInventoryMap);
-
-
-                            itemShoppingListManager.addItemShoppingList(itemShoppingList);
-
-                            mDatabaseRef.child("productlist").child(itemShoppingList.getItemInventoryMap().getItemInventory().getBarcodeId())
-                                    .addListenerForSingleValueEvent(new ValueEventListener() {
-                                        @Override
-                                        public void onDataChange(DataSnapshot dataSnapshot) {
-                                            retailPrice.add(dataSnapshot.child("retailprice").getValue(Double.class));
-                                        }
-
-                                        @Override
-                                        public void onCancelled(DatabaseError databaseError) {
-
-                                        }
-                                    });
-
-                            mDatabaseRef.child("storelist")
-                                    .addListenerForSingleValueEvent(new ValueEventListener() {
-                                        @Override
-                                        public void onDataChange(DataSnapshot dataSnapshot) {
-                                            for (DataSnapshot data : dataSnapshot.getChildren()) {
-                                                String storeKey = data.getKey();
-                                                final String storeName = data.child("name").getValue(String.class);
-
-                                                Log.d("tag: ", storeKey + "   " + storeName);
-
-                                                final String itemName = itemShoppingList.getItemInventoryMap().getItemInventory().getName();
-                                                final String itemBarcode = itemShoppingList.getItemInventoryMap().getItemInventory().getBarcodeId();
-                                                Log.d("tag: ", itemName + "   " + itemBarcode);
-
-                                                mDatabaseRef.child("productinstore").child(storeKey)
-                                                        .addListenerForSingleValueEvent(new ValueEventListener() {
-                                                            @Override
-                                                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                                                for (DataSnapshot data : dataSnapshot.getChildren()) {
-                                                                    String key = "" + data.child("barcode").getValue(Long.class);
-                                                                    double price = data.child("price").getValue(Double.class);
-                                                                    if (!itemBarcode.equals(key)) {
-                                                                        continue;
-                                                                    }
-                                                                    ProductCrowd productCrowd = new ProductCrowd(itemName, price, storeName);
-                                                                    productCrowdManager.addProductCrowd(productCrowd);
-
-                                                                }
-
-                                                            }
-
-                                                            @Override
-                                                            public void onCancelled(DatabaseError databaseError) {
-                                                                Log.d("tag: ", "Finish");
-
-                                                            }
-                                                        });
-
-                                            }
-                                        }
-
-                                        @Override
-                                        public void onCancelled(DatabaseError databaseError) {
-
-                                        }
-                                    });
-
-                        }
-
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-
-                        }
-                    });
-        }
-
-        @Override
-        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-        }
-
-        @Override
-        public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            String itemInventoryID = dataSnapshot.getKey();
-            int index = itemShoppingListManager.getIndexByKey(itemInventoryID);
-
-            for (int i = 0; i < productCrowdManager.getProductCrowds().size(); i++) {
-                ProductCrowd productCrowd = productCrowdManager.getProductCrowds().get(i);
-
-                String nameItem = itemShoppingListManager.getItemShoppingLists()
-                        .get(index).getItemInventoryMap().getItemInventory().getName();
-
-                if (productCrowd.getName().equals(nameItem)) {
-                    productCrowdManager.getProductCrowds().remove(i);
+        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+            if(task.isSuccessful()){
+                for(DocumentSnapshot documentSnapshot : task.getResult()){
+                    itemShoppingListManager.addItemShoppingList(documentSnapshot.toObject(ItemShoppingList.class));
                 }
+                doTransaction();
+
             }
-
-            itemShoppingListManager.getItemShoppingLists().remove(index);
-
-
-        }
-
-        @Override
-        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-        }
-
-        @Override
-        public void onCancelled(DatabaseError databaseError) {
-
+            else{
+                Log.d("TAG", "Error to get Shopping List Item");
+            }
         }
     };
 
-    final ValueEventListener getStoreListener = new ValueEventListener() {
-        @Override
-        public void onDataChange(DataSnapshot dataSnapshot) {
-            for (DataSnapshot data : dataSnapshot.getChildren()) {
-                stores.add(data.child("name").getValue(String.class));
-            }
-        }
-
-        @Override
-        public void onCancelled(DatabaseError databaseError) {
-
-        }
-    };
 
 
     /***********************************************************************************************
      ************************************* Implementation ********************************************
      ***********************************************************************************************/
 
-
     @Override
     public void startOptimizePrice() {
+
+        itemShoppingListManager = new ItemShoppingListManager();
+        productCrowdManager = new ProductCrowdManager();
+        retailPrice = new ArrayList<Double>();
+        itemOptimizeAdapter.setItemShoppingLists(productCrowdManager.getProductCrowds());
+        itemOptimizeAdapter.notifyDataSetChanged();
+
+        if(tvSavePrice != null || tvSavePrice != null){
+            tvTotalPrice.setVisibility(View.GONE);
+            tvSavePrice.setVisibility(View.GONE);
+        }
+
+        cItemsShoppingList.get().addOnCompleteListener(getItemShoppingList);
+    }
+
+    private void optimizePrice() {
         Log.d("Tag", "Hello Price");
 
         ProductCrowdManager optimizeProductCrowd = new ProductCrowdManager();

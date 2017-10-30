@@ -43,15 +43,20 @@ public class ItemShoppingListManager {
         return itemShoppingLists;
     }
 
-    public int getIndexByKey(String key){
+    private int getIndexByKey(String key){
         int index = -1;
         for(int i = 0 ; i < getSize() ; i++){
-            if(key.equals(itemShoppingLists.get(i).getItemInventoryMap().getId())){
+            if(key.equals(itemShoppingLists.get(i).getBarcodeId())){
                 index = i;
                 return index;
             }
         }
         return index;
+    }
+
+    public void removeItemShoppingList(String barcode){
+        int index = getIndexByKey(barcode);
+        itemShoppingLists.remove(index);
     }
 
 

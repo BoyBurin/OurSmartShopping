@@ -1,83 +1,91 @@
-package com.example.seniorproject.smartshopping.controller.fragment.dialogfragment;
+package com.example.seniorproject.smartshopping.controller.fragment.settingfragment;
 
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.seniorproject.smartshopping.R;
-import com.example.seniorproject.smartshopping.model.dao.ShoppingList;
+import com.example.seniorproject.smartshopping.model.dao.Group;
+import com.example.seniorproject.smartshopping.model.dao.GroupList;
 import com.example.seniorproject.smartshopping.model.manager.GroupManager;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.WriteBatch;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 
-public class FragmentDialogAddShoppingList extends DialogFragment {
+public class CreatedGroupFragment extends Fragment {
 
     /***********************************************************************************************
      ************************************* Variable class ********************************************
      ***********************************************************************************************/
 
-    public interface DeleteAddShoppingListDialog{
-        void delete();
+    public interface GroupSettingCancel{
+        void cancel();
     }
-    public interface PickImageShoppingListDialog{
+
+    public interface GroupSettingAdded{
+        void add();
+    }
+
+    public interface PickImage{
         void pickImage();
     }
 
-    private EditText edtListName;
-    private EditText edtListDescribe;
+    private EditText edtGroupName;
+    private EditText edtGroupDescribe;
     private Button btnUploadImage;
-    private TextView tvURI;
     private Button btnCancel;
     private Button btnAdd;
+    private TextView tvURI;
 
-    private StorageReference mShoopingListStorageRef;
+    private StorageReference mGroupStorageRef;
     private FirebaseFirestore db;
-    private CollectionReference cShoppingLists;
+    private CollectionReference cGroups;
+    private CollectionReference cGroupUser;
+    private FirebaseUser user;
+    private DatabaseReference generateId;
 
     private Uri selectedImageUri;
 
     public static final int RC_PHOTO_PICKER =  2;
 
 
+
+
     /***********************************************************************************************
      ************************************* Method class ********************************************
      ***********************************************************************************************/
 
-    public FragmentDialogAddShoppingList() {
+    public CreatedGroupFragment() {
         super();
     }
 
     @SuppressWarnings("unused")
-    public static FragmentDialogAddShoppingList newInstance() {
-        FragmentDialogAddShoppingList fragment = new FragmentDialogAddShoppingList();
+    public static CreatedGroupFragment newInstance() {
+        CreatedGroupFragment fragment = new CreatedGroupFragment();
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
@@ -95,68 +103,42 @@ public class FragmentDialogAddShoppingList extends DialogFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_dialog_add_shopping_list, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_create_group, container, false);
         initInstances(rootView, savedInstanceState);
         return rootView;
     }
 
     private void init(Bundle savedInstanceState) {
-        // Init Fragment level's variable(s) here
-        mShoopingListStorageRef = FirebaseStorage.getInstance().getReference().child("shoppinglist");
+
+        generateId = FirebaseDatabase.getInstance().getReference();
+        mGroupStorageRef = FirebaseStorage.getInstance().getReference().child("groups");
 
         db = FirebaseFirestore.getInstance();
-        cShoppingLists = db.collection("groups").document(GroupManager.getInstance().getCurrentGroup().getId())
-                .collection("shoppinglists");
+        cGroups = db.collection("groups");
+
+        user = FirebaseAuth.getInstance().getCurrentUser();
+        if(user != null) {
+            cGroupUser = db.collection("users").document(user.getUid()).collection("groups");
+        }
+        else{
+            Toast.makeText(getContext(), "Cannot find User", Toast.LENGTH_SHORT).show();
+        }
 
     }
 
     @SuppressWarnings("UnusedParameters")
     private void initInstances(View rootView, Bundle savedInstanceState) {
-        // Init 'View' instance(s) with rootView.findViewById here
-        edtListName = (EditText) rootView.findViewById(R.id.edtListName);
-        edtListDescribe = (EditText) rootView.findViewById(R.id.edtListDescribe);
+
+        edtGroupName = (EditText) rootView.findViewById(R.id.edtGroupName);
+        edtGroupDescribe = (EditText) rootView.findViewById(R.id.edtGroupDescribe);
         btnUploadImage = (Button) rootView.findViewById(R.id.btnUploadImage);
         tvURI = (TextView) rootView.findViewById(R.id.tvURI);
         btnCancel = (Button) rootView.findViewById(R.id.btnCancel);
         btnAdd = (Button) rootView.findViewById(R.id.btnAdd);
 
-        btnCancel.setOnClickListener(cancelDialogListener);
+        btnCancel.setOnClickListener(cancelListener);
         btnUploadImage.setOnClickListener(uploadImageListener);
-        btnAdd.setOnClickListener(addDialogListener);
-    }
-
-    private void hideKeyboard(){
-        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(getActivity().INPUT_METHOD_SERVICE);
-        //Find the currently focused view, so we can grab the correct window token from it.
-        View view = getActivity().getCurrentFocus();
-        //If no view currently has focus, create a new one, just so we can grab a window token from it
-        if (view == null) {
-            view = new View(getActivity());
-        }
-        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        Uri selectedImageUri = data.getData();
-        this.selectedImageUri = selectedImageUri;
-        tvURI.setText(selectedImageUri.getLastPathSegment());
-        tvURI.setVisibility(View.VISIBLE);
-
-    }
-
-    private void closeDialog(){
-        DeleteAddShoppingListDialog deleteAddShoppingListDialog =
-                (DeleteAddShoppingListDialog) getActivity();
-        deleteAddShoppingListDialog.delete();
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        hideKeyboard();
+        btnAdd.setOnClickListener(createGroupListener);
     }
 
     @Override
@@ -186,49 +168,83 @@ public class FragmentDialogAddShoppingList extends DialogFragment {
         // Restore Instance State here
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        Uri selectedImageUri = data.getData();
+        this.selectedImageUri = selectedImageUri;
+        tvURI.setText(selectedImageUri.getLastPathSegment());
+        tvURI.setVisibility(View.VISIBLE);
+
+    }
+
+
     /***********************************************************************************************
      ************************************* Listener variables ********************************************
      ***********************************************************************************************/
 
-    final View.OnClickListener cancelDialogListener = new View.OnClickListener() {
+    final View.OnClickListener cancelListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            closeDialog();
+
+            GroupSettingCancel groupSettingCancel = (GroupSettingCancel) getActivity();
+            groupSettingCancel.cancel();
         }
     };
 
     final View.OnClickListener uploadImageListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            PickImageShoppingListDialog pickImageShoppingListDialog =
-                    (PickImageShoppingListDialog) getActivity();
+            PickImage pickImage =
+                    (PickImage) getActivity();
 
-            pickImageShoppingListDialog.pickImage();
+            pickImage.pickImage();
 
         }
     };
 
-    private void addShoppingListToDatabase(String downloadUrl){
+    private void addGroupToDatabase(String downloadUrl){
 
-        ShoppingList newShoppingList = new ShoppingList();
-        newShoppingList.setName(edtListName.getText().toString());
-        newShoppingList.setDescript(edtListDescribe.getText().toString());
-        newShoppingList.setPhotoURL(downloadUrl.toString());
+        String groupId = generateId.push().getKey().toString();
+        String name = edtGroupName.getText().toString();
+        String photoUrl = downloadUrl.toString();
+        String quote = edtGroupDescribe.getText().toString();
+        String token = name + groupId.substring(1,5);
 
-        cShoppingLists.add(newShoppingList).addOnSuccessListener(addShoppingListSuccess).addOnFailureListener(addShoppingListFailed);
+        final GroupList groupList = new GroupList(groupId, name, photoUrl);
+        Group group = new Group();
+        group.setName(name);
+        group.setPhotoUrl(photoUrl);
+        group.setQuote(quote);
+        group.setToken(token);
 
-        Toast.makeText(getActivity(), "Add Shooping List " + newShoppingList.getName() + " Success", Toast.LENGTH_SHORT).show();
-        closeDialog();
+        WriteBatch batch = db.batch();
+
+        batch.set(cGroups.document(groupId), group);
+        batch.set(cGroupUser.document(groupId), groupList);
+
+        batch.commit().addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                Toast.makeText(getActivity(), "Create Group Success", Toast.LENGTH_SHORT).show();
+
+                GroupSettingAdded groupSettingAdded = (GroupSettingAdded) getActivity();
+                groupSettingAdded.add();
+            }
+        });
+
+
     }
 
-    final View.OnClickListener addDialogListener = new View.OnClickListener() {
+    final View.OnClickListener createGroupListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
             if(selectedImageUri != null){
-                StorageReference photRef = mShoopingListStorageRef.child(selectedImageUri.getLastPathSegment());
+                StorageReference photRef = mGroupStorageRef.child(selectedImageUri.getLastPathSegment());
                 photRef.putFile(selectedImageUri).addOnSuccessListener(uploadSuccessListener).addOnFailureListener(uploadFailed);
             } else{
-                addShoppingListToDatabase("");
+                addGroupToDatabase("");
             }
         }
     };
@@ -239,7 +255,7 @@ public class FragmentDialogAddShoppingList extends DialogFragment {
         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
             Log.d("Tag", "Success");
             Uri downloadUrl = taskSnapshot.getDownloadUrl();
-            addShoppingListToDatabase(downloadUrl.toString());
+            addGroupToDatabase(downloadUrl.toString());
 
         }
     };
@@ -265,10 +281,6 @@ public class FragmentDialogAddShoppingList extends DialogFragment {
             Toast.makeText(getActivity(), "Add Shooping List Failed", Toast.LENGTH_SHORT).show();
         }
     };
-
-
-
-
 
 
     /***********************************************************************************************
