@@ -1,4 +1,4 @@
-package com.example.seniorproject.smartshopping.view.adapter.group;
+package com.example.seniorproject.smartshopping.view.recyclerviewadapter;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.View;

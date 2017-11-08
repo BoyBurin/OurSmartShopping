@@ -26,7 +26,7 @@ import com.example.seniorproject.smartshopping.model.manager.group.GroupWatingMa
 import com.example.seniorproject.smartshopping.model.manager.iteminventory.ItemInventoryManager;
 import com.example.seniorproject.smartshopping.model.manager.shoppinglist.ShoppingListManager;
 import com.example.seniorproject.smartshopping.view.adapter.group.GroupSettingAdapter;
-import com.example.seniorproject.smartshopping.view.adapter.group.GroupWatingAdapter;
+import com.example.seniorproject.smartshopping.view.recyclerviewadapter.GroupWatingAdapter;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;

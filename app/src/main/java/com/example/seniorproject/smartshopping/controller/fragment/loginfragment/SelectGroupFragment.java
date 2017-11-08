@@ -3,6 +3,8 @@ package com.example.seniorproject.smartshopping.controller.fragment.loginfragmen
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,17 +14,20 @@ import android.widget.Toast;
 
 import com.example.seniorproject.smartshopping.R;
 import com.example.seniorproject.smartshopping.model.dao.group.Group;
+import com.example.seniorproject.smartshopping.model.dao.group.GroupList;
 import com.example.seniorproject.smartshopping.model.dao.group.GroupMap;
 import com.example.seniorproject.smartshopping.model.datatype.MutableInteger;
 import com.example.seniorproject.smartshopping.model.manager.group.GroupManager;
 import com.example.seniorproject.smartshopping.view.adapter.group.GroupAdapter;
+import com.example.seniorproject.smartshopping.view.recyclerviewadapter.SelectedGroupAdapter;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 
-public class SelectGroupFragment extends Fragment {
+public class SelectGroupFragment extends Fragment implements SelectedGroupAdapter.OnItemClickListener{
+
 
     /***********************************************************************************************
      ************************************* Variable class ********************************************
@@ -37,8 +42,10 @@ public class SelectGroupFragment extends Fragment {
 
     private ListView listView;
     private GroupManager gm;
-    private GroupAdapter groupAdapter;
-    private MutableInteger lastPositionInteger;
+    private RecyclerView recyclerView;
+    private SelectedGroupAdapter selectedGroupAdapter;
+    //private GroupAdapter groupAdapter;
+    //private MutableInteger lastPositionInteger;
 
     private FirebaseFirestore db;
     private CollectionReference cGroup;
@@ -88,20 +95,23 @@ public class SelectGroupFragment extends Fragment {
     }
 
     private void init(Bundle savedInstanceState) {
-        lastPositionInteger = new MutableInteger(-1);
-        groupAdapter = new GroupAdapter(lastPositionInteger);
         gm = GroupManager.getInstance();
+        selectedGroupAdapter = new SelectedGroupAdapter(getContext());
 
     }
 
     @SuppressWarnings("UnusedParameters")
     private void initInstances(View rootView, Bundle savedInstanceState) {
         listView = (ListView) rootView.findViewById(R.id.listViewGroup);
-        groupAdapter.setGroups(gm.getGroups());
-        listView.setAdapter(groupAdapter);
+        recyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false));
 
-        listView.setOnItemClickListener(getCurrentGroupListener);
-        groupAdapter.notifyDataSetChanged();
+        selectedGroupAdapter.setGroups(gm.getGroups());
+        selectedGroupAdapter.setItemClickListener(this);
+        recyclerView.setAdapter(selectedGroupAdapter);
+        selectedGroupAdapter.notifyDataSetChanged();
+
+
     }
 
     @Override
@@ -141,7 +151,7 @@ public class SelectGroupFragment extends Fragment {
      ************************************* Listener variables ********************************************
      ***********************************************************************************************/
 
-    final AdapterView.OnItemClickListener getCurrentGroupListener = new AdapterView.OnItemClickListener() {
+    /*final AdapterView.OnItemClickListener getCurrentGroupListener = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
 
@@ -169,11 +179,42 @@ public class SelectGroupFragment extends Fragment {
                 }
             });
         }
-    };
+    };*/
 
 
     /***********************************************************************************************
      ************************************* Inner class ********************************************
      ***********************************************************************************************/
+
+
+    /***********************************************************************************************
+     ************************************* Implementation ********************************************
+     ***********************************************************************************************/
+    @Override
+    public void onItemClick(GroupList group) {
+        String groupId = group.getId();
+        cGroup.document(groupId).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                if(documentSnapshot.exists()){
+                    Group group = documentSnapshot.toObject(Group.class);
+                    String groupId = documentSnapshot.getId();
+                    GroupMap currentGroup = new GroupMap(groupId, group);
+
+                    gm.setCurrentGroup(currentGroup);
+
+                    SaveCurrentGroupListener saveCurrentGroupListener =
+                            (SaveCurrentGroupListener) getActivity();
+
+                    saveCurrentGroupListener.saveCurrentGroup();
+
+                    Toast.makeText(getContext(), "Welcome to " + group.getName(), Toast.LENGTH_SHORT).show();
+                }
+                else{
+                    Toast.makeText(getContext(), "Please select group again", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
 
 }

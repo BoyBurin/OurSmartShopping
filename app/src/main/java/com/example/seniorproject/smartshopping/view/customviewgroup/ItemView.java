@@ -5,7 +5,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -13,7 +12,6 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.seniorproject.smartshopping.R;
 import com.example.seniorproject.smartshopping.view.state.BundleSavedState;
-import com.example.seniorproject.smartshopping.view.transformation.CircleTransform;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
@@ -59,7 +57,7 @@ public class ItemView extends BaseCustomViewGroup {
     }
 
     private void initInflate() {
-        inflate(getContext(), R.layout.item_view, this);
+        inflate(getContext(), R.layout.custom_view_group_item_view, this);
     }
 
     private void initInstances() {

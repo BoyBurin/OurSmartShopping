@@ -21,4 +21,7 @@
     <color name="brown">#715143</color>
 
     <!-- ...............................................  -->
+    
+    <color name="deep_orange">#FF5722</color>
+    <color name="white">#FFFFFF</color>
 </resources>
