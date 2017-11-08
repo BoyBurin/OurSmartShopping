@@ -10,7 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.seniorproject.smartshopping.R;
-import com.example.seniorproject.smartshopping.model.dao.ItemInventoryMap;
+import com.example.seniorproject.smartshopping.model.dao.iteminventory.ItemInventoryMap;
 import com.example.seniorproject.smartshopping.view.specialview.SlidingTabLayout;
 
 

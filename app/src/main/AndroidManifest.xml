@@ -9,14 +9,14 @@
     <application
         android:name=".MainApplication"
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/icon_app"
         android:label="SmartShopping"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/icon_app"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
             android:name=".controller.activity.LoginActivity"
-            android:label="Smart Shopping"
+            android:label="ถูกจังเลย"
             android:theme="@style/AppThemeWithNoActionBar"
             android:windowSoftInputMode="adjustResize|stateHidden">
             <intent-filter>
@@ -27,20 +27,29 @@
         </activity>
         <activity
             android:name=".controller.activity.MainActivity"
-            android:windowSoftInputMode="adjustResize|stateHidden"/>
+            android:theme="@style/AppThemeWithNoActionBar"
+            android:windowSoftInputMode="adjustResize|stateHidden" />
         <activity
             android:name=".controller.activity.MoreItemInventoryActivity"
+            android:theme="@style/BrownTheme"
             android:windowSoftInputMode="adjustResize|stateHidden" />
-        <activity android:name=".controller.activity.MoreShoppingListItemActivity" />
+        <activity
+            android:name=".controller.activity.MoreShoppingListItemActivity"
+            android:theme="@style/BrownTheme" />
+
         <activity android:name=".superuser.SuperUserItemActivity" />
         <activity
             android:name=".controller.activity.OCRActivity"
-            android:theme="@style/AppThemeWithNoActionBar" />
+            android:theme="@style/BrownTheme" />
         <activity
             android:name=".controller.activity.MoreGroupSettingActivity"
             android:windowSoftInputMode="adjustResize|stateHidden"
-            />
-        <receiver android:name=".controller.boardcastreceiver.AlarmReceiver"/>
+            android:theme="@style/BrownTheme"/>
+
+        <receiver android:name=".controller.boardcastreceiver.AlarmReceiver" />
+        <activity
+            android:name=".controller.activity.MoreBuyItemManuallyActivity"
+            android:theme="@style/BrownTheme" />
     </application>
 
 </manifest>

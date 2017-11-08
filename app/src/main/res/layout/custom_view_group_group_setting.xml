@@ -36,9 +36,7 @@
             android:ellipsize="end"
             android:gravity="center"
             android:maxLines="2"
-            android:text="My Name is Burin"
-            android:textColor="@android:color/black"
-            android:textSize="12sp" />
+            android:text="My Name is Burin" />
 
 
     </RelativeLayout>

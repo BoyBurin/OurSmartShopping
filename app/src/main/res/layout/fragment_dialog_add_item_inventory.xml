@@ -14,6 +14,7 @@
         android:layout_height="150dp" />
 
     <TextView
+        android:layout_marginTop="@dimen/activity_vertical_margin"
         android:id="@+id/tvName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -21,6 +22,63 @@
         android:textColor="@android:color/black"
         android:layout_below="@+id/imgItem"
         android:textColorHint="@color/dark_grey" />
+
+    <RadioGroup
+        android:id="@+id/rg"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
+        android:layout_below="@+id/tvName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checkedButton="@+id/rp"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+    <RadioButton
+        android:id="@+id/rIncrease"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:text="Increase" />
+
+    <RadioButton
+        android:id="@+id/rDecrease"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:text="Decrease" />
+
+    </RadioGroup>
+
+    <LinearLayout
+        android:id="@+id/groupUpdateAmount"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
+        android:layout_below="@+id/rg"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+
+        <EditText
+            android:id="@+id/edtNumber"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@color/cardview_shadow_end_color"
+            android:inputType="number"
+            android:text="1"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:visibility="gone" />
+
+
+        <TextView
+            android:id="@+id/tvUnit"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:freezesText="true"
+            android:text="Unit"
+            android:visibility="gone"/>
+    </LinearLayout>
 
     <EditText
         android:id="@+id/edtAmount"
@@ -112,6 +170,44 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"/>
+
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
+        android:layout_below="@+id/groupUpdateAmount"
+        android:orientation="horizontal">
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            />
+
+        <Button
+            android:id="@+id/btnCancel2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="36dp"
+            android:text="@string/add_shopping_list_cancel_button"
+            android:visibility="gone"/>
+
+        <Button
+            android:id="@+id/btnAdd2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/add_shopping_list_add_button"
+            android:visibility="gone"/>
+        <View
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"/>
+
+
 
     </LinearLayout>
 

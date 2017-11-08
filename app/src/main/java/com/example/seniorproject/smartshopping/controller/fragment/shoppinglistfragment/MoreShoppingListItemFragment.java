@@ -10,7 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.seniorproject.smartshopping.R;
-import com.example.seniorproject.smartshopping.model.dao.ShoppingListMap;
+import com.example.seniorproject.smartshopping.model.dao.shoppinglist.ShoppingListMap;
 import com.example.seniorproject.smartshopping.view.specialview.SlidingTabLayout;
 
 

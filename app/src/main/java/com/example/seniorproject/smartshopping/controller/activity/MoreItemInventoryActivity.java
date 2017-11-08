@@ -1,5 +1,7 @@
 package com.example.seniorproject.smartshopping.controller.activity;
 
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -9,8 +11,8 @@ import android.view.MenuItem;
 
 import com.example.seniorproject.smartshopping.R;
 import com.example.seniorproject.smartshopping.controller.fragment.inventoryfragment.MoreItemInventoryFragment;
-import com.example.seniorproject.smartshopping.model.dao.ItemInventoryMap;
-import com.example.seniorproject.smartshopping.model.manager.GroupManager;
+import com.example.seniorproject.smartshopping.model.dao.iteminventory.ItemInventoryMap;
+import com.example.seniorproject.smartshopping.model.manager.group.GroupManager;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentReference;
@@ -59,6 +61,7 @@ public class MoreItemInventoryActivity extends AppCompatActivity {
             setTitle(itemInventoryMap.getItemInventory().getName().toString());
             getSupportActionBar().setHomeButtonEnabled(true);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            //getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.parseColor("#A1887F")));
 
             db = FirebaseFirestore.getInstance();
             dItem = db.collection("groups").document(GroupManager.getInstance().getCurrentGroup().getId())

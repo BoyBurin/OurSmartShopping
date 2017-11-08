@@ -1,8 +1,7 @@
 package com.example.seniorproject.smartshopping.model.ocrtools;
 
-import com.example.seniorproject.smartshopping.model.dao.ItemInventory;
-import com.example.seniorproject.smartshopping.model.dao.ItemInventoryMap;
-import com.example.seniorproject.smartshopping.model.manager.ItemInventoryManager;
+import com.example.seniorproject.smartshopping.model.dao.iteminventory.ItemInventoryMap;
+import com.example.seniorproject.smartshopping.model.manager.iteminventory.ItemInventoryManager;
 
 import java.io.File;
 import java.io.FileNotFoundException;

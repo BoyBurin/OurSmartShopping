@@ -31,27 +31,30 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.seniorproject.smartshopping.model.dao.ItemInventory;
-import com.example.seniorproject.smartshopping.model.dao.ItemInventoryMap;
-import com.example.seniorproject.smartshopping.model.dao.ItemOCR;
+import com.example.seniorproject.smartshopping.model.dao.iteminventory.ItemInventory;
+import com.example.seniorproject.smartshopping.model.dao.iteminventory.ItemInventoryMap;
+import com.example.seniorproject.smartshopping.model.dao.itemocr.ItemOCR;
+import com.example.seniorproject.smartshopping.model.dao.productstore.ProductCrowd;
 import com.example.seniorproject.smartshopping.model.datatype.MutableInteger;
-import com.example.seniorproject.smartshopping.model.manager.GroupManager;
-import com.example.seniorproject.smartshopping.model.manager.ItemInventoryManager;
-import com.example.seniorproject.smartshopping.model.manager.ItemOCRManager;
+import com.example.seniorproject.smartshopping.model.manager.group.GroupManager;
+import com.example.seniorproject.smartshopping.model.manager.itemocr.ItemOCRManager;
 import com.example.seniorproject.smartshopping.model.ocrtools.LevenshteinDistance;
 import com.example.seniorproject.smartshopping.model.util.PermissionUtils;
-import com.example.seniorproject.smartshopping.view.adapter.ItemOCRAdapter;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
+import com.example.seniorproject.smartshopping.view.adapter.itemocr.ItemOCRAdapter;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.HttpTransport;
@@ -71,12 +74,17 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.example.seniorproject.smartshopping.R;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.Transaction;
 
 public class OCRActivity extends AppCompatActivity {
     private static final String CLOUD_VISION_API_KEY = "AIzaSyCFC2KKqZoQ5lIWyNp00bh3wDoO4p_z7xY";
@@ -90,6 +98,8 @@ public class OCRActivity extends AppCompatActivity {
 
     private TextView mImageDetails;
     private ImageView mMainImage;
+    private Spinner spinner;
+
     private long startTimeMS;
     private float uploadDurationSec;
 
@@ -97,22 +107,36 @@ public class OCRActivity extends AppCompatActivity {
     private ItemOCRManager itemOCRManager;
     private ItemOCRAdapter itemOCRAdapter;
     private MutableInteger lastPositionInteger;
+
+    private FloatingActionButton fab;
     private ListView listView;
     private TextView tvTotalPrice;
     private Button btnSaveOCR;
+    private TextView storeName;
     private ProgressBar progressBarOCR;
 
     private DatabaseReference mDatabaseRef;
+    private FirebaseFirestore db;
 
+    private ArrayAdapter<String> adapter;
+    private String currentStore;
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            finish();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ocr);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -143,8 +167,13 @@ public class OCRActivity extends AppCompatActivity {
 
     }
 
+
     private void init() {
+        getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setTitle(GroupManager.getInstance().getCurrentGroup().getGroup().getName());
+
+        db = FirebaseFirestore.getInstance();
 
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
         lastPositionInteger = new MutableInteger(-1);
@@ -153,6 +182,13 @@ public class OCRActivity extends AppCompatActivity {
         tvTotalPrice = (TextView) findViewById(R.id.tvTotalPrice);
         btnSaveOCR = (Button) findViewById(R.id.btnSaveOCR);
         progressBarOCR = (ProgressBar) findViewById(R.id.progressBarOCR);
+        spinner = (Spinner) findViewById(R.id.spinner);
+        storeName = (TextView) findViewById(R.id.store_name);
+
+        currentStore = "Big C Bangpakok";
+        String[] stores = {"Big C Bangpakok", "Max Value Pracha Uthit", "Tesco Lotus Bangpakok", "Tesco Lotus ตลาดโลตัสประชาอุทิศ"};
+        adapter = new ArrayAdapter<String>(getApplicationContext(),  android.R.layout.simple_spinner_item, stores);
+        //adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         tvTotalPrice.setVisibility(View.GONE);
         btnSaveOCR.setOnClickListener(saveInfoListener);
@@ -173,6 +209,9 @@ public class OCRActivity extends AppCompatActivity {
         listView.setAdapter(itemOCRAdapter);
 
         itemOCRAdapter.notifyDataSetChanged();
+
+        spinner.setAdapter(adapter);
+        spinner.setOnItemSelectedListener(storeSelectedLister);
     }
 
     public void startGalleryChooser() {
@@ -376,7 +415,12 @@ public class OCRActivity extends AppCompatActivity {
                 tvTotalPrice.setText("Total:    " + totalPrice + "   บาท");
 
 
+                btnSaveOCR.setVisibility(View.VISIBLE);
+                storeName.setVisibility(View.VISIBLE);
+                storeName.setText(currentStore);
+                spinner.setVisibility(View.GONE);
                 mImageDetails.setVisibility(View.GONE);
+                fab.setVisibility(View.GONE);
 
 
 
@@ -495,7 +539,73 @@ public class OCRActivity extends AppCompatActivity {
         @Override
         public void onClick(View view) {
             progressBarOCR.setVisibility(View.VISIBLE);
-            for (int i = 0; i < itemOCRManager.getItemOCRs().size(); i++) {
+
+            db.runTransaction(new Transaction.Function<Void>() {
+                @Override
+                public Void apply(Transaction transaction) throws FirebaseFirestoreException {
+                    CollectionReference storeRef = db.collection("stores").document(currentStore)
+                            .collection("products");
+                    CollectionReference itemRef = db.collection("groups").document(GroupManager.getInstance().getCurrentGroup().getId())
+                            .collection("items");
+
+                    long[]amountSet = new long[itemOCRManager.getItemOCRs().size()];
+                    double[]priceSet = new double[itemOCRManager.getItemOCRs().size()];
+
+                    for (int i = 0; i < itemOCRManager.getItemOCRs().size(); i++) {
+                        ItemOCR itemOCR = itemOCRManager.getItemOCRs().get(i);
+                        priceSet[i] = itemOCR.getPrice();
+                        amountSet[i] = itemOCR.getAmount();
+                    }
+
+                    ArrayList<ProductCrowd> products = new ArrayList<ProductCrowd>();
+                    for (int i = 0; i < itemOCRManager.getItemOCRs().size(); i++) {
+                        String itemInventoryID = itemOCRManager.getItemOCRs().get(i).getItemInventoryMap().getId();
+                        ProductCrowd newData = transaction.get(storeRef.document(itemInventoryID)).toObject(ProductCrowd.class);
+                        products.add(newData);
+                    }
+
+                    ArrayList<ItemInventory> itemInventories = new ArrayList<ItemInventory>();
+                    double[]updateAmount = new double[itemOCRManager.getItemOCRs().size()];
+                    for (int i = 0; i < itemOCRManager.getItemOCRs().size(); i++) {
+                        String itemInventoryID = itemOCRManager.getItemOCRs().get(i).getItemInventoryMap().getId();
+                        ItemInventory newData = transaction.get(itemRef.document(itemInventoryID)).toObject(ItemInventory.class);
+                        itemInventories.add(newData);
+                        updateAmount[i] = newData.getAmount() + amountSet[i];
+                    }
+
+                    for (int i = 0; i < itemOCRManager.getItemOCRs().size(); i++) {
+                        String itemInventoryID = itemOCRManager.getItemOCRs().get(i).getItemInventoryMap().getId();
+                        Map<String, Object> update = new HashMap<>();
+                        update.put("price", priceSet[i]);
+                        transaction.update(storeRef.document(itemInventoryID), update);
+                    }
+
+                    for (int i = 0; i < itemOCRManager.getItemOCRs().size(); i++) {
+                        String itemInventoryID = itemOCRManager.getItemOCRs().get(i).getItemInventoryMap().getId();
+                        Map<String, Object> update = new HashMap<>();
+                        update.put("amount", updateAmount[i]);
+                        transaction.update(itemRef.document(itemInventoryID), update);
+                    }
+
+                    return null;
+                }
+            }).addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    progressBarOCR.setVisibility(View.GONE);
+                    Log.d(TAG, "Transaction success!");
+                    Toast.makeText(OCRActivity.this, "Save Successful", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+            })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.w(TAG, "Transaction failure.", e);
+                        }
+                    });
+
+           /* for (int i = 0; i < itemOCRManager.getItemOCRs().size(); i++) {
                 ItemOCR itemOCR = itemOCRManager.getItemOCRs().get(i);
                 ItemInventory itemInventory = itemOCR.getItemInventoryMap().getItemInventory();
                 String itemInventoryID = itemOCR.getItemInventoryMap().getId();
@@ -515,7 +625,32 @@ public class OCRActivity extends AppCompatActivity {
                 });
             }
             Toast.makeText(OCRActivity.this, "Update Item Inventory Success", Toast.LENGTH_SHORT).show();
-            finish();
+            finish();*/
+        }
+    };
+
+    final AdapterView.OnItemSelectedListener storeSelectedLister = new AdapterView.OnItemSelectedListener() {
+        @Override
+        public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
+            switch (position){
+                case 0:
+                    currentStore = "Big C Bangpakok";
+                    break;
+                case 1:
+                    currentStore = "Max Value Pracha Uthit";
+                    break;
+                case 2:
+                    currentStore = "Tesco Lotus Bangpakok";
+                    break;
+                case 3:
+                    currentStore = "Tesco Lotus ตลาดโลตัสประชาอุทิศ";
+                    break;
+            }
+        }
+
+        @Override
+        public void onNothingSelected(AdapterView<?> adapterView) {
+
         }
     };
 

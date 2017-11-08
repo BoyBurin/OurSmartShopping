@@ -10,9 +10,11 @@
 
     <style name="AppThemeWithNoActionBar" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorPrimary">@color/action_bar</item>
+        <item name="colorPrimaryDark">@color/dark_action_bar</item>
+        <item name="android:textColor">@color/brown</item>
+        <item name="android:navigationBarColor">@color/navigation_dark_action_bar</item>
+        <item name="android:textSize">18sp</item>
     </style>
 
     <!-- Login  -->
@@ -21,15 +23,23 @@
         <item name="android:textColor">@android:color/white</item>
     </style>
 
+    <style name="BrownTheme" parent="Theme.AppCompat.Light.DarkActionBar" >
+        <item name="colorPrimary">@color/action_bar</item>
+        <item name="colorPrimaryDark">@color/dark_action_bar</item>
+        <item name="android:textColor">@color/brown</item>
+        <item name="android:navigationBarColor">@color/navigation_dark_action_bar</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+
+
     <!-- ...............................................  -->
 
     <!--Main Shopping list  -->
 
     <style name="FAB">
-        <item name="android:layout_margin">0dp</item>
         <item name="fabSize">normal</item>
         <item name="rippleColor">@android:color/white</item>
-        <item name="backgroundTint">@color/primary</item>
+        <item name="backgroundTint">@color/brown</item>
     </style>
 
     <!-- ...............................................  -->

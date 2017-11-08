@@ -1,6 +1,6 @@
 package com.example.seniorproject.smartshopping.model.util;
 
-import com.example.seniorproject.smartshopping.model.dao.ProductCrowd;
+import com.example.seniorproject.smartshopping.model.dao.productstore.ProductCrowd;
 
 import java.util.ArrayList;
 import java.util.List;

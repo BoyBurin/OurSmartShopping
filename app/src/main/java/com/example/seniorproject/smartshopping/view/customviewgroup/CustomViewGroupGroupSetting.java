@@ -57,7 +57,7 @@ public class CustomViewGroupGroupSetting extends BaseCustomViewGroup {
     }
 
     private void initInflate() {
-        inflate(getContext(), R.layout.item_view, this);
+        inflate(getContext(), R.layout.custom_view_group_group_setting, this);
     }
 
     private void initInstances() {
@@ -128,7 +128,7 @@ public class CustomViewGroupGroupSetting extends BaseCustomViewGroup {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int width = MeasureSpec.getSize(widthMeasureSpec); // width is pixel
-        int height = width;
+        int height = width + (width / 4);
         int newHeightMeasureSpec = MeasureSpec.makeMeasureSpec(
                 height,
                 MeasureSpec.EXACTLY

@@ -18,13 +18,6 @@
             android:layout_height="match_parent"
             android:scaleType="fitXY" />
 
-        <ImageView
-            android:id="@+id/ivRoundGreen"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:background="@drawable/shape_round_green"
-            android:visibility="gone" />
 
         <ImageView
             android:id="@+id/ivRoundYellow"
@@ -60,8 +53,7 @@
             android:gravity="center"
             android:maxLines="2"
             android:text="My Name is Burin"
-            android:textColor="@android:color/black"
-            android:textSize="12sp" />
+            android:textColor="@color/brown" />
 
 
     </RelativeLayout>

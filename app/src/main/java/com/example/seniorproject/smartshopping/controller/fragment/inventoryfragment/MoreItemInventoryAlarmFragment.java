@@ -13,20 +13,19 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import com.example.seniorproject.smartshopping.R;
 import com.example.seniorproject.smartshopping.controller.boardcastreceiver.AlarmReceiver;
 import com.example.seniorproject.smartshopping.controller.fragment.dialogfragment.DialogAddAlarmFragment;
-import com.example.seniorproject.smartshopping.model.dao.ItemInventoryMap;
+import com.example.seniorproject.smartshopping.model.dao.iteminventory.ItemInventoryMap;
 import com.example.seniorproject.smartshopping.model.dao.alarm.ItemAlarm;
 import com.example.seniorproject.smartshopping.model.dao.alarm.ItemAlarmIdAction;
 import com.example.seniorproject.smartshopping.model.datatype.MutableInteger;
-import com.example.seniorproject.smartshopping.model.manager.GroupManager;
-import com.example.seniorproject.smartshopping.model.manager.ItemAlarmIdListenerManager;
-import com.example.seniorproject.smartshopping.view.adapter.ItemAlarmAdapter;
+import com.example.seniorproject.smartshopping.model.manager.group.GroupManager;
+import com.example.seniorproject.smartshopping.model.manager.iteminventory.ItemAlarmIdListenerManager;
+import com.example.seniorproject.smartshopping.view.adapter.iteminventory.ItemAlarmAdapter;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.CollectionReference;
@@ -38,7 +37,6 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 
 
@@ -243,7 +241,7 @@ public class MoreItemInventoryAlarmFragment extends Fragment {
                         }
                         calendar.set(Calendar.DAY_OF_WEEK, dayNum);
 
-                        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),
+                        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, itemAlarm.getTimeInMillis(),
                                 3000, alarmIntent);
 
 

@@ -4,7 +4,6 @@ package com.example.seniorproject.smartshopping.controller.fragment.inventoryfra
  * Created by thamm on 9/9/2560.
  */
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
@@ -14,25 +13,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
-import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.example.seniorproject.smartshopping.R;
-import com.example.seniorproject.smartshopping.model.dao.ItemInventory;
-import com.example.seniorproject.smartshopping.model.dao.ItemInventoryMap;
+import com.example.seniorproject.smartshopping.model.dao.iteminventory.ItemInventory;
+import com.example.seniorproject.smartshopping.model.dao.iteminventory.ItemInventoryMap;
 import com.example.seniorproject.smartshopping.model.datatype.MutableInteger;
-import com.example.seniorproject.smartshopping.model.manager.GroupManager;
-import com.example.seniorproject.smartshopping.model.manager.ItemInventoryManager;
-import com.example.seniorproject.smartshopping.model.manager.ItemShoppingListManager;
-import com.example.seniorproject.smartshopping.view.adapter.ItemInventoryAdapter;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import com.example.seniorproject.smartshopping.model.manager.group.GroupManager;
+import com.example.seniorproject.smartshopping.model.manager.iteminventory.ItemInventoryManager;
+import com.example.seniorproject.smartshopping.view.adapter.iteminventory.ItemInventoryAdapter;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -41,8 +30,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
-
-import java.util.HashMap;
 
 public class InventoryFragment extends Fragment{
     /***********************************************************************************************
@@ -212,6 +199,7 @@ public class InventoryFragment extends Fragment{
 
                         //Update
                         itemMap.setItemInventory(update);
+                        gm.sortItem();
                         itemInventoryAdapter.setItemInventories(gm.getItemInventories());
                         itemInventoryAdapter.notifyDataSetChanged();
 

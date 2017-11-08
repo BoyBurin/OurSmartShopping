@@ -2,12 +2,15 @@ package com.example.seniorproject.smartshopping.view.customviewgroup;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.text.InputType;
 import android.util.AttributeSet;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -16,13 +19,13 @@ import com.example.seniorproject.smartshopping.view.state.BundleSavedState;
 
 public class CustomViewGroupEditText extends BaseCustomViewGroup {
 
-    private TextView tvCustomViewGroupEditText;
+    private ImageView customViewGroupImageView;
     private EditText edTextCustomViewGroupEditText;
 
 
-    public void setTextView(String text) {
+    public void setImage(Drawable drawable) {
 
-        this.tvCustomViewGroupEditText.setText(text);
+        this.customViewGroupImageView.setBackground(drawable);
     }
 
     public void setHintEditText(String text){
@@ -84,7 +87,7 @@ public class CustomViewGroupEditText extends BaseCustomViewGroup {
 
     private void initInstances() {
 
-        tvCustomViewGroupEditText = (TextView) findViewById(R.id.tvCustomViewGroupEditText);
+        customViewGroupImageView = (ImageView) findViewById(R.id.customViewGroupImageView);
         edTextCustomViewGroupEditText = (EditText) findViewById(R.id.edTextCustomViewGroupEditText);
 
     }

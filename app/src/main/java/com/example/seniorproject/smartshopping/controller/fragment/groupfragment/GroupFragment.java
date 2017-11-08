@@ -3,24 +3,32 @@ package com.example.seniorproject.smartshopping.controller.fragment.groupfragmen
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
 import com.example.seniorproject.smartshopping.R;
-import com.example.seniorproject.smartshopping.model.dao.User;
-import com.example.seniorproject.smartshopping.model.dao.UserMap;
+import com.example.seniorproject.smartshopping.model.dao.user.User;
+import com.example.seniorproject.smartshopping.model.dao.user.UserInGroup;
+import com.example.seniorproject.smartshopping.model.dao.user.UserInGroupMap;
+import com.example.seniorproject.smartshopping.model.dao.user.UserMap;
 import com.example.seniorproject.smartshopping.model.datatype.MutableInteger;
-import com.example.seniorproject.smartshopping.model.manager.GroupManager;
-import com.example.seniorproject.smartshopping.model.manager.UserManager;
-import com.example.seniorproject.smartshopping.view.adapter.UserAdapter;
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
+import com.example.seniorproject.smartshopping.model.manager.group.GroupManager;
+import com.example.seniorproject.smartshopping.model.manager.user.UserInGroupManager;
+import com.example.seniorproject.smartshopping.model.manager.user.UserManager;
+import com.example.seniorproject.smartshopping.view.adapter.user.UserAdapter;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.QuerySnapshot;
 
 
 public class GroupFragment extends Fragment {
@@ -30,11 +38,14 @@ public class GroupFragment extends Fragment {
      ***********************************************************************************************/
 
     private ListView listView;
-    private UserManager userManager;
+    private UserInGroupManager userInGroupManager;
     private UserAdapter userAdapter;
     private MutableInteger lastPositionInteger;
 
     private DatabaseReference mDatabaseRef;
+    private FirebaseFirestore db;
+    private CollectionReference cUser;
+    private ListenerRegistration cUserListener;
 
 
 
@@ -75,10 +86,13 @@ public class GroupFragment extends Fragment {
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
         lastPositionInteger = new MutableInteger(-1);
         userAdapter = new UserAdapter(lastPositionInteger);
-        userManager = new UserManager();
+        userInGroupManager = new UserInGroupManager();
 
-        mDatabaseRef.child("useringroup").child(GroupManager.getInstance().getCurrentGroup().getId())
-                .addChildEventListener(UserListener);
+        db = FirebaseFirestore.getInstance();
+
+        cUser = db.collection("groups").document(GroupManager.getInstance().getCurrentGroup().getId())
+        .collection("users");
+        cUserListener = cUser.addSnapshotListener(userListener);
 
 
     }
@@ -86,16 +100,17 @@ public class GroupFragment extends Fragment {
     @SuppressWarnings("UnusedParameters")
     private void initInstances(View rootView, Bundle savedInstanceState) {
         listView = (ListView) rootView.findViewById(R.id.listViewGroup);
-        userAdapter.setUsers(userManager.getUsers());
+        userAdapter.setUsers(userInGroupManager.getUsers());
         listView.setAdapter(userAdapter);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mDatabaseRef.child("useringroup")
-                .child(GroupManager.getInstance().getCurrentGroup().getId())
-                .removeEventListener(UserListener);
+        if(cUserListener != null){
+            cUserListener.remove();
+            cUserListener = null;
+        }
 
         /*mDatabaseRef.child("iteminventory")
                 .removeEventListener(itemUpdateListener);*/
@@ -132,7 +147,37 @@ public class GroupFragment extends Fragment {
      ************************************* Listener variables ********************************************
      ***********************************************************************************************/
 
-    final ChildEventListener UserListener = new ChildEventListener() {
+    final EventListener<QuerySnapshot> userListener = new EventListener<QuerySnapshot>() {
+        @Override
+        public void onEvent(QuerySnapshot documentSnapshots, FirebaseFirestoreException e) {
+            if (e != null) {
+                Log.w("TAG", "listen:error", e);
+                return;
+            }
+
+            for (DocumentChange dc : documentSnapshots.getDocumentChanges()) {
+                switch (dc.getType()) {
+                    case ADDED:
+                        DocumentSnapshot documentSnapshot = dc.getDocument();
+                        UserInGroup user = documentSnapshot.toObject(UserInGroup.class);
+                        UserInGroupMap userMap = new UserInGroupMap(documentSnapshot.getId(), user);
+                        userInGroupManager.addUser(userMap);
+                        userAdapter.setUsers(userInGroupManager.getUsers());
+                        userAdapter.notifyDataSetChanged();
+
+
+                        break;
+                    case MODIFIED:
+                        break;
+                    case REMOVED:
+
+                        break;
+                }
+            }
+        }
+    };
+
+    /*final ChildEventListener UserListener = new ChildEventListener() {
         @Override
         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
             final String userID = dataSnapshot.getKey();
@@ -173,7 +218,7 @@ public class GroupFragment extends Fragment {
         public void onCancelled(DatabaseError databaseError) {
 
         }
-    };
+    };*/
 
 
     /***********************************************************************************************

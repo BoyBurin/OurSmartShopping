@@ -10,8 +10,8 @@ import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 
 import com.example.seniorproject.smartshopping.R;
-import com.example.seniorproject.smartshopping.model.dao.ItemInventory;
-import com.example.seniorproject.smartshopping.model.manager.GroupManager;
+import com.example.seniorproject.smartshopping.model.dao.iteminventory.ItemInventory;
+import com.example.seniorproject.smartshopping.model.manager.group.GroupManager;
 
 /**
  * Created by boyburin on 10/30/2017 AD.

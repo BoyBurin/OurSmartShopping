@@ -35,4 +35,10 @@
 
     <string name="image_picker_error">Something is wrong with that image. Pick a different one please.</string>
 
+    <string name="shopping_expense">Shopping expense : 7000 baht</string>
+    <string name="saving_money">Saving : 1750 baht</string>
+
+    <string name="receipt_name"></string>
+    <string name="receipt_location"></string>
+
 </resources>

@@ -12,26 +12,27 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.seniorproject.smartshopping.R;
-import com.example.seniorproject.smartshopping.model.dao.ItemInventory;
-import com.example.seniorproject.smartshopping.model.manager.GroupManager;
+import com.example.seniorproject.smartshopping.model.dao.iteminventory.ItemInventory;
+import com.example.seniorproject.smartshopping.model.manager.group.GroupManager;
+import com.example.seniorproject.smartshopping.model.manager.iteminventory.ItemInventoryManager;
 import com.example.seniorproject.smartshopping.superuser.ProductList;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.Transaction;
 
 
 public class DialogAddItemInventoryFragment extends DialogFragment {
@@ -60,6 +61,11 @@ public class DialogAddItemInventoryFragment extends DialogFragment {
     private  Button btnScanBarcode;
     private Button btnCancel;
     private Button btnAdd;
+    private Button btnAdd2;
+    private Button btnCancel2;
+    private RadioGroup rg;
+    private TextView tvUnit;
+    private EditText edtNumber;
 
 
     private String photoUrl;
@@ -124,12 +130,22 @@ public class DialogAddItemInventoryFragment extends DialogFragment {
         btnScanBarcode = (Button) rootView.findViewById(R.id.btnScanBarcode);
         btnCancel = (Button) rootView.findViewById(R.id.btnCancel);
         btnAdd = (Button) rootView.findViewById(R.id.btnAdd);
+        tvUnit = (TextView) rootView.findViewById(R.id.tvUnit);
+        rg = (RadioGroup) rootView.findViewById(R.id.rg);
+        edtNumber = (EditText) rootView.findViewById(R.id.edtNumber);
+        btnAdd2 = (Button) rootView.findViewById(R.id.btnAdd2);
+        btnCancel2 = (Button) rootView.findViewById(R.id.btnCancel2);
+
 
         btnScanBarcode.setOnClickListener(addBarcodeListener);
 
         btnAdd.setOnClickListener(addItemInventory);
+        btnAdd2.setOnClickListener(updateItemListener);
 
         btnCancel.setOnClickListener(cancelDialogListener);
+        btnCancel2.setOnClickListener(cancelDialogListener);
+
+        rg.check(R.id.rIncrease);
     }
 
     @Override
@@ -174,9 +190,48 @@ public class DialogAddItemInventoryFragment extends DialogFragment {
         // Restore Instance State here
     }
 
+
     /***********************************************************************************************
      ************************************* Listener variables ********************************************
      ***********************************************************************************************/
+
+    final View.OnClickListener updateItemListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            db.runTransaction(new Transaction.Function<Void>() {
+                @Override
+                public Void apply(Transaction transaction) throws FirebaseFirestoreException {
+                    DocumentSnapshot snapshot = transaction.get(cItems.document(barcodeId));
+                    int mul;
+                    if(rg.getCheckedRadioButtonId() == R.id.rIncrease){
+                        mul = 1;
+                    }
+                    else{
+                        mul = -1;
+                    }
+                    long updateAmount = Long.parseLong(edtNumber.getText().toString());
+                    long newAmount = snapshot.getLong("amount") + (updateAmount * mul);
+                    transaction.update(cItems.document(barcodeId), "amount", newAmount);
+
+                    // Success
+                    return null;
+                }
+            }).addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    Log.d("TAG", "Transaction success!");
+                    Toast.makeText(getContext(), "Update amount Successful", Toast.LENGTH_SHORT).show();
+                    closeDialog();
+                }
+            })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.w("TAG", "Transaction failure.", e);
+                        }
+                    });
+        }
+    };
 
 
     final OnCompleteListener<QuerySnapshot> getProductList = new OnCompleteListener<QuerySnapshot>() {
@@ -198,12 +253,24 @@ public class DialogAddItemInventoryFragment extends DialogFragment {
                     photoUrl = productList.getPhotoUrl().toString();
                     unit = productList.getUnit();
 
-                    edtAmount.setVisibility(View.VISIBLE);
-                    edtSoft.setVisibility(View.VISIBLE);
-                    edtHard.setVisibility(View.VISIBLE);
-                    edtListDescribe.setVisibility(View.VISIBLE);
-                    btnCancel.setVisibility(View.VISIBLE);
-                    btnAdd.setVisibility(View.VISIBLE);
+                    ItemInventoryManager itemInventoryManager = ItemInventoryManager.getInstance();
+                    if(itemInventoryManager.isContain(barcodeId)){
+                        rg.setVisibility(View.VISIBLE);
+                        tvUnit.setVisibility(View.VISIBLE);
+                        edtNumber.setVisibility(View.VISIBLE);
+                        btnAdd2.setVisibility(View.VISIBLE);
+                        btnCancel2.setVisibility(View.VISIBLE);
+                        btnScanBarcode.setVisibility(View.GONE);
+
+                        tvUnit.setText(productList.getUnit());
+                    }else {
+                        edtAmount.setVisibility(View.VISIBLE);
+                        edtSoft.setVisibility(View.VISIBLE);
+                        edtHard.setVisibility(View.VISIBLE);
+                        edtListDescribe.setVisibility(View.VISIBLE);
+                        btnCancel.setVisibility(View.VISIBLE);
+                        btnAdd.setVisibility(View.VISIBLE);
+                    }
 
                 } else {
                     Toast.makeText(getContext(), "Item is not found", Toast.LENGTH_SHORT).show();
@@ -258,10 +325,18 @@ public class DialogAddItemInventoryFragment extends DialogFragment {
             ItemInventory item = new ItemInventory(name, amount, comment,
                     photoUrl, unit, barcodeId, hard, soft);
 
-            cItems.add(item);
-            Toast.makeText(getActivity(), "Add Item Success", Toast.LENGTH_SHORT).show();
-
-            closeDialog();
+            cItems.document(barcodeId).set(item).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if(task.isSuccessful()){
+                        Toast.makeText(getActivity(), "Add Item Success", Toast.LENGTH_SHORT).show();
+                        closeDialog();
+                    }
+                    else{
+                        Log.d("TAG", "Cannot add Item");
+                    }
+                }
+            });
 
         }
     };

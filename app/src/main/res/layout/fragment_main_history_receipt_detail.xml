@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:id="@+id/containerReceiptDetail"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1.5">
+
+        <TextView
+            android:id="@+id/receiptName"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/receipt_name"
+            />
+
+        <TextView
+            android:id="@+id/shpLocation"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/receiptName"
+            android:text="@string/receipt_location"
+            />
+
+
+
+
+    </RelativeLayout>
+
+
+</LinearLayout>

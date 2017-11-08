@@ -13,13 +13,10 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.example.seniorproject.smartshopping.R;
-import com.example.seniorproject.smartshopping.model.dao.ItemInventory;
-import com.example.seniorproject.smartshopping.model.dao.ItemInventoryMap;
-import com.example.seniorproject.smartshopping.model.manager.GroupManager;
+import com.example.seniorproject.smartshopping.model.dao.iteminventory.ItemInventoryMap;
+import com.example.seniorproject.smartshopping.model.manager.group.GroupManager;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.WriteBatch;
@@ -176,11 +173,12 @@ public class MoreItemInventoryEditFragment extends Fragment {
                         backgroundLoading.setVisibility(View.GONE);
                         btnSave.setVisibility(View.VISIBLE);
 
-                        clearText();
+                        //clearText();
+                        Toast.makeText(getActivity(), "Update Item Inventory Successful", Toast.LENGTH_SHORT).show();
                     }
                     else{
                         Toast.makeText(getActivity(), "Update Item Inventory Failed", Toast.LENGTH_SHORT).show();
-                        clearText();
+                        //clearText();
                     }
                 }
             });

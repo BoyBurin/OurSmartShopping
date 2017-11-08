@@ -13,35 +13,24 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.example.seniorproject.smartshopping.R;
-import com.example.seniorproject.smartshopping.model.dao.ItemInventory;
-import com.example.seniorproject.smartshopping.model.dao.ItemInventoryMap;
-import com.example.seniorproject.smartshopping.model.dao.ItemShoppingList;
-import com.example.seniorproject.smartshopping.model.dao.ShoppingListMap;
+import com.example.seniorproject.smartshopping.model.dao.shoppinglist.ItemShoppingList;
+import com.example.seniorproject.smartshopping.model.dao.shoppinglist.ShoppingListMap;
 import com.example.seniorproject.smartshopping.model.datatype.MutableInteger;
-import com.example.seniorproject.smartshopping.model.manager.GroupManager;
-import com.example.seniorproject.smartshopping.model.manager.ItemShoppingListManager;
-import com.example.seniorproject.smartshopping.view.adapter.ItemShoppingListAdapter;
+import com.example.seniorproject.smartshopping.model.manager.group.GroupManager;
+import com.example.seniorproject.smartshopping.model.manager.shoppinglist.ItemShoppingListManager;
+import com.example.seniorproject.smartshopping.view.adapter.shoppinglist.ItemShoppingListAdapter;
 import com.example.seniorproject.smartshopping.view.customviewgroup.CustomViewGroupShoppingListItemAdd;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentChange;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
-
-import java.util.ArrayList;
 
 
 public class MoreShoppingListItemUpdateFragment extends Fragment implements

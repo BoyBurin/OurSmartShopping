@@ -28,6 +28,7 @@
 
             </LinearLayout>
 
+
             <RelativeLayout
                 android:id="@+id/containerInventory"
                 android:layout_width="match_parent"
@@ -37,16 +38,29 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:weightSum="6">
+                    android:orientation="vertical"
+                    android:weightSum="3.0">
+
+                    <TextView
+                        android:id="@+id/shoppingExpense"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="@string/shopping_expense"
+                        />
+
+                    <TextView
+                        android:id="@+id/savingMoney"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="@string/saving_money"
+                        />
 
                     <ListView
                         android:id="@+id/list"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:scrollbars="none"
+                        android:scrollbars="none">
 
-                        >
 
                     </ListView>
 
@@ -56,6 +70,9 @@
             </RelativeLayout>
 
         </LinearLayout>
+
+
+
     </ScrollView>
 
 

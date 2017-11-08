@@ -12,15 +12,13 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.example.seniorproject.smartshopping.R;
-import com.example.seniorproject.smartshopping.model.dao.Group;
-import com.example.seniorproject.smartshopping.model.dao.User;
+import com.example.seniorproject.smartshopping.model.dao.group.Group;
+import com.example.seniorproject.smartshopping.model.dao.user.User;
 import com.example.seniorproject.smartshopping.view.customviewgroup.CustomViewGroupEditText;
-import com.example.seniorproject.smartshopping.view.customviewgroup.CustomViewGroupUser;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -96,10 +94,10 @@ public class CreateAccountFragment extends Fragment {
         customCreateGroup = (CustomViewGroupEditText) rootView.findViewById(R.id.customCreateGroup);
         btnCreateAccount = (Button) rootView.findViewById(R.id.btnCreateAccount);
 
-        customEmail.setTextView("Email");
+        /*customEmail.setTextView("Email");
         customUsername.setTextView("Username");
         customPassword.setTextView("Password");
-        customCreateGroup.setTextView("Group");
+        customCreateGroup.setTextView("Group");*/
         btnCreateAccount.setOnClickListener(saveInfo);
     }
 

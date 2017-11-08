@@ -25,7 +25,6 @@ public class ItemView extends BaseCustomViewGroup {
     TextView tvName;
     ImageView imgItem;
 
-    ImageView ivRoundGreen;
     ImageView ivRoundYellow;
     ImageView ivRoundRed;
 
@@ -68,7 +67,6 @@ public class ItemView extends BaseCustomViewGroup {
         tvName = (TextView) findViewById(R.id.tvName);
         imgItem = (ImageView) findViewById(R.id.imgItem);
 
-        ivRoundGreen = (ImageView) findViewById(R.id.ivRoundGreen);
         ivRoundYellow = (ImageView) findViewById(R.id.ivRoundYellow);
         ivRoundRed = (ImageView) findViewById(R.id.ivRoundRed);
     }
@@ -160,11 +158,10 @@ public class ItemView extends BaseCustomViewGroup {
     }
 
     public void setRemainder(long soft, long hard, long amount){
-        ivRoundGreen.setVisibility(GONE);
         ivRoundYellow.setVisibility(GONE);
         ivRoundRed.setVisibility(GONE);
         if(amount > soft){
-            ivRoundGreen.setVisibility(VISIBLE);
+            return;
         } else if(amount < hard){
             ivRoundRed.setVisibility(VISIBLE);
         } else{

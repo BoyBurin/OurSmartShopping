@@ -10,23 +10,16 @@ import android.widget.Toast;
 
 import com.example.seniorproject.smartshopping.R;
 import com.example.seniorproject.smartshopping.controller.fragment.shoppinglistfragment.MoreShoppingListItemFragment;
-import com.example.seniorproject.smartshopping.model.dao.ItemShoppingList;
-import com.example.seniorproject.smartshopping.model.dao.ShoppingListMap;
-import com.example.seniorproject.smartshopping.model.manager.GroupManager;
+import com.example.seniorproject.smartshopping.model.dao.shoppinglist.ShoppingListMap;
+import com.example.seniorproject.smartshopping.model.manager.group.GroupManager;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.firestore.Transaction;
 import com.google.firebase.firestore.WriteBatch;
-
-import java.util.ArrayList;
 
 public class MoreShoppingListItemActivity extends AppCompatActivity {
 

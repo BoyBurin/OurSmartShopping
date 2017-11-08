@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,33 +15,30 @@ import android.widget.GridView;
 import android.widget.Toast;
 
 import com.example.seniorproject.smartshopping.R;
-import com.example.seniorproject.smartshopping.model.dao.Group;
-import com.example.seniorproject.smartshopping.model.dao.GroupList;
-import com.example.seniorproject.smartshopping.model.dao.GroupMap;
+import com.example.seniorproject.smartshopping.model.dao.group.Group;
+import com.example.seniorproject.smartshopping.model.dao.group.GroupList;
+import com.example.seniorproject.smartshopping.model.dao.group.GroupMap;
+import com.example.seniorproject.smartshopping.model.dao.group.GroupWating;
+import com.example.seniorproject.smartshopping.model.dao.group.GroupWatingListener;
 import com.example.seniorproject.smartshopping.model.datatype.MutableInteger;
-import com.example.seniorproject.smartshopping.model.manager.GroupManager;
-import com.example.seniorproject.smartshopping.model.manager.ItemInventoryManager;
-import com.example.seniorproject.smartshopping.model.manager.ShoppingListManager;
-import com.example.seniorproject.smartshopping.superuser.ProductList;
-import com.example.seniorproject.smartshopping.view.adapter.GroupSettingAdapter;
+import com.example.seniorproject.smartshopping.model.manager.group.GroupManager;
+import com.example.seniorproject.smartshopping.model.manager.group.GroupWatingManager;
+import com.example.seniorproject.smartshopping.model.manager.iteminventory.ItemInventoryManager;
+import com.example.seniorproject.smartshopping.model.manager.shoppinglist.ShoppingListManager;
+import com.example.seniorproject.smartshopping.view.adapter.group.GroupSettingAdapter;
+import com.example.seniorproject.smartshopping.view.adapter.group.GroupWatingAdapter;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentChange;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.firestore.Transaction;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 
 public class GroupSettingFragment extends Fragment {
@@ -53,14 +52,21 @@ public class GroupSettingFragment extends Fragment {
     }
 
     private GridView gridView;
+    private RecyclerView recyclerView;
+    private RecyclerView.LayoutManager layoutManager;
+    private RecyclerView.Adapter adapter;
+
     private GroupSettingAdapter groupSettingAdapter;
     private MutableInteger lastPositionInteger;
+    private GroupWatingManager groupWatingManager;
 
 
     private FirebaseFirestore db;
     private CollectionReference cGroupUser;
     private CollectionReference cGroups;
     private ListenerRegistration cGroupUserListener;
+    private CollectionReference cGroupWating;
+    private ListenerRegistration cGroupWatingListener;
     private FirebaseUser user;
 
 
@@ -103,7 +109,10 @@ public class GroupSettingFragment extends Fragment {
 
         lastPositionInteger = new MutableInteger(-1);
         groupSettingAdapter = new GroupSettingAdapter(lastPositionInteger);
+        groupWatingManager = new GroupWatingManager();
 
+        layoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false);
+        adapter = new GroupWatingAdapter();
         db = FirebaseFirestore.getInstance();
 
         cGroups = db.collection("groups");
@@ -118,6 +127,12 @@ public class GroupSettingFragment extends Fragment {
 
         cGroupUserListener = cGroupUser.addSnapshotListener(groupListener);
 
+        cGroupWating = db.collection("users").document(user.getUid()).collection("groupwating");
+
+        cGroupWatingListener = cGroupWating.addSnapshotListener(groupWatingListener);
+
+
+
 
     }
 
@@ -126,6 +141,11 @@ public class GroupSettingFragment extends Fragment {
 
         gridView = (GridView) rootView.findViewById(R.id.gridView);
         gridView.setAdapter(groupSettingAdapter);
+        recyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerView);
+        //recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(layoutManager);
+
+        recyclerView.setAdapter(adapter);
 
         gridView.setOnItemClickListener(changeGroupListener);
 
@@ -168,11 +188,60 @@ public class GroupSettingFragment extends Fragment {
             cGroupUserListener.remove();
             cGroupUserListener = null;
         }
+
+        if(cGroupWatingListener != null){
+            cGroupWatingListener.remove();
+            cGroupWatingListener = null;
+        }
     }
 
     /***********************************************************************************************
      ************************************* Listener variables ********************************************
      ***********************************************************************************************/
+
+    private final EventListener<QuerySnapshot> groupWatingListener = new EventListener<QuerySnapshot>() {
+        @Override
+        public void onEvent(QuerySnapshot documentSnapshots, FirebaseFirestoreException e) {
+            if (e != null) {
+                Log.w("TAG", "listen:error", e);
+                return;
+            }
+
+
+
+            for (DocumentChange dc : documentSnapshots.getDocumentChanges()) {
+                switch (dc.getType()) {
+                    case ADDED:
+
+                        final GroupWating newGroup = dc.getDocument().toObject(GroupWating.class);
+                        View.OnClickListener deleteListener = new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                cGroupWating.document(newGroup.getId()).delete().addOnSuccessListener(deleteSuccess)
+                                        .addOnFailureListener(deleteFailed);
+                            }
+                        };
+                        GroupWatingListener groupWatingListener = new GroupWatingListener();
+                        groupWatingListener.setGroupWating(newGroup);
+                        groupWatingListener.setDeleteListener(deleteListener);
+
+                        groupWatingManager.addGroup(groupWatingListener);
+
+                        GroupWatingAdapter groupAdapter = (GroupWatingAdapter) adapter;
+                        groupAdapter.setGroup(groupWatingManager.getGroups());
+                        groupAdapter.notifyDataSetChanged();
+                        Log.d("TAG", "Added Waiting " );
+                        break;
+                    case MODIFIED:
+                        Log.d("TAG", "Modified Group: " + dc.getDocument().getData());
+                        break;
+                    case REMOVED:
+                        Log.d("TAG", "Removed Group: ");
+                        break;
+                }
+            }
+        }
+    };
 
     private final EventListener<QuerySnapshot> groupListener = new EventListener<QuerySnapshot>() {
         @Override
@@ -192,7 +261,7 @@ public class GroupSettingFragment extends Fragment {
                         if(!GroupManager.getInstance().isContain(newGroup)){
                             GroupManager.getInstance().addGroup(newGroup);
                         }
-                        groupSettingAdapter.setGroups(GroupManager.getInstance().getGroups());
+                        groupSettingAdapter.setGroups(GroupManager.getInstance().getGroupsWithoutCurrent());
                         groupSettingAdapter.notifyDataSetChanged();
                         Log.d("TAG", "Added " );
                         break;
@@ -200,6 +269,9 @@ public class GroupSettingFragment extends Fragment {
                         Log.d("TAG", "Modified Group: " + dc.getDocument().getData());
                         break;
                     case REMOVED:
+                        newGroup = dc.getDocument().toObject(GroupList.class);
+
+                        GroupManager.getInstance().deleteGroup(newGroup);
                         Log.d("TAG", "Removed Group: ");
                         break;
                 }
@@ -213,7 +285,7 @@ public class GroupSettingFragment extends Fragment {
 
             final GroupManager gm = GroupManager.getInstance();
             if(position < gm.getSize()){
-                GroupList currentGroup = gm.getGroup(position);
+                GroupList currentGroup = gm.getGroupWithoutCurrent(position);
 
                 cGroups.document(currentGroup.getId()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                     @Override
@@ -240,6 +312,22 @@ public class GroupSettingFragment extends Fragment {
                     }
                 });
             }
+        }
+    };
+
+
+    final OnSuccessListener<Void> deleteSuccess = new OnSuccessListener<Void>() {
+        @Override
+        public void onSuccess(Void aVoid) {
+            Toast.makeText(getContext(), "Delete Alarm Successful", Toast.LENGTH_SHORT).show();
+            Log.d("TAG"," successfully deleted!");
+        }
+    };
+
+    final OnFailureListener deleteFailed = new OnFailureListener() {
+        @Override
+        public void onFailure(@NonNull Exception e) {
+            Log.d("TAG", "Deleted Error " );
         }
     };
 

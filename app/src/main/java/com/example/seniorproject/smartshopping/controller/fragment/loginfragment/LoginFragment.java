@@ -1,6 +1,5 @@
 package com.example.seniorproject.smartshopping.controller.fragment.loginfragment;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -10,39 +9,23 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.example.seniorproject.smartshopping.R;
-import com.example.seniorproject.smartshopping.model.dao.Group;
-import com.example.seniorproject.smartshopping.model.dao.GroupList;
-import com.example.seniorproject.smartshopping.model.dao.GroupMap;
-import com.example.seniorproject.smartshopping.model.dao.User;
+import com.example.seniorproject.smartshopping.model.dao.group.GroupList;
 import com.example.seniorproject.smartshopping.model.manager.Contextor;
-import com.example.seniorproject.smartshopping.model.manager.GroupManager;
+import com.example.seniorproject.smartshopping.model.manager.group.GroupManager;
 import com.example.seniorproject.smartshopping.view.customviewgroup.CustomViewGroupEditText;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.UserProfileChangeRequest;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentChange;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
-
-import java.util.ArrayList;
 
 public class LoginFragment extends Fragment {
 
@@ -129,12 +112,12 @@ public class LoginFragment extends Fragment {
         customGroupUserName = (CustomViewGroupEditText) rootView.findViewById(R.id.customGroupUserName);
         customGroupPassword = (CustomViewGroupEditText) rootView.findViewById(R.id.customGroupPassword);
 
-        customGroupUserName.setTextView("Username");
+        customGroupUserName.setImage(getContext().getDrawable(R.drawable.user_login));
         customGroupUserName.setHintEditText("Username");
         customGroupUserName.setEditTextInputTypeToText();
 
         customGroupPassword.setEditTextInputTypeToPassword();
-        customGroupPassword.setTextView("Password");
+        customGroupPassword.setImage(getContext().getDrawable(R.drawable.password_login));
         customGroupPassword.setHintEditText("Password");
 
         btnLogin = (Button)rootView.findViewById(R.id.btnLogin);

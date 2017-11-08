@@ -4,13 +4,21 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
 
-    <color name="overlay_color">#80000000</color>
+    <color name="overlay_color">#40000000</color>
+
+    <color name="action_bar">#A1887F</color>
+    <color name="dark_action_bar">#8D6E63</color>
+    <color name="navigation_dark_action_bar">#A1887F</color>
 
     <!-- Main Shopping List -->
 
     <color name="grey">#EDEEEF</color>
     <color name="primary">#83CF1C</color>
     <color name="dark_grey">#AEAEAE</color>
+
+    <color name="light_yellow">#fff9d1</color>
+    <color name="dark_brown">#4f392f</color>
+    <color name="brown">#715143</color>
 
     <!-- ...............................................  -->
 </resources>

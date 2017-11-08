@@ -16,9 +16,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.seniorproject.smartshopping.R;
-import com.example.seniorproject.smartshopping.model.dao.Group;
-import com.example.seniorproject.smartshopping.model.dao.GroupList;
-import com.example.seniorproject.smartshopping.model.manager.GroupManager;
+import com.example.seniorproject.smartshopping.model.dao.group.Group;
+import com.example.seniorproject.smartshopping.model.dao.group.GroupList;
+import com.example.seniorproject.smartshopping.model.dao.user.User;
+import com.example.seniorproject.smartshopping.model.dao.user.UserInGroup;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -29,6 +30,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.WriteBatch;
 import com.google.firebase.storage.FirebaseStorage;
@@ -42,15 +44,15 @@ public class CreatedGroupFragment extends Fragment {
      ************************************* Variable class ********************************************
      ***********************************************************************************************/
 
-    public interface GroupSettingCancel{
+    public interface GroupSettingCancel {
         void cancel();
     }
 
-    public interface GroupSettingAdded{
+    public interface GroupSettingAdded {
         void add();
     }
 
-    public interface PickImage{
+    public interface PickImage {
         void pickImage();
     }
 
@@ -65,14 +67,13 @@ public class CreatedGroupFragment extends Fragment {
     private FirebaseFirestore db;
     private CollectionReference cGroups;
     private CollectionReference cGroupUser;
+    private CollectionReference cUserInGroup;
     private FirebaseUser user;
     private DatabaseReference generateId;
 
     private Uri selectedImageUri;
 
-    public static final int RC_PHOTO_PICKER =  2;
-
-
+    public static final int RC_PHOTO_PICKER = 2;
 
 
     /***********************************************************************************************
@@ -117,10 +118,9 @@ public class CreatedGroupFragment extends Fragment {
         cGroups = db.collection("groups");
 
         user = FirebaseAuth.getInstance().getCurrentUser();
-        if(user != null) {
+        if (user != null) {
             cGroupUser = db.collection("users").document(user.getUid()).collection("groups");
-        }
-        else{
+        } else {
             Toast.makeText(getContext(), "Cannot find User", Toast.LENGTH_SHORT).show();
         }
 
@@ -204,13 +204,13 @@ public class CreatedGroupFragment extends Fragment {
         }
     };
 
-    private void addGroupToDatabase(String downloadUrl){
+    private void addGroupToDatabase(String downloadUrl) {
 
-        String groupId = generateId.push().getKey().toString();
+        final String groupId = generateId.push().getKey().toString();
         String name = edtGroupName.getText().toString();
         String photoUrl = downloadUrl.toString();
         String quote = edtGroupDescribe.getText().toString();
-        String token = name + groupId.substring(1,5);
+        String token = name + groupId.substring(1, 5);
 
         final GroupList groupList = new GroupList(groupId, name, photoUrl);
         Group group = new Group();
@@ -227,23 +227,44 @@ public class CreatedGroupFragment extends Fragment {
         batch.commit().addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
-                Toast.makeText(getActivity(), "Create Group Success", Toast.LENGTH_SHORT).show();
 
-                GroupSettingAdded groupSettingAdded = (GroupSettingAdded) getActivity();
-                groupSettingAdded.add();
+                db.collection("users").document(user.getUid()).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            cUserInGroup = db.collection("groups").document(groupId)
+                                    .collection("users");
+
+                            if (user != null) {
+                                User userData = task.getResult().toObject(User.class);
+                                UserInGroup userInGroup = new UserInGroup();
+                                userInGroup.setName(userData.getName());
+                                userInGroup.setPhotoUrl(userData.getPhotoUrl());
+                                cUserInGroup.document(user.getUid()).set(userInGroup)
+                                        .addOnSuccessListener(createSuccessful)
+                                        .addOnFailureListener(createFailed);
+                            }
+                        } else {
+                            Toast.makeText(getActivity(), "Get user and Create Group Failed", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+
             }
         });
 
 
     }
 
+
+
     final View.OnClickListener createGroupListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            if(selectedImageUri != null){
+            if (selectedImageUri != null) {
                 StorageReference photRef = mGroupStorageRef.child(selectedImageUri.getLastPathSegment());
                 photRef.putFile(selectedImageUri).addOnSuccessListener(uploadSuccessListener).addOnFailureListener(uploadFailed);
-            } else{
+            } else {
                 addGroupToDatabase("");
             }
         }
@@ -267,18 +288,21 @@ public class CreatedGroupFragment extends Fragment {
         }
     };
 
-    final OnSuccessListener<DocumentReference> addShoppingListSuccess = new OnSuccessListener<DocumentReference>() {
+    final OnSuccessListener<Void> createSuccessful = new OnSuccessListener<Void>() {
         @Override
-        public void onSuccess(DocumentReference documentReference) {
-            Log.d("TAG", "DocumentSnapshot written with ID: " + documentReference.getId());
+        public void onSuccess(Void aVoid) {
+            Toast.makeText(getActivity(), "Create Group Success", Toast.LENGTH_SHORT).show();
+
+            GroupSettingAdded groupSettingAdded = (GroupSettingAdded) getActivity();
+            groupSettingAdded.add();
         }
     };
 
-    final OnFailureListener addShoppingListFailed = new OnFailureListener() {
+    final OnFailureListener createFailed = new OnFailureListener() {
         @Override
         public void onFailure(@NonNull Exception e) {
             Log.w("TAG", "Error adding document", e);
-            Toast.makeText(getActivity(), "Add Shooping List Failed", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), "Create Group Failed", Toast.LENGTH_SHORT).show();
         }
     };
 
