@@ -26,7 +26,7 @@ import com.example.seniorproject.smartshopping.model.manager.group.GroupWatingMa
 import com.example.seniorproject.smartshopping.model.manager.iteminventory.ItemInventoryManager;
 import com.example.seniorproject.smartshopping.model.manager.shoppinglist.ShoppingListManager;
 import com.example.seniorproject.smartshopping.view.adapter.group.GroupSettingAdapter;
-import com.example.seniorproject.smartshopping.view.recyclerviewadapter.GroupWatingAdapter;
+import com.example.seniorproject.smartshopping.view.recyclerviewadapter.GroupWatingRecyclerViewAdapter;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -112,7 +112,7 @@ public class GroupSettingFragment extends Fragment {
         groupWatingManager = new GroupWatingManager();
 
         layoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false);
-        adapter = new GroupWatingAdapter();
+        adapter = new GroupWatingRecyclerViewAdapter();
         db = FirebaseFirestore.getInstance();
 
         cGroups = db.collection("groups");
@@ -227,7 +227,7 @@ public class GroupSettingFragment extends Fragment {
 
                         groupWatingManager.addGroup(groupWatingListener);
 
-                        GroupWatingAdapter groupAdapter = (GroupWatingAdapter) adapter;
+                        GroupWatingRecyclerViewAdapter groupAdapter = (GroupWatingRecyclerViewAdapter) adapter;
                         groupAdapter.setGroup(groupWatingManager.getGroups());
                         groupAdapter.notifyDataSetChanged();
                         Log.d("TAG", "Added Waiting " );

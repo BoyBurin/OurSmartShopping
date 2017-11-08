@@ -6,8 +6,8 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/light_yellow"
-        android:alpha="0.2"/>
+        android:alpha="0.2"
+        android:background="@color/light_yellow" />
 
 
     <!--  <android.support.v7.widget.SearchView
@@ -126,25 +126,13 @@
         </LinearLayout> -->
 
 
-    <TextView
-        android:id="@+id/tvInventory"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recyclerView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Inventory"
-        android:padding="16dp"
-        android:textColor="@color/dark_brown"/>
+        android:layout_height="match_parent"/>
 
-        <GridView
-            android:id="@+id/gridView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:verticalSpacing="0dp"
-            android:horizontalSpacing="0dp"
-            android:stretchMode="columnWidth"
-            android:layout_below="@+id/tvInventory"
-            android:numColumns="2" />
 
-   <!--  </LinearLayout> -->
+    <!--  </LinearLayout> -->
 
 
     <android.support.design.widget.FloatingActionButton xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -154,13 +142,13 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
+        android:layout_marginBottom="@dimen/activity_vertical_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
         android:onClick="showAddListDialog"
         android:src="@drawable/icon_add"
         app:borderWidth="0dp"
         app:elevation="6dp"
         app:pressedTranslationZ="12dp"
-        android:layout_marginBottom="@dimen/activity_vertical_margin"
-        android:layout_marginRight="@dimen/activity_horizontal_margin"
         app:rippleColor="@android:color/white" />
 
 

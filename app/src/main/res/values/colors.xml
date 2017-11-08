@@ -24,4 +24,6 @@
     
     <color name="deep_orange">#FF5722</color>
     <color name="white">#FFFFFF</color>
+    <color name="light_blue">#9BEEF0</color>
+    <color name="sad_blue">#B4CFD0</color>
 </resources>

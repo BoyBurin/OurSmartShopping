@@ -24,7 +24,7 @@ import java.util.ArrayList;
  * Created by boyburin on 11/8/2017 AD.
  */
 
-public class SelectedGroupAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class SelectedGroupRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private ArrayList<GroupList> groups;
     private Context context;
@@ -44,7 +44,7 @@ public class SelectedGroupAdapter extends RecyclerView.Adapter<RecyclerView.View
      ************************************* Method ********************************************
      ***********************************************************************************************/
 
-    public SelectedGroupAdapter(Context context){
+    public SelectedGroupRecyclerViewAdapter(Context context){
         this.context = context;
     }
 
@@ -69,7 +69,6 @@ public class SelectedGroupAdapter extends RecyclerView.Adapter<RecyclerView.View
 
         params.width = width/2;
         params.height = height/2;
-        Log.d("Height", height + "");
 
         view.setLayoutParams(params);
 

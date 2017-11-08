@@ -336,10 +336,9 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
     }
 
     @Override
-    public void goToMoreItemInventory(ItemInventoryMap itemInventoryMap, int position) {
+    public void goToMoreItemInventory(ItemInventoryMap itemInventoryMap) {
         Intent intent = new Intent(this, MoreItemInventoryActivity.class);
         intent.putExtra("itemInventoryMap", itemInventoryMap);
-        intent.putExtra("position", position);
         startActivity(intent);
     }
 

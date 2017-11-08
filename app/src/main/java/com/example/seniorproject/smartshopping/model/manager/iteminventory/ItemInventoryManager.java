@@ -70,6 +70,10 @@ public class ItemInventoryManager {
         return itemInventories;
     }
 
+    public ArrayList<ItemInventoryMap> getItemInventoryMaps(){
+        return itemInventoryMaps;
+    }
+
 
     public int getIndexByKey(String key){
         int index = -1;

@@ -72,6 +72,7 @@ public class DialogAddItemInventoryFragment extends DialogFragment {
 
     private String unit;
     private String barcodeId;
+    private String type;
 
 
 
@@ -252,6 +253,7 @@ public class DialogAddItemInventoryFragment extends DialogFragment {
                     tvName.setText(productList.getName());
                     photoUrl = productList.getPhotoUrl().toString();
                     unit = productList.getUnit();
+                    type = productList.getType();
 
                     ItemInventoryManager itemInventoryManager = ItemInventoryManager.getInstance();
                     if(itemInventoryManager.isContain(barcodeId)){
@@ -323,7 +325,7 @@ public class DialogAddItemInventoryFragment extends DialogFragment {
             long soft = Long.parseLong(edtSoft.getText().toString());
 
             ItemInventory item = new ItemInventory(name, amount, comment,
-                    photoUrl, unit, barcodeId, hard, soft);
+                    photoUrl, unit, barcodeId, hard, soft, type);
 
             cItems.document(barcodeId).set(item).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override

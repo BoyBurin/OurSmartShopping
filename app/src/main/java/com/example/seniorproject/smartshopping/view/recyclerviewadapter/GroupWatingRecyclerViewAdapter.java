@@ -15,11 +15,11 @@ import java.util.ArrayList;
  * Created by boyburin on 10/31/2017 AD.
  */
 
-public class GroupWatingAdapter extends RecyclerView.Adapter<GroupWatingAdapter.ViewHolder>  {
+public class GroupWatingRecyclerViewAdapter extends RecyclerView.Adapter<GroupWatingRecyclerViewAdapter.ViewHolder>  {
     private ArrayList<GroupWatingListener> groups;
     private StorageReference storageReference;
 
-    public GroupWatingAdapter(){
+    public GroupWatingRecyclerViewAdapter(){
         groups = new ArrayList<>();
     }
 
@@ -27,19 +27,19 @@ public class GroupWatingAdapter extends RecyclerView.Adapter<GroupWatingAdapter.
         this.groups = groups;
     }
     @Override
-    public GroupWatingAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public GroupWatingRecyclerViewAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         /*View v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.custom_view_group_group_wating, parent, false);*/
 
         CustomViewGroupGroupWating v = new CustomViewGroupGroupWating(parent.getContext());
         v.setLayoutParams(new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
-        GroupWatingAdapter.ViewHolder vh = new GroupWatingAdapter.ViewHolder(v);
+        GroupWatingRecyclerViewAdapter.ViewHolder vh = new GroupWatingRecyclerViewAdapter.ViewHolder(v);
         return vh;
     }
 
     @Override
-    public void onBindViewHolder(GroupWatingAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(GroupWatingRecyclerViewAdapter.ViewHolder holder, int position) {
         GroupWatingListener group = groups.get(position);
         //holder.tvName.setText(group.getGroupWating().getName());
         ((CustomViewGroupGroupWating)holder.itemView).setNameText(group.getGroupWating().getName());

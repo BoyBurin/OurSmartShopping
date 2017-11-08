@@ -8,7 +8,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -16,17 +15,15 @@ import com.example.seniorproject.smartshopping.R;
 import com.example.seniorproject.smartshopping.model.dao.group.Group;
 import com.example.seniorproject.smartshopping.model.dao.group.GroupList;
 import com.example.seniorproject.smartshopping.model.dao.group.GroupMap;
-import com.example.seniorproject.smartshopping.model.datatype.MutableInteger;
 import com.example.seniorproject.smartshopping.model.manager.group.GroupManager;
-import com.example.seniorproject.smartshopping.view.adapter.group.GroupAdapter;
-import com.example.seniorproject.smartshopping.view.recyclerviewadapter.SelectedGroupAdapter;
+import com.example.seniorproject.smartshopping.view.recyclerviewadapter.SelectedGroupRecyclerViewAdapter;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 
-public class SelectGroupFragment extends Fragment implements SelectedGroupAdapter.OnItemClickListener{
+public class SelectGroupFragment extends Fragment implements SelectedGroupRecyclerViewAdapter.OnItemClickListener{
 
 
     /***********************************************************************************************
@@ -43,7 +40,7 @@ public class SelectGroupFragment extends Fragment implements SelectedGroupAdapte
     private ListView listView;
     private GroupManager gm;
     private RecyclerView recyclerView;
-    private SelectedGroupAdapter selectedGroupAdapter;
+    private SelectedGroupRecyclerViewAdapter selectedGroupRecyclerViewAdapter;
     //private GroupAdapter groupAdapter;
     //private MutableInteger lastPositionInteger;
 
@@ -96,7 +93,7 @@ public class SelectGroupFragment extends Fragment implements SelectedGroupAdapte
 
     private void init(Bundle savedInstanceState) {
         gm = GroupManager.getInstance();
-        selectedGroupAdapter = new SelectedGroupAdapter(getContext());
+        selectedGroupRecyclerViewAdapter = new SelectedGroupRecyclerViewAdapter(getContext());
 
     }
 
@@ -106,10 +103,10 @@ public class SelectGroupFragment extends Fragment implements SelectedGroupAdapte
         recyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false));
 
-        selectedGroupAdapter.setGroups(gm.getGroups());
-        selectedGroupAdapter.setItemClickListener(this);
-        recyclerView.setAdapter(selectedGroupAdapter);
-        selectedGroupAdapter.notifyDataSetChanged();
+        selectedGroupRecyclerViewAdapter.setGroups(gm.getGroups());
+        selectedGroupRecyclerViewAdapter.setItemClickListener(this);
+        recyclerView.setAdapter(selectedGroupRecyclerViewAdapter);
+        selectedGroupRecyclerViewAdapter.notifyDataSetChanged();
 
 
     }

@@ -39,7 +39,7 @@
     <style name="FAB">
         <item name="fabSize">normal</item>
         <item name="rippleColor">@android:color/white</item>
-        <item name="backgroundTint">@color/brown</item>
+        <item name="backgroundTint">@color/light_blue</item>
     </style>
 
     <!-- ...............................................  -->

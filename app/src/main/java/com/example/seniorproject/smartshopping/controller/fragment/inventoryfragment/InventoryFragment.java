@@ -7,6 +7,9 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,10 +21,13 @@ import android.widget.Toast;
 import com.example.seniorproject.smartshopping.R;
 import com.example.seniorproject.smartshopping.model.dao.iteminventory.ItemInventory;
 import com.example.seniorproject.smartshopping.model.dao.iteminventory.ItemInventoryMap;
+import com.example.seniorproject.smartshopping.model.daorecyclerview.iteminventory.BaseItemInventory;
+import com.example.seniorproject.smartshopping.model.daorecyclerview.iteminventory.ItemInventoryCreator;
 import com.example.seniorproject.smartshopping.model.datatype.MutableInteger;
 import com.example.seniorproject.smartshopping.model.manager.group.GroupManager;
 import com.example.seniorproject.smartshopping.model.manager.iteminventory.ItemInventoryManager;
 import com.example.seniorproject.smartshopping.view.adapter.iteminventory.ItemInventoryAdapter;
+import com.example.seniorproject.smartshopping.view.recyclerviewadapter.ItemInventoryRecyclerViewAdapter;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -31,12 +37,15 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
 
-public class InventoryFragment extends Fragment{
+import java.util.ArrayList;
+
+public class InventoryFragment extends Fragment implements ItemInventoryRecyclerViewAdapter.OnItemClickListener{
+
     /***********************************************************************************************
      ************************************* Variable class ********************************************
      ***********************************************************************************************/
     public interface MoreItemInventoryListener{
-        void goToMoreItemInventory(ItemInventoryMap itemInventoryMap, int position);
+        void goToMoreItemInventory(ItemInventoryMap itemInventoryMap);
     }
 
     public interface ItemInventoryFloatingButton{
@@ -46,9 +55,12 @@ public class InventoryFragment extends Fragment{
     private FloatingActionButton fab;
 
 
-    private GridView gridView;
-    private ItemInventoryAdapter itemInventoryAdapter;
-    private MutableInteger lastPositionInteger;
+    private RecyclerView recyclerView;
+    private ItemInventoryRecyclerViewAdapter itemInventoryRecyclerViewAdapter;
+
+    private ArrayList<BaseItemInventory> baseItemInventories;
+    private ArrayList<String> types;
+    private ItemInventoryCreator itemInventoryCreator;
 
     private FirebaseFirestore db;
     private CollectionReference cItems;
@@ -91,8 +103,10 @@ public class InventoryFragment extends Fragment{
 
     private void init(Bundle savedInstanceState) {
         // Init Fragment level's variable(s) here
-        lastPositionInteger = new MutableInteger(-1);
-        itemInventoryAdapter = new ItemInventoryAdapter(lastPositionInteger);
+        baseItemInventories = new ArrayList<>();
+        itemInventoryCreator = new ItemInventoryCreator();
+        types = itemInventoryCreator.getTypes(ItemInventoryManager.getInstance().getItemInventoryMaps());
+        itemInventoryRecyclerViewAdapter = new ItemInventoryRecyclerViewAdapter(getContext());
 
         db = FirebaseFirestore.getInstance();
         cItems = db.collection("groups")
@@ -106,13 +120,25 @@ public class InventoryFragment extends Fragment{
     @SuppressWarnings("UnusedParameters")
     private void initInstances(View rootView, Bundle savedInstanceState) {
 
-        gridView = (GridView) rootView.findViewById(R.id.gridView);
-        gridView.setAdapter(itemInventoryAdapter);
+        recyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerView);
+
+        GridLayoutManager manager = new GridLayoutManager(getContext(), 2);
+        manager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+            @Override
+            public int getSpanSize(int position) {
+                if(baseItemInventories.get(position).getType() == BaseItemInventory.ITEM_INVENTORY){
+                    return 1;
+                }
+                else return 2;
+            }
+        });
+
+        recyclerView.setLayoutManager(manager);
+        recyclerView.setAdapter(itemInventoryRecyclerViewAdapter);
 
         fab = (FloatingActionButton) rootView.findViewById(R.id.fab);
         fab.setOnClickListener(addItemListener);
 
-        gridView.setOnItemClickListener(moreItemInventoryListener);
 
 
 
@@ -157,6 +183,19 @@ public class InventoryFragment extends Fragment{
         // Restore Instance State here
     }
 
+    public void setBaseItemInventories(){
+
+        ItemInventoryManager manager = ItemInventoryManager.getInstance();
+        types = itemInventoryCreator.updateTypes(types, manager.getItemInventoryMaps());
+        baseItemInventories = itemInventoryCreator.createItemInventories(manager.getItemInventoryMaps(), types);
+
+        itemInventoryRecyclerViewAdapter.setItemInventories(baseItemInventories);
+        itemInventoryRecyclerViewAdapter.setItemClickListener(this);
+        itemInventoryRecyclerViewAdapter.notifyDataSetChanged();
+
+        Log.d("size", "" + baseItemInventories.size());
+    }
+
     /***********************************************************************************************
      ************************************* Listener variables ********************************************
      ***********************************************************************************************/
@@ -182,8 +221,7 @@ public class InventoryFragment extends Fragment{
                         //Add
                         ItemInventoryMap itemMap = new ItemInventoryMap(id, item);
                         gm.addItemInventory(itemMap);
-                        itemInventoryAdapter.setItemInventories(gm.getItemInventories());
-                        itemInventoryAdapter.notifyDataSetChanged();
+                        setBaseItemInventories();
 
                         Toast.makeText(getContext(), "Added " + item.getName(), Toast.LENGTH_SHORT).show();
 
@@ -200,8 +238,7 @@ public class InventoryFragment extends Fragment{
                         //Update
                         itemMap.setItemInventory(update);
                         gm.sortItem();
-                        itemInventoryAdapter.setItemInventories(gm.getItemInventories());
-                        itemInventoryAdapter.notifyDataSetChanged();
+                        setBaseItemInventories();
 
                         Toast.makeText(getContext(), "Update " + update.getName(), Toast.LENGTH_SHORT).show();
                         break;
@@ -213,8 +250,7 @@ public class InventoryFragment extends Fragment{
 
                         index = gm.getIndexByKey(id);
                         gm.removeItemInventory(index);
-                        itemInventoryAdapter.setItemInventories(gm.getItemInventories());
-                        itemInventoryAdapter.notifyDataSetChanged();
+                        setBaseItemInventories();
 
                         Toast.makeText(getContext(), "Remove " + item.getName(), Toast.LENGTH_SHORT).show();
                         break;
@@ -234,22 +270,20 @@ public class InventoryFragment extends Fragment{
 
 
 
-    final AdapterView.OnItemClickListener moreItemInventoryListener = new AdapterView.OnItemClickListener() {
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-            if(position < ItemInventoryManager.getInstance().getSize()) {
-
-                ItemInventoryMap itemInventoryMap = ItemInventoryManager.getInstance().getItemInventory(position);
-                MoreItemInventoryListener moreItemInventoryListener =
-                        (MoreItemInventoryListener) getActivity();
-                moreItemInventoryListener.goToMoreItemInventory(itemInventoryMap, position);
-            }
-        }
-    };
-
 
     /***********************************************************************************************
      ************************************* Inner class ********************************************
      ***********************************************************************************************/
+
+
+    /***********************************************************************************************
+     ************************************* Implementation ********************************************
+     ***********************************************************************************************/
+
+    @Override
+    public void onItemClick(ItemInventoryMap itemInventory) {
+        MoreItemInventoryListener moreItemInventoryListener =
+                (MoreItemInventoryListener) getActivity();
+        moreItemInventoryListener.goToMoreItemInventory(itemInventory);
+    }
 }
