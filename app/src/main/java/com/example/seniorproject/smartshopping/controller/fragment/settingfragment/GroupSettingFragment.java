@@ -19,7 +19,7 @@ import com.example.seniorproject.smartshopping.model.dao.group.Group;
 import com.example.seniorproject.smartshopping.model.dao.group.GroupList;
 import com.example.seniorproject.smartshopping.model.dao.group.GroupMap;
 import com.example.seniorproject.smartshopping.model.dao.group.GroupWating;
-import com.example.seniorproject.smartshopping.model.dao.group.GroupWatingListener;
+import com.example.seniorproject.smartshopping.model.dao.group.GroupWatingWithAction;
 import com.example.seniorproject.smartshopping.model.datatype.MutableInteger;
 import com.example.seniorproject.smartshopping.model.manager.group.GroupManager;
 import com.example.seniorproject.smartshopping.model.manager.group.GroupWatingManager;
@@ -221,11 +221,11 @@ public class GroupSettingFragment extends Fragment {
                                         .addOnFailureListener(deleteFailed);
                             }
                         };
-                        GroupWatingListener groupWatingListener = new GroupWatingListener();
-                        groupWatingListener.setGroupWating(newGroup);
-                        groupWatingListener.setDeleteListener(deleteListener);
+                        GroupWatingWithAction groupWatingWithAction = new GroupWatingWithAction();
+                        groupWatingWithAction.setGroupWating(newGroup);
+                        groupWatingWithAction.setDeleteListener(deleteListener);
 
-                        groupWatingManager.addGroup(groupWatingListener);
+                        groupWatingManager.addGroup(groupWatingWithAction);
 
                         GroupWatingRecyclerViewAdapter groupAdapter = (GroupWatingRecyclerViewAdapter) adapter;
                         groupAdapter.setGroup(groupWatingManager.getGroups());

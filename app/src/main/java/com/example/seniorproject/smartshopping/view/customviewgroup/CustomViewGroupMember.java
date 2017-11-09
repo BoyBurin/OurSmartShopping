@@ -13,29 +13,27 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.seniorproject.smartshopping.R;
 import com.example.seniorproject.smartshopping.view.state.BundleSavedState;
 import com.example.seniorproject.smartshopping.view.transformation.CircleTransform;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 
-public class CustomViewGroupUser extends BaseCustomViewGroup {
+public class CustomViewGroupMember extends BaseCustomViewGroup {
 
-    private ImageView imgUser;
+    private ImageView imgViewMember;
     private TextView tvUsername;
 
 
-    public CustomViewGroupUser(Context context) {
+    public CustomViewGroupMember(Context context) {
         super(context);
         initInflate();
         initInstances();
     }
 
-    public CustomViewGroupUser(Context context, AttributeSet attrs) {
+    public CustomViewGroupMember(Context context, AttributeSet attrs) {
         super(context, attrs);
         initInflate();
         initInstances();
         initWithAttrs(attrs, 0, 0);
     }
 
-    public CustomViewGroupUser(Context context, AttributeSet attrs, int defStyleAttr) {
+    public CustomViewGroupMember(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         initInflate();
         initInstances();
@@ -43,7 +41,7 @@ public class CustomViewGroupUser extends BaseCustomViewGroup {
     }
 
     @TargetApi(21)
-    public CustomViewGroupUser(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public CustomViewGroupMember(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         initInflate();
         initInstances();
@@ -51,12 +49,12 @@ public class CustomViewGroupUser extends BaseCustomViewGroup {
     }
 
     private void initInflate() {
-        inflate(getContext(), R.layout.custom_view_group_user, this);
+        inflate(getContext(), R.layout.custom_view_group_group_member, this);
     }
 
     private void initInstances() {
         tvUsername = (TextView) findViewById(R.id.tvUsername);
-        imgUser = (ImageView) findViewById(R.id.imgUser);
+        imgViewMember = (ImageView) findViewById(R.id.imgViewMember);
     }
 
     private void initWithAttrs(AttributeSet attrs, int defStyleAttr, int defStyleRes) {
@@ -105,7 +103,7 @@ public class CustomViewGroupUser extends BaseCustomViewGroup {
                 //.error(Drawable pic)  picture has problem
                 .transform(new CircleTransform(getContext())) //Cool !!!
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .into(imgUser);
+                .into(imgViewMember);
 
     }
 

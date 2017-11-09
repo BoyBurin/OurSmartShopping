@@ -4,12 +4,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
-import com.example.seniorproject.smartshopping.model.dao.user.User;
 import com.example.seniorproject.smartshopping.model.dao.user.UserInGroup;
 import com.example.seniorproject.smartshopping.model.dao.user.UserInGroupMap;
-import com.example.seniorproject.smartshopping.model.dao.user.UserMap;
 import com.example.seniorproject.smartshopping.model.datatype.MutableInteger;
-import com.example.seniorproject.smartshopping.view.customviewgroup.CustomViewGroupUser;
+import com.example.seniorproject.smartshopping.view.customviewgroup.CustomViewGroupMember;
 
 import java.util.ArrayList;
 
@@ -64,11 +62,11 @@ public class UserAdapter extends BaseAdapter{
     @Override
     public View getView(int position, View view, ViewGroup viewGroup) {
         //if(getItemViewType(i) == 0) {
-            CustomViewGroupUser item;
+            CustomViewGroupMember item;
             if (view != null)
-                item = (CustomViewGroupUser) view;
+                item = (CustomViewGroupMember) view;
             else
-                item = new CustomViewGroupUser(viewGroup.getContext());
+                item = new CustomViewGroupMember(viewGroup.getContext());
 
         UserInGroupMap userMap = (UserInGroupMap) getItem(position);
         UserInGroup user = userMap.getUser();

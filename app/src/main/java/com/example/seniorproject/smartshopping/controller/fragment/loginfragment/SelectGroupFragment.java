@@ -37,12 +37,9 @@ public class SelectGroupFragment extends Fragment implements SelectedGroupRecycl
         void visibleSelectGroup(boolean visible);
     }
 
-    private ListView listView;
     private GroupManager gm;
     private RecyclerView recyclerView;
     private SelectedGroupRecyclerViewAdapter selectedGroupRecyclerViewAdapter;
-    //private GroupAdapter groupAdapter;
-    //private MutableInteger lastPositionInteger;
 
     private FirebaseFirestore db;
     private CollectionReference cGroup;
@@ -99,7 +96,6 @@ public class SelectGroupFragment extends Fragment implements SelectedGroupRecycl
 
     @SuppressWarnings("UnusedParameters")
     private void initInstances(View rootView, Bundle savedInstanceState) {
-        listView = (ListView) rootView.findViewById(R.id.listViewGroup);
         recyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false));
 

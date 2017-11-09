@@ -12,10 +12,9 @@ import com.example.seniorproject.smartshopping.model.dao.iteminventory.ItemInven
 import com.example.seniorproject.smartshopping.model.daorecyclerview.iteminventory.BaseItemInventory;
 import com.example.seniorproject.smartshopping.model.daorecyclerview.iteminventory.ItemInventoryRecyclerView;
 import com.example.seniorproject.smartshopping.model.daorecyclerview.iteminventory.ItemInventoryTypeNameRecyclerView;
-import com.example.seniorproject.smartshopping.view.customviewgroup.CustomViewGroupGroupWating;
 import com.example.seniorproject.smartshopping.view.customviewgroup.ItemView;
-import com.example.seniorproject.smartshopping.view.viewholder.itemInventory.ItemInventoryTypeViewHolder;
-import com.example.seniorproject.smartshopping.view.viewholder.itemInventory.ItemInventoryViewHolder;
+import com.example.seniorproject.smartshopping.view.viewholder.inventory.ItemInventoryTypeViewHolder;
+import com.example.seniorproject.smartshopping.view.viewholder.inventory.ItemInventoryViewHolder;
 
 import java.util.ArrayList;
 

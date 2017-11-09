@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:weightSum="10"
+    android:layout_margin="@dimen/margin_padding">
+
+    <ImageView
+        android:id="@+id/imgViewMember"
+        android:layout_width="0dp"
+        android:layout_height="72dp"
+        android:layout_weight="3"
+        android:padding="@dimen/margin_padding_small"
+        android:scaleType="centerCrop"
+        android:src="@drawable/bg_medium"/>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="72dp"
+        android:layout_weight="7"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/margin_padding_small">
+
+            <TextView
+                android:id="@+id/tvMemberName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_weight="4"
+                android:padding="@dimen/margin_padding_small"
+                android:textSize="@dimen/text_size_large" />
+
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:weightSum="4">
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1" />
+
+            <Button
+                android:id="@+id/btnAccept"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/accept"
+                android:textSize="@dimen/text_size_extra_small" />
+
+            <Button
+                android:id="@+id/btnDecline"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/decline"
+                android:textSize="@dimen/text_size_extra_small" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+
+</LinearLayout>

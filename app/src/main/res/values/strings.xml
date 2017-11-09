@@ -23,6 +23,8 @@
     <!-- Group -->
     <string name="member">Member</string>
     <string name="group">Group</string>
+    <string name="accept">Accept</string>
+    <string name="decline">Decline</string>
 
     <!-- OCR -->
     <string name="action_settings">Settings</string>

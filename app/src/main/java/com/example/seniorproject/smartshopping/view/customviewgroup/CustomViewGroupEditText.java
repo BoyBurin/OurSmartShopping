@@ -9,10 +9,7 @@ import android.text.InputType;
 import android.util.AttributeSet;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.seniorproject.smartshopping.R;
 import com.example.seniorproject.smartshopping.view.state.BundleSavedState;
@@ -82,7 +79,7 @@ public class CustomViewGroupEditText extends BaseCustomViewGroup {
 
     private void initInflate() {
 
-        inflate(getContext(), R.layout.custome_view_group_edit_text, this);
+        inflate(getContext(), R.layout.custom_view_group_edit_text, this);
     }
 
     private void initInstances() {

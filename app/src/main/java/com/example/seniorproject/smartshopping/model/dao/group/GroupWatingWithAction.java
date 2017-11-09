@@ -6,7 +6,7 @@ import android.view.View;
  * Created by boyburin on 10/31/2017 AD.
  */
 
-public class GroupWatingListener {
+public class GroupWatingWithAction {
     private GroupWating groupWating;
     private View.OnClickListener deleteListener;
 

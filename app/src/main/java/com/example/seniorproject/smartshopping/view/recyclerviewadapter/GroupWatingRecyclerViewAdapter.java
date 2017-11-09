@@ -4,7 +4,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.example.seniorproject.smartshopping.model.dao.group.GroupWatingListener;
+import com.example.seniorproject.smartshopping.model.dao.group.GroupWatingWithAction;
 import com.example.seniorproject.smartshopping.view.customviewgroup.CustomViewGroupGroupWating;
 import com.google.firebase.storage.StorageReference;
 
@@ -16,14 +16,14 @@ import java.util.ArrayList;
  */
 
 public class GroupWatingRecyclerViewAdapter extends RecyclerView.Adapter<GroupWatingRecyclerViewAdapter.ViewHolder>  {
-    private ArrayList<GroupWatingListener> groups;
+    private ArrayList<GroupWatingWithAction> groups;
     private StorageReference storageReference;
 
     public GroupWatingRecyclerViewAdapter(){
         groups = new ArrayList<>();
     }
 
-    public void setGroup(ArrayList<GroupWatingListener> groups){
+    public void setGroup(ArrayList<GroupWatingWithAction> groups){
         this.groups = groups;
     }
     @Override
@@ -40,7 +40,7 @@ public class GroupWatingRecyclerViewAdapter extends RecyclerView.Adapter<GroupWa
 
     @Override
     public void onBindViewHolder(GroupWatingRecyclerViewAdapter.ViewHolder holder, int position) {
-        GroupWatingListener group = groups.get(position);
+        GroupWatingWithAction group = groups.get(position);
         //holder.tvName.setText(group.getGroupWating().getName());
         ((CustomViewGroupGroupWating)holder.itemView).setNameText(group.getGroupWating().getName());
         ((CustomViewGroupGroupWating)holder.itemView).setImageUrl(group.getGroupWating().getPhotoUrl());

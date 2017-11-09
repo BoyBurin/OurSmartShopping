@@ -1,4 +1,4 @@
-package com.example.seniorproject.smartshopping.view.viewholder.itemInventory;
+package com.example.seniorproject.smartshopping.view.viewholder.inventory;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.View;

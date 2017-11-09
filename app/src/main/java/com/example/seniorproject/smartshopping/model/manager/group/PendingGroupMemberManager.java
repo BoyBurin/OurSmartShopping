@@ -2,19 +2,20 @@ package com.example.seniorproject.smartshopping.model.manager.group;
 
 import android.content.Context;
 
-
 import com.example.seniorproject.smartshopping.model.dao.group.GroupWatingWithAction;
+import com.example.seniorproject.smartshopping.model.dao.group.PendingGroupMember;
+import com.example.seniorproject.smartshopping.model.dao.group.PendingGroupMemberWithAction;
 import com.example.seniorproject.smartshopping.model.manager.Contextor;
 
 import java.util.ArrayList;
 
 
-public class GroupWatingManager {
+public class PendingGroupMemberManager {
     /******************************************************************************************
      * ****************************** Variable *********************************************
      *******************************************************************************************/
 
-    private ArrayList<GroupWatingWithAction> groups;
+    private ArrayList<PendingGroupMemberWithAction> members;
 
     /******************************************************************************************
      * ****************************** Methods *********************************************
@@ -24,40 +25,32 @@ public class GroupWatingManager {
 
     private Context mContext;
 
-    public GroupWatingManager() {
+    public PendingGroupMemberManager() {
 
         mContext = Contextor.getInstance().getContext();
-        groups = new ArrayList<GroupWatingWithAction>();
+        members = new ArrayList<PendingGroupMemberWithAction>();
     }
 
-    public GroupWatingWithAction getGroup(int index) {
+    public PendingGroupMemberWithAction getGroup(int index) {
 
-        return groups.get(index);
+        return members.get(index);
     }
 
 
     public int getSize(){
-        return groups.size();
+        return members.size();
     }
 
-    public void addGroup(GroupWatingWithAction group){
-        groups.add(group);
-    }
-
-
-
-    public ArrayList<GroupWatingWithAction> getGroups(){
-        return groups;
+    public void addGroup(PendingGroupMemberWithAction group){
+        members.add(group);
     }
 
 
-    public boolean isContain(GroupWatingWithAction newGroup){
-        for(GroupWatingWithAction group : groups){
-            if(group.getGroupWating().getId().equals(newGroup.getGroupWating().getId())){
-                return true;
-            }
-        }
-        return false;
+
+    public ArrayList<PendingGroupMemberWithAction> getGroups(){
+        return members;
     }
+
+
 
 }
