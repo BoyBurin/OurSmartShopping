@@ -154,6 +154,7 @@ public class MoreShoppingListItemSelectorFragment extends Fragment {
         // Restore Instance State here
     }
 
+
     /***********************************************************************************************
      ************************************* Listener variables ********************************************
      ***********************************************************************************************/
@@ -185,10 +186,10 @@ public class MoreShoppingListItemSelectorFragment extends Fragment {
                     newData.put("barcodeId", itemBarcode);
                     newData.put("name", itemname);
 
-                    cItemShoppingList.add(newData)
-                            .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                    cItemShoppingList.document(itemBarcode).set(newData)
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
-                        public void onSuccess(DocumentReference documentReference) {
+                        public void onSuccess(Void aVoid) {
                             FinishAddShoppingListItemListener finishAddShoppingListItemListener =
                                     (FinishAddShoppingListItemListener) getParentFragment();
 

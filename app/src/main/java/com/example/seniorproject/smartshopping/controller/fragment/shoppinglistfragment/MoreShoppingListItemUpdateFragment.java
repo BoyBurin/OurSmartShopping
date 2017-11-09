@@ -13,6 +13,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.example.seniorproject.smartshopping.R;
+import com.example.seniorproject.smartshopping.model.dao.iteminventory.ItemInventory;
 import com.example.seniorproject.smartshopping.model.dao.shoppinglist.ItemShoppingList;
 import com.example.seniorproject.smartshopping.model.dao.shoppinglist.ShoppingListMap;
 import com.example.seniorproject.smartshopping.model.datatype.MutableInteger;
@@ -25,12 +26,15 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
+
+import java.util.ArrayList;
 
 
 public class MoreShoppingListItemUpdateFragment extends Fragment implements
@@ -51,6 +55,7 @@ public class MoreShoppingListItemUpdateFragment extends Fragment implements
     private FirebaseFirestore db;
     private CollectionReference cItemsShoppingList;
     private ListenerRegistration cItemsShoppingListListener;
+    private ArrayList<ListenerRegistration> dItemInventoryListeners;
 
     private ItemShoppingListManager itemShoppingListManager;
     private CustomViewGroupShoppingListItemAdd customViewGroupShoppingListItemAdd;
@@ -100,6 +105,7 @@ public class MoreShoppingListItemUpdateFragment extends Fragment implements
         lastPositionInteger = new MutableInteger(-1);
         itemShoppingListAdapter = new ItemShoppingListAdapter(lastPositionInteger);
         itemShoppingListManager = new ItemShoppingListManager();
+        dItemInventoryListeners = new ArrayList<>();
         //deleteListener = new ArrayList<View.OnClickListener>();
         db = FirebaseFirestore.getInstance();
         cItemsShoppingList = db.collection("groups").document(GroupManager.getInstance().getCurrentGroup().getId())
@@ -130,6 +136,13 @@ public class MoreShoppingListItemUpdateFragment extends Fragment implements
             cItemsShoppingListListener.remove();
             cItemsShoppingListListener = null;
         }
+
+        for(ListenerRegistration dItemInventoryListener : dItemInventoryListeners){
+            if(dItemInventoryListener != null){
+                dItemInventoryListener.remove();
+            }
+            dItemInventoryListeners = null;
+        }
     }
 
     @Override
@@ -157,6 +170,20 @@ public class MoreShoppingListItemUpdateFragment extends Fragment implements
     @SuppressWarnings("UnusedParameters")
     private void onRestoreInstanceState(Bundle savedInstanceState) {
         // Restore Instance State here
+    }
+
+    public int getStatus(long soft, long hard, long amount){
+        int status = -1;
+
+        if(amount > soft){
+            status = 0;
+        } else if(amount < hard){
+            status = 2;
+        } else{
+            status = 1;
+        }
+
+        return status;
     }
 
     /***********************************************************************************************
@@ -199,6 +226,11 @@ public class MoreShoppingListItemUpdateFragment extends Fragment implements
                             }
                         };
 
+                        DocumentReference dIteminventory = db.collection("groups").document(GroupManager.getInstance().getCurrentGroup().getId())
+                                .collection("items").document(newItemShoppingList.getBarcodeId());
+                        ListenerRegistration dItemInventoryListener = dIteminventory.addSnapshotListener(itemInventoryListener);
+
+                        dItemInventoryListeners.add(dItemInventoryListener);
                         newItemShoppingList.setDeleteListener(onClickDeleteListener);
 
                         itemShoppingListManager.addItemShoppingList(newItemShoppingList);
@@ -211,10 +243,19 @@ public class MoreShoppingListItemUpdateFragment extends Fragment implements
 
                     case MODIFIED:
 
-                        DocumentSnapshot documentSnapshotModified = dc.getDocument();
+                        /*DocumentSnapshot documentSnapshotModified = dc.getDocument();
+                        ItemShoppingList newItemShoppingListModified = documentSnapshotModified.toObject(ItemShoppingList.class);
+                        String barcodeId = newItemShoppingListModified.getBarcodeId();
+                        int status = newItemShoppingListModified.getStatus();
+
+                        ItemShoppingList itemShoppingList = itemShoppingListManager.getItemShoppingListByBarcode(barcodeId);
+
+                        itemShoppingList.setStatus(status);
+                        itemShoppingListAdapter.setItemShoppingLists(itemShoppingListManager.getItemShoppingLists());
+                        itemShoppingListAdapter.notifyDataSetChanged();*/
 
 
-                        Toast.makeText(getContext(), "Update " , Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Update Status Successful" , Toast.LENGTH_SHORT).show();
                         break;
 
                     case REMOVED:
@@ -223,6 +264,7 @@ public class MoreShoppingListItemUpdateFragment extends Fragment implements
                         ItemShoppingList newItemShoppingListRemove = documentSnapshotRemove.toObject(ItemShoppingList.class);
 
                         itemShoppingListManager.removeItemShoppingList(newItemShoppingListRemove.getBarcodeId());
+                        itemShoppingListManager.sortItem();
                         itemShoppingListAdapter.setItemShoppingLists(itemShoppingListManager.getItemShoppingLists());
                         itemShoppingListAdapter.notifyDataSetChanged();
 
@@ -248,6 +290,33 @@ public class MoreShoppingListItemUpdateFragment extends Fragment implements
 
             customViewGroupShoppingListItemAdd.setVisibility(View.VISIBLE);
             listView.setVisibility(View.GONE);
+        }
+    };
+
+    final EventListener<DocumentSnapshot> itemInventoryListener = new EventListener<DocumentSnapshot>() {
+        @Override
+        public void onEvent(DocumentSnapshot documentSnapshot, FirebaseFirestoreException e) {
+            if (e != null) {
+                Log.w("TAG", "Listen failed.", e);
+                return;
+            }
+
+            if (documentSnapshot != null && documentSnapshot.exists()) {
+                ItemInventory itemInventory = documentSnapshot.toObject(ItemInventory.class);
+                long soft = itemInventory.getSoft();
+                long hard = itemInventory.getHard();
+                long amount = itemInventory.getAmount();
+
+                ItemShoppingList itemShoppingList = itemShoppingListManager.getItemShoppingListByBarcode(itemInventory.getBarcodeId());
+                itemShoppingList.setStatus(getStatus(soft, hard, amount));
+
+                itemShoppingListManager.sortItem();
+                itemShoppingListAdapter.setItemShoppingLists(itemShoppingListManager.getItemShoppingLists());
+                itemShoppingListAdapter.notifyDataSetChanged();
+
+            } else {
+                Log.d("TAG", "Current data: null");
+            }
         }
     };
 

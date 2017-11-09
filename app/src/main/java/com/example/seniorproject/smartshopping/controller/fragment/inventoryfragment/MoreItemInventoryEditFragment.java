@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,12 +15,19 @@ import android.widget.Toast;
 
 import com.example.seniorproject.smartshopping.R;
 import com.example.seniorproject.smartshopping.model.dao.iteminventory.ItemInventoryMap;
+import com.example.seniorproject.smartshopping.model.dao.shoppinglist.ShoppingListMap;
 import com.example.seniorproject.smartshopping.model.manager.group.GroupManager;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.WriteBatch;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 
 
 public class MoreItemInventoryEditFragment extends Fragment {
@@ -39,6 +47,7 @@ public class MoreItemInventoryEditFragment extends Fragment {
 
     private FirebaseFirestore db;
     private DocumentReference dItem;
+    private CollectionReference cShoppingList;
 
     private ProgressBar progressBar;
     private View backgroundLoading;
@@ -86,6 +95,9 @@ public class MoreItemInventoryEditFragment extends Fragment {
         db = FirebaseFirestore.getInstance();
         dItem = db.collection("groups").document(GroupManager.getInstance().getCurrentGroup().getId())
                 .collection("items").document(itemInventoryMap.getId());
+
+        cShoppingList = db.collection("groups").document(GroupManager.getInstance().getCurrentGroup().getId())
+                .collection("shoppinglists");
 
     }
 
@@ -142,6 +154,55 @@ public class MoreItemInventoryEditFragment extends Fragment {
         edtSoft.setText("");
     }
 
+    public int getStatus(long soft, long hard, long amount){
+        int status = -1;
+
+        if(amount > soft){
+            status = 0;
+        } else if(amount < hard){
+            status = 2;
+        } else{
+            status = 1;
+        }
+
+        return status;
+    }
+
+    private void updateItemShoppingListStatus(ArrayList<String> shoppingListId){
+        long amount = Integer.parseInt(edtAmount.getText().toString());
+        long soft = Long.parseLong(edtSoft.getText().toString());
+        long hard = Long.parseLong(edtHard.getText().toString());
+
+        WriteBatch batch = db.batch();
+
+        for(String id : shoppingListId){
+
+            batch.update(cShoppingList.document(id).collection("items").document(itemInventoryMap.getId())
+                    , "status", getStatus(soft, hard, amount));
+        }
+
+        batch.commit().addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if(task.isSuccessful()) {
+                    progressBar.setVisibility(View.GONE);
+                    backgroundLoading.setVisibility(View.GONE);
+                    btnSave.setVisibility(View.VISIBLE);
+
+                    //clearText();
+                    Toast.makeText(getActivity(), "Update Item Inventory Successful", Toast.LENGTH_SHORT).show();
+                }
+                else{
+                    progressBar.setVisibility(View.GONE);
+                    backgroundLoading.setVisibility(View.GONE);
+                    btnSave.setVisibility(View.VISIBLE);
+                    Toast.makeText(getActivity(), "Update Item Shopping List Failed", Toast.LENGTH_SHORT).show();
+                    //clearText();
+                }
+            }
+        });
+    }
+
     /***********************************************************************************************
      ************************************* Listener variables ********************************************
      ***********************************************************************************************/
@@ -165,10 +226,14 @@ public class MoreItemInventoryEditFragment extends Fragment {
             batch.update(dItem, "soft", soft);
             batch.update(dItem, "hard", hard);
 
+
             batch.commit().addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     if(task.isSuccessful()) {
+
+                        //cShoppingList.get().addOnCompleteListener(getShoppingList);
+
                         progressBar.setVisibility(View.GONE);
                         backgroundLoading.setVisibility(View.GONE);
                         btnSave.setVisibility(View.VISIBLE);
@@ -177,8 +242,8 @@ public class MoreItemInventoryEditFragment extends Fragment {
                         Toast.makeText(getActivity(), "Update Item Inventory Successful", Toast.LENGTH_SHORT).show();
                     }
                     else{
+
                         Toast.makeText(getActivity(), "Update Item Inventory Failed", Toast.LENGTH_SHORT).show();
-                        //clearText();
                     }
                 }
             });
@@ -186,6 +251,26 @@ public class MoreItemInventoryEditFragment extends Fragment {
 
         }
     };
+
+    final OnCompleteListener<QuerySnapshot> getShoppingList = new OnCompleteListener<QuerySnapshot>() {
+        @Override
+        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+            if (task.isSuccessful()) {
+                ArrayList<String> shoppingListId = new ArrayList<>();
+
+                for (DocumentSnapshot document : task.getResult()) {
+                    shoppingListId.add(document.getId());
+                }
+
+                updateItemShoppingListStatus(shoppingListId);
+
+
+            } else {
+                Log.d("TAG", "Error getting Shoppinglist: ", task.getException());
+            }
+        }
+    };
+
 
 
     /***********************************************************************************************

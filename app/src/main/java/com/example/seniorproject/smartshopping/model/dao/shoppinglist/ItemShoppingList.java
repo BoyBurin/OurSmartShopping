@@ -14,6 +14,7 @@ public class ItemShoppingList {
     private long amount;
     private String name;
     private String barcodeId;
+    private int status;
     private View.OnClickListener deleteListener;
 
     /******************************************************************************************
@@ -24,10 +25,11 @@ public class ItemShoppingList {
 
     }
 
-    public ItemShoppingList(long amount, String name, String barcodeId){
+    public ItemShoppingList(long amount, String name, String barcodeId, int status){
         this.amount = amount;
         this.name = name;
         this.barcodeId = barcodeId;
+        this.status = status;
     }
 
     public long getAmount() {
@@ -56,6 +58,14 @@ public class ItemShoppingList {
 
     public void setDeleteListener(View.OnClickListener deleteListener){
         this.deleteListener = deleteListener;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
     }
 
     public View.OnClickListener getDeleteListener(){

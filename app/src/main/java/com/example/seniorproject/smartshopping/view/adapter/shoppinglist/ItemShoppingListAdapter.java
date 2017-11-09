@@ -74,6 +74,7 @@ public class ItemShoppingListAdapter extends BaseAdapter{
         long amount = itemShoppingList.getAmount();
         item.setItemName(itemShoppingList.getName());
         item.setAmount(amount);
+        item.setStatus(itemShoppingList.getStatus());
         item.setDeleteListener(itemShoppingLists.get(position).getDeleteListener());
 
         lastPositionInteger.setValue(position);

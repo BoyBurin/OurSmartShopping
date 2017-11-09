@@ -2,10 +2,12 @@ package com.example.seniorproject.smartshopping.view.customviewgroup;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.media.Image;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.seniorproject.smartshopping.R;
@@ -15,8 +17,14 @@ public class CustomViewGroupShoppingListItem extends BaseCustomViewGroup {
 
     private TextView tvCustomViewGroupShoopingListItemName;
     private TextView tvCustomViewGroupAmount;
-    private ImageButton imgBtnCustomViewGroupEditAmount;
-    private  ImageButton imgBtnCustomViewGroupDelete;
+    private ImageButton imgBtnCustomViewGroupDelete;
+    private ImageView imgViewStatusGreen;
+    private ImageView imgViewStatusYellow;
+    private ImageView imgViewStatusRed;
+
+    private final int GREEN_STATUS = 0;
+    private final int YELLOW_STATUS = 1;
+    private final int RED_STATUS = 2;
 
     public CustomViewGroupShoppingListItem(Context context) {
         super(context);
@@ -53,8 +61,10 @@ public class CustomViewGroupShoppingListItem extends BaseCustomViewGroup {
     private void initInstances() {
         tvCustomViewGroupShoopingListItemName = (TextView) findViewById(R.id.tvCustomViewGroupShoopingListItemName);
         tvCustomViewGroupAmount = (TextView) findViewById(R.id.tvCustomViewGroupAmount);
-        imgBtnCustomViewGroupEditAmount = (ImageButton) findViewById(R.id.imgBtnCustomViewGroupEditAmount);
         imgBtnCustomViewGroupDelete = (ImageButton) findViewById(R.id.imgBtnCustomViewGroupDelete);
+        imgViewStatusGreen = (ImageView) findViewById(R.id.imgViewStatusGreen);
+        imgViewStatusYellow = (ImageView) findViewById(R.id.imgViewStatusYellow);
+        imgViewStatusRed = (ImageView) findViewById(R.id.imgViewStatusRed);
     }
 
     private void initWithAttrs(AttributeSet attrs, int defStyleAttr, int defStyleRes) {
@@ -101,8 +111,24 @@ public class CustomViewGroupShoppingListItem extends BaseCustomViewGroup {
         this.tvCustomViewGroupAmount.setText(tvCustomViewGroupAmount + "");
     }
 
-    public void setDeleteListener(OnClickListener onClickListener){
+    public void setDeleteListener(OnClickListener onClickListener) {
         imgBtnCustomViewGroupDelete.setOnClickListener(onClickListener);
+    }
+
+    public void setStatus(long status){
+        imgViewStatusGreen.setVisibility(INVISIBLE);
+        imgViewStatusYellow.setVisibility(INVISIBLE);
+        imgViewStatusRed.setVisibility(INVISIBLE);
+
+        if(status == GREEN_STATUS){
+            imgViewStatusGreen.setVisibility(VISIBLE);
+        }
+        else if(status == YELLOW_STATUS){
+            imgViewStatusYellow.setVisibility(VISIBLE);
+        }
+        else{
+            imgViewStatusRed.setVisibility(VISIBLE);
+        }
     }
 
 }

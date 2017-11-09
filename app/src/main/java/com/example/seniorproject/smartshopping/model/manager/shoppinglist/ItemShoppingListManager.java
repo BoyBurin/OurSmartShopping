@@ -6,6 +6,8 @@ import com.example.seniorproject.smartshopping.model.dao.shoppinglist.ItemShoppi
 import com.example.seniorproject.smartshopping.model.manager.Contextor;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 
 /**
@@ -36,6 +38,11 @@ public class ItemShoppingListManager {
 
     public void addItemShoppingList(ItemShoppingList itemShoppingList){
         itemShoppingLists.add(itemShoppingList);
+        Collections.sort(itemShoppingLists, new ItemSort());
+    }
+
+    public void sortItem(){
+        Collections.sort(itemShoppingLists, new ItemSort());
     }
 
 
@@ -57,6 +64,36 @@ public class ItemShoppingListManager {
     public void removeItemShoppingList(String barcode){
         int index = getIndexByKey(barcode);
         itemShoppingLists.remove(index);
+    }
+
+    public ItemShoppingList getItemShoppingListByBarcode(String barcode){
+        int index = getIndexByKey(barcode);
+
+        return itemShoppingLists.get(index);
+    }
+
+    public class ItemSort implements Comparator<ItemShoppingList> {
+
+        @Override
+        public int compare(ItemShoppingList item1, ItemShoppingList item2) {
+            long value1 = item1.getStatus();
+            long value2 = item2.getStatus();
+
+            if(value1 < value2){
+                return -1;
+            }
+            else if(value1 > value2){
+                return 1;
+            }
+            else{
+                return 0;
+            }
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            return false;
+        }
     }
 
 
