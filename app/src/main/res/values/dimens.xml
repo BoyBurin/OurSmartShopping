@@ -27,4 +27,6 @@
     <dimen name="min_button_width">120dp</dimen>
     <dimen name="empty_space_height">16dp</dimen>
     <dimen name="user_icon_size">30dp</dimen>
+
+    <dimen name="button_size">24dp</dimen>
 </resources>

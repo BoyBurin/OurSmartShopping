@@ -51,6 +51,15 @@ public class PendingGroupMemberManager {
         return members;
     }
 
+    public void removePendingGroupMember(String id){
+        for(int i = 0 ; i < members.size() ; i++){
+            if(members.get(i).getId().equals(id)){
+                members.remove(i);
+                break;
+            }
+        }
+    }
+
 
 
 }

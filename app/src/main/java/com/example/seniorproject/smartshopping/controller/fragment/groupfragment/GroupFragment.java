@@ -218,6 +218,11 @@ public class GroupFragment extends Fragment {
                     case MODIFIED:
                         break;
                     case REMOVED:
+                        documentSnapshot = dc.getDocument();
+                        user = documentSnapshot.toObject(UserInGroup.class);
+                        userMap = new UserInGroupMap(documentSnapshot.getId(), user);
+                        userInGroupManager.removeUser(documentSnapshot.getId());
+                        setGroupInterface();
 
                         break;
                 }
@@ -252,6 +257,7 @@ public class GroupFragment extends Fragment {
                                                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                                                             @Override
                                                             public void onSuccess(Void aVoid) {
+                                                                pendingGroupMemberManager.removePendingGroupMember(documentSnapshot.getId());
                                                                 setGroupInterface();
                                                                 Toast.makeText(getContext(), "Accept" + pendingGroupMember.getName(), Toast.LENGTH_SHORT).show();
                                                                 Log.d("TAG", "DocumentSnapshot successfully written!");
@@ -283,6 +289,7 @@ public class GroupFragment extends Fragment {
                                     @Override
                                     public void onSuccess(Void aVoid) {
 
+                                        pendingGroupMemberManager.removePendingGroupMember(documentSnapshot.getId());
                                         setGroupInterface();
                                         Toast.makeText(getContext(), "Decline" + pendingGroupMember.getName(), Toast.LENGTH_SHORT).show();
                                         Log.d("TAG", "DocumentSnapshot successfully deleted!");
@@ -299,7 +306,8 @@ public class GroupFragment extends Fragment {
                         };
 
                         PendingGroupMemberWithAction pendingGroupMemberWithAction =
-                                new PendingGroupMemberWithAction(accept, decline, pendingGroupMember);
+                                new PendingGroupMemberWithAction(accept, decline, pendingGroupMember, documentSnapshot.getId());
+
 
                         pendingGroupMemberManager.addGroup(pendingGroupMemberWithAction);
                         setGroupInterface();

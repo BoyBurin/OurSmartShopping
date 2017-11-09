@@ -19,6 +19,7 @@ import com.example.seniorproject.smartshopping.model.daorecyclerview.group.Group
 import com.example.seniorproject.smartshopping.model.daorecyclerview.group.PendingGroupMemberRecyclerView;
 import com.example.seniorproject.smartshopping.model.daorecyclerview.group.TittleNameRecyclerView;
 import com.example.seniorproject.smartshopping.view.customviewgroup.CustomViewGroupMember;
+import com.example.seniorproject.smartshopping.view.transformation.CircleTransform;
 import com.example.seniorproject.smartshopping.view.viewholder.group.GroupDetailViewHolder;
 import com.example.seniorproject.smartshopping.view.viewholder.group.GroupMemberViewHolder;
 import com.example.seniorproject.smartshopping.view.viewholder.group.PendingGroupMemberViewHolder;
@@ -113,7 +114,7 @@ public class GroupRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.
         GroupDetailRecyclerView myItem = (GroupDetailRecyclerView) item;
         Group group = myItem.getGroup().getGroup();
 
-        setImageUrl(group.getPhotoUrl(), myHolder.imgViewGroup);
+        setImageUrlRect(group.getPhotoUrl(), myHolder.imgViewGroup);
         myHolder.tvGroupName.setText(group.getName());
         myHolder.tvQuote.setText(group.getQuote());
     }
@@ -145,11 +146,25 @@ public class GroupRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.
         ((CustomViewGroupMember)myHolder.itemView).setImageUrl(member.getPhotoUrl());
     }
 
-    private void setImageUrl(String url, ImageView imageView) {
+    public void setImageUrl(String url, ImageView imageView) {
         Glide.with(context)
                 .load(url)
-                .placeholder(R.drawable.loading) //default pic
-                .centerCrop()
+                .thumbnail(Glide.with(context).load(R.drawable.loading)
+                        //.placeholder(R.drawable.loading) //default pic
+                        .centerCrop())
+                //.error(Drawable pic)  picture has problem
+                .transform(new CircleTransform(context)) //Cool !!!
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .into(imageView);
+
+    }
+
+    public void setImageUrlRect(String url, ImageView imageView) {
+        Glide.with(context)
+                .load(url)
+                .thumbnail(Glide.with(context).load(R.drawable.loading)
+                        //.placeholder(R.drawable.loading) //default pic
+                        .centerCrop())
                 //.error(Drawable pic)  picture has problem
                 //.transform(new CircleTransform(context)) //Cool !!!
                 .diskCacheStrategy(DiskCacheStrategy.ALL)

@@ -11,15 +11,18 @@ public class PendingGroupMemberWithAction {
     private View.OnClickListener accept;
     private View.OnClickListener decline;
     private PendingGroupMember pendingGroupMember;
+    private String id;
 
     public PendingGroupMemberWithAction(){
 
     }
 
-    public PendingGroupMemberWithAction(View.OnClickListener accept, View.OnClickListener decline, PendingGroupMember pendingGroupMember){
+    public PendingGroupMemberWithAction(View.OnClickListener accept, View.OnClickListener decline, PendingGroupMember pendingGroupMember
+    , String id){
         this.accept = accept;
         this.decline = decline;
         this.pendingGroupMember = pendingGroupMember;
+        this.id = id;
     }
 
     public View.OnClickListener getAccept() {
@@ -44,5 +47,13 @@ public class PendingGroupMemberWithAction {
 
     public void setPendingGroupMember(PendingGroupMember pendingGroupMember) {
         this.pendingGroupMember = pendingGroupMember;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

@@ -44,6 +44,15 @@ public class UserInGroupManager {
         return users;
     }
 
+    public void removeUser(String id){
+        for(int i = 0 ; i < users.size() ; i++){
+            if(users.get(i).getId().equals(id)){
+                users.remove(i);
+                break;
+            }
+        }
+    }
+
     public void sortItem(){
         Collections.sort(users, new ItemSort());
     }
