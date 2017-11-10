@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/margin_padding"
+    android:weightSum="15">
+
+    <ImageView
+        android:id="@+id/imgViewPurchaseItem"
+        android:layout_width="0dp"
+        android:layout_height="64dp"
+        android:layout_weight="3"
+        android:padding="@dimen/margin_padding_small"
+        android:scaleType="centerCrop"
+        android:src="@drawable/bg_medium" />
+
+    <TextView
+        android:id="@+id/tvName"
+        android:layout_width="0dp"
+        android:layout_weight="6"
+        android:layout_height="64dp"
+        android:hint="Name"
+        android:padding="@dimen/margin_padding_small"
+        android:textSize="@dimen/text_size_extra_small"
+        android:gravity="center"/>
+
+    <TextView
+        android:id="@+id/tvAmount"
+        android:layout_width="0dp"
+        android:layout_weight="2"
+        android:layout_height="64dp"
+        android:hint="amount"
+        android:padding="@dimen/margin_padding_small"
+        android:textSize="@dimen/text_size_extra_small"
+        android:gravity="center"/>
+
+    <TextView
+        android:id="@+id/tvPrice"
+        android:layout_width="0dp"
+        android:layout_weight="2"
+        android:layout_height="64dp"
+        android:hint="price"
+        android:padding="@dimen/margin_padding_small"
+        android:textSize="@dimen/text_size_extra_small"
+        android:gravity="center"/>
+
+    <ImageButton
+        android:id="@+id/imgBtnDelete"
+        android:layout_width="0dp"
+        android:layout_height="64dp"
+        android:layout_weight="2"
+        android:src="@drawable/delete"
+        android:paddingVertical="@dimen/margin_padding_large"
+        android:scaleType="center"/>
+
+</LinearLayout>

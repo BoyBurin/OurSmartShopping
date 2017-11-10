@@ -20,6 +20,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.seniorproject.smartshopping.R;
 import com.example.seniorproject.smartshopping.model.dao.iteminventory.ItemInventory;
+import com.example.seniorproject.smartshopping.model.dao.iteminventory.ItemInventoryMap;
 import com.example.seniorproject.smartshopping.model.manager.group.GroupManager;
 import com.example.seniorproject.smartshopping.model.manager.iteminventory.ItemInventoryManager;
 import com.example.seniorproject.smartshopping.superuser.ProductList;
@@ -28,9 +29,12 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.Transaction;
 
@@ -51,6 +55,7 @@ public class DialogAddItemInventoryFragment extends DialogFragment {
     private FirebaseFirestore db;
     private CollectionReference cProductList;
     private CollectionReference cItems;
+    private ListenerRegistration cItemsListener;
 
     private ImageView imgItem;
     private TextView tvName;
@@ -67,6 +72,7 @@ public class DialogAddItemInventoryFragment extends DialogFragment {
     private TextView tvUnit;
     private EditText edtNumber;
 
+    private ItemInventoryManager itemInventoryManager = new ItemInventoryManager();
 
     private String photoUrl;
 
@@ -110,6 +116,7 @@ public class DialogAddItemInventoryFragment extends DialogFragment {
     }
 
     private void init(Bundle savedInstanceState) {
+        itemInventoryManager = new ItemInventoryManager();
         photoUrl = "bf";
         barcodeId = "vdf";
 
@@ -117,6 +124,8 @@ public class DialogAddItemInventoryFragment extends DialogFragment {
         cProductList = db.collection("productlist");
         cItems = db.collection("groups").document(GroupManager.getInstance().getCurrentGroup().getId())
                 .collection("items");
+
+        cItemsListener = cItems.addSnapshotListener(itemListener);
 
     }
 
@@ -191,6 +200,15 @@ public class DialogAddItemInventoryFragment extends DialogFragment {
         // Restore Instance State here
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        if(cItemsListener != null){
+            cItemsListener.remove();
+            cItemsListener = null;
+        }
+    }
 
     /***********************************************************************************************
      ************************************* Listener variables ********************************************
@@ -255,7 +273,6 @@ public class DialogAddItemInventoryFragment extends DialogFragment {
                     unit = productList.getUnit();
                     type = productList.getType();
 
-                    ItemInventoryManager itemInventoryManager = ItemInventoryManager.getInstance();
                     if(itemInventoryManager.isContain(barcodeId)){
                         rg.setVisibility(View.VISIBLE);
                         tvUnit.setVisibility(View.VISIBLE);
@@ -340,6 +357,61 @@ public class DialogAddItemInventoryFragment extends DialogFragment {
                 }
             });
 
+        }
+    };
+
+
+    final EventListener<QuerySnapshot> itemListener = new EventListener<QuerySnapshot>() {
+        @Override
+        public void onEvent(QuerySnapshot documentSnapshots, FirebaseFirestoreException e) {
+            if (e != null) {
+                Log.w("TAG", "listen:error", e);
+                return;
+            }
+
+
+            for (DocumentChange dc : documentSnapshots.getDocumentChanges()) {
+                switch (dc.getType()) {
+                    case ADDED:
+                        DocumentSnapshot documentSnapshot = dc.getDocument();
+                        ItemInventory item = documentSnapshot.toObject(ItemInventory.class);
+                        String id = documentSnapshot.getId();
+
+                        //Add
+                        ItemInventoryMap itemMap = new ItemInventoryMap(id, item);
+                        itemInventoryManager.addItemInventory(itemMap);
+
+                        //Toast.makeText(getContext(), "Added " + item.getName(), Toast.LENGTH_SHORT).show();
+
+                        break;
+
+                    case MODIFIED:
+                        documentSnapshot = dc.getDocument();
+                        ItemInventory update = documentSnapshot.toObject(ItemInventory.class);
+                        id = documentSnapshot.getId();
+
+                        int index = itemInventoryManager.getIndexByKey(id);
+                        itemMap = itemInventoryManager.getItemInventory(index);
+
+                        //Update
+                        itemMap.setItemInventory(update);
+                        itemInventoryManager.sortItem();
+
+                        Toast.makeText(getContext(), "Update " + update.getName(), Toast.LENGTH_SHORT).show();
+                        break;
+
+                    case REMOVED:
+                        documentSnapshot = dc.getDocument();
+                        item = documentSnapshot.toObject(ItemInventory.class);
+                        id = documentSnapshot.getId();
+
+                        index = itemInventoryManager.getIndexByKey(id);
+                        itemInventoryManager.removeItemInventory(index);
+
+                        Toast.makeText(getContext(), "Remove " + item.getName(), Toast.LENGTH_SHORT).show();
+                        break;
+                }
+            }
         }
     };
 

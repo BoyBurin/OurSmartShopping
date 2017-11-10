@@ -14,6 +14,7 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.example.seniorproject.smartshopping.R;
+import com.example.seniorproject.smartshopping.model.dao.iteminventory.ItemInventory;
 import com.example.seniorproject.smartshopping.model.dao.iteminventory.ItemInventoryMap;
 import com.example.seniorproject.smartshopping.model.dao.shoppinglist.ShoppingListMap;
 import com.example.seniorproject.smartshopping.model.datatype.MutableInteger;
@@ -23,8 +24,14 @@ import com.example.seniorproject.smartshopping.view.adapter.iteminventory.ItemIn
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -52,9 +59,12 @@ public class MoreShoppingListItemSelectorFragment extends Fragment {
     private ItemInventoryAdapter itemInventoryAdapter;
     private MutableInteger lastPositionInteger;
     private ItemInventoryMap currentItemInventoryMap;
+    private ItemInventoryManager itemInventoryManager;
 
     private FirebaseFirestore db;
     private CollectionReference cItemShoppingList;
+    private CollectionReference cItems;
+    private ListenerRegistration cItemsListener;
 
     private ImageButton addedButton;
 
@@ -100,6 +110,7 @@ public class MoreShoppingListItemSelectorFragment extends Fragment {
     }
 
     private void init(Bundle savedInstanceState) {
+        itemInventoryManager = new ItemInventoryManager();
         lastPositionInteger = new MutableInteger(-1);
         itemInventoryAdapter = new ItemInventoryAdapter(lastPositionInteger);
 
@@ -112,12 +123,18 @@ public class MoreShoppingListItemSelectorFragment extends Fragment {
                 .collection("shoppinglists").document(shoppingListId)
                 .collection("items");
 
+        cItems = db.collection("groups")
+                .document(GroupManager.getInstance().getCurrentGroup().getId())
+                .collection("items");
+
+        cItemsListener = cItems.addSnapshotListener(itemListener);
+
     }
 
     @SuppressWarnings("UnusedParameters")
     private void initInstances(View rootView, Bundle savedInstanceState) {
         gridView = (GridView) rootView.findViewById(R.id.gridView);
-        itemInventoryAdapter.setItemInventories(ItemInventoryManager.getInstance().getItemInventories());
+        itemInventoryAdapter.setItemInventories(itemInventoryManager.getItemInventories());
         gridView.setAdapter(itemInventoryAdapter);
         itemInventoryAdapter.notifyDataSetChanged();
 
@@ -154,6 +171,15 @@ public class MoreShoppingListItemSelectorFragment extends Fragment {
         // Restore Instance State here
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        if(cItemsListener != null){
+            cItemsListener.remove();
+            cItemsListener = null;
+        }
+    }
 
     /***********************************************************************************************
      ************************************* Listener variables ********************************************
@@ -164,7 +190,7 @@ public class MoreShoppingListItemSelectorFragment extends Fragment {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             AddShoppingListItemListener addShoppingListItemListener =
                     (AddShoppingListItemListener)getParentFragment();
-            currentItemInventoryMap = ItemInventoryManager.getInstance().getItemInventory(position);
+            currentItemInventoryMap = itemInventoryManager.getItemInventory(position);
             addShoppingListItemListener.setName(currentItemInventoryMap.getItemInventory().getName());
         }
     };
@@ -206,6 +232,70 @@ public class MoreShoppingListItemSelectorFragment extends Fragment {
                                     Toast.makeText(getContext(), "Add Item in Shopping List Failed", Toast.LENGTH_SHORT).show();
                                 }
                             });
+                }
+            }
+        }
+    };
+
+
+    final EventListener<QuerySnapshot> itemListener = new EventListener<QuerySnapshot>() {
+        @Override
+        public void onEvent(QuerySnapshot documentSnapshots, FirebaseFirestoreException e) {
+            if (e != null) {
+                Log.w("TAG", "listen:error", e);
+                return;
+            }
+
+
+            for (DocumentChange dc : documentSnapshots.getDocumentChanges()) {
+                switch (dc.getType()) {
+                    case ADDED:
+                        DocumentSnapshot documentSnapshot = dc.getDocument();
+                        ItemInventory item = documentSnapshot.toObject(ItemInventory.class);
+                        String id = documentSnapshot.getId();
+
+                        //Add
+                        ItemInventoryMap itemMap = new ItemInventoryMap(id, item);
+                        itemInventoryManager.addItemInventory(itemMap);
+
+                        itemInventoryAdapter.setItemInventories(itemInventoryManager.getItemInventories());
+                        itemInventoryAdapter.notifyDataSetChanged();
+
+                        Toast.makeText(getContext(), "Added " + item.getName(), Toast.LENGTH_SHORT).show();
+
+                        break;
+
+                    case MODIFIED:
+                        documentSnapshot = dc.getDocument();
+                        ItemInventory update = documentSnapshot.toObject(ItemInventory.class);
+                        id = documentSnapshot.getId();
+
+                        int index = itemInventoryManager.getIndexByKey(id);
+                        itemMap = itemInventoryManager.getItemInventory(index);
+
+                        //Update
+                        itemMap.setItemInventory(update);
+                        itemInventoryManager.sortItem();
+
+                        itemInventoryAdapter.setItemInventories(itemInventoryManager.getItemInventories());
+                        itemInventoryAdapter.notifyDataSetChanged();
+
+                        Toast.makeText(getContext(), "Update " + update.getName(), Toast.LENGTH_SHORT).show();
+                        break;
+
+                    case REMOVED:
+                        documentSnapshot = dc.getDocument();
+                        item = documentSnapshot.toObject(ItemInventory.class);
+                        id = documentSnapshot.getId();
+
+                        index = itemInventoryManager.getIndexByKey(id);
+                        itemInventoryManager.removeItemInventory(index);
+
+                        itemInventoryAdapter.setItemInventories(itemInventoryManager.getItemInventories());
+                        itemInventoryAdapter.notifyDataSetChanged();
+
+                        Toast.makeText(getContext(), "Remove " + item.getName(), Toast.LENGTH_SHORT).show();
+                        break;
                 }
             }
         }

@@ -295,7 +295,6 @@ public class GroupSettingFragment extends Fragment {
                             String groupId = documentSnapshot.getId();
                             GroupMap currentGroup = new GroupMap(groupId, group);
 
-                            ItemInventoryManager.getInstance().reset();
                             ShoppingListManager.getInstance().reset();
                             gm.setCurrentGroup(currentGroup);
 

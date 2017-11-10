@@ -43,5 +43,11 @@
 
     <string name="receipt_name"></string>
     <string name="receipt_location"></string>
+    <string name="total_price">Total Price</string>
+    <string name="baht">Baht</string>
+    <string name="save_button">Save</string>
+
+    <string name="cancel_button">Cancel</string>
+    <string name="add_button">Add</string>
 
 </resources>

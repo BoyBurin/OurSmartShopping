@@ -59,7 +59,6 @@ public class LoginActivity extends AppCompatActivity implements LoginFragment.Lo
 
     private void initInstances(){
 
-        ItemInventoryManager.getInstance().reset();
         ShoppingListManager.getInstance().reset();
         GroupManager.getInstance().reset();
         progressbarLogin = (ProgressBar) findViewById(R.id.progressbarLogin);

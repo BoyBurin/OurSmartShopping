@@ -10,11 +10,12 @@ import java.util.Scanner;
 
 public class LevenshteinDistance {
 
-	public ArrayList<ItemInventoryMap> doLevenshteinDistance(ArrayList<String> data){
+	public ArrayList<ItemInventoryMap> doLevenshteinDistance(ArrayList<String> data, ItemInventoryManager itemInventoryManager){
+
 
 		ArrayList<ItemInventoryMap> itemInventoryMaps = new ArrayList<ItemInventoryMap>();
-		for(int i = 0 ; i < ItemInventoryManager.getInstance().getSize() ; i++){
-			itemInventoryMaps.add(ItemInventoryManager.getInstance().getItemInventory(i));
+		for(int i = 0 ; i < itemInventoryManager.getSize() ; i++){
+			itemInventoryMaps.add(itemInventoryManager.getItemInventory(i));
 
 		}
 

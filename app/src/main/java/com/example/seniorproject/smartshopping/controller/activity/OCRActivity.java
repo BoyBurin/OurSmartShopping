@@ -36,19 +36,23 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.seniorproject.smartshopping.controller.fragment.purchaseitem.PurchaseItemOCRFragment;
 import com.example.seniorproject.smartshopping.model.dao.iteminventory.ItemInventory;
 import com.example.seniorproject.smartshopping.model.dao.iteminventory.ItemInventoryMap;
 import com.example.seniorproject.smartshopping.model.dao.itemocr.ItemOCR;
 import com.example.seniorproject.smartshopping.model.dao.productstore.ProductCrowd;
 import com.example.seniorproject.smartshopping.model.datatype.MutableInteger;
 import com.example.seniorproject.smartshopping.model.manager.group.GroupManager;
+import com.example.seniorproject.smartshopping.model.manager.iteminventory.ItemInventoryManager;
 import com.example.seniorproject.smartshopping.model.manager.itemocr.ItemOCRManager;
 import com.example.seniorproject.smartshopping.model.ocrtools.LevenshteinDistance;
 import com.example.seniorproject.smartshopping.model.util.PermissionUtils;
@@ -82,8 +86,13 @@ import com.example.seniorproject.smartshopping.R;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.Transaction;
 
 public class OCRActivity extends AppCompatActivity {
@@ -96,8 +105,13 @@ public class OCRActivity extends AppCompatActivity {
     public static final int CAMERA_PERMISSIONS_REQUEST = 2;
     public static final int CAMERA_IMAGE_REQUEST = 3;
 
+    public static final String PURCHASE_ITEM_OCR_FRAGMENT = "purchaseITEMOCRFRAGMENT";
+
     private TextView mImageDetails;
-    private ImageView mMainImage;
+    private RelativeLayout activityLayout;
+    private FrameLayout containerOCR;
+    private RelativeLayout loadingOCR;
+    //private ImageView mMainImage;
     private Spinner spinner;
 
     private long startTimeMS;
@@ -105,21 +119,26 @@ public class OCRActivity extends AppCompatActivity {
 
     private ItemOCR itemOCR;
     private ItemOCRManager itemOCRManager;
-    private ItemOCRAdapter itemOCRAdapter;
-    private MutableInteger lastPositionInteger;
+    private ItemInventoryManager itemInventoryManager;
+    /*private ItemOCRAdapter itemOCRAdapter;
+    private MutableInteger lastPositionInteger;*/
 
     private FloatingActionButton fab;
-    private ListView listView;
-    private TextView tvTotalPrice;
-    private Button btnSaveOCR;
-    private TextView storeName;
+    //private ListView listView;
+    //private TextView tvTotalPrice;
+    //private Button btnSaveOCR;
+    //private TextView storeName;
     private ProgressBar progressBarOCR;
 
-    private DatabaseReference mDatabaseRef;
-    private FirebaseFirestore db;
+    /*private DatabaseReference mDatabaseRef;
+    private FirebaseFirestore db;*/
 
     private ArrayAdapter<String> adapter;
     private String currentStore;
+
+    private FirebaseFirestore db;
+    private CollectionReference cItems;
+    private ListenerRegistration cItemsListener;
 
 
     @Override
@@ -160,8 +179,7 @@ public class OCRActivity extends AppCompatActivity {
         });
 
         mImageDetails = (TextView) findViewById(R.id.image_details);
-        mMainImage = (ImageView) findViewById(R.id.main_image);
-        mMainImage.setVisibility(View.GONE);
+
 
         init();
 
@@ -173,42 +191,24 @@ public class OCRActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setTitle(GroupManager.getInstance().getCurrentGroup().getGroup().getName());
 
+        itemInventoryManager = new ItemInventoryManager();
         db = FirebaseFirestore.getInstance();
+        cItems = db.collection("groups")
+                .document(GroupManager.getInstance().getCurrentGroup().getId())
+                .collection("items");
 
-        mDatabaseRef = FirebaseDatabase.getInstance().getReference();
-        lastPositionInteger = new MutableInteger(-1);
-        itemOCRManager = new ItemOCRManager();
-        itemOCRAdapter = new ItemOCRAdapter(lastPositionInteger);
-        tvTotalPrice = (TextView) findViewById(R.id.tvTotalPrice);
-        btnSaveOCR = (Button) findViewById(R.id.btnSaveOCR);
+        cItemsListener = cItems.addSnapshotListener(itemListener);
+
         progressBarOCR = (ProgressBar) findViewById(R.id.progressBarOCR);
+        loadingOCR = (RelativeLayout) findViewById(R.id.loadingOCR);
         spinner = (Spinner) findViewById(R.id.spinner);
-        storeName = (TextView) findViewById(R.id.store_name);
+        activityLayout = (RelativeLayout) findViewById(R.id.activityLayout);
+        containerOCR = (FrameLayout) findViewById(R.id.containerOCR);
+        itemOCRManager = new ItemOCRManager();
 
         currentStore = "Big C Bangpakok";
         String[] stores = {"Big C Bangpakok", "Max Value Pracha Uthit", "Tesco Lotus Bangpakok", "Tesco Lotus ตลาดโลตัสประชาอุทิศ"};
         adapter = new ArrayAdapter<String>(getApplicationContext(),  android.R.layout.simple_spinner_item, stores);
-        //adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-        tvTotalPrice.setVisibility(View.GONE);
-        btnSaveOCR.setOnClickListener(saveInfoListener);
-
-
-        listView = (ListView) findViewById(R.id.listViewItemOCR);
-
-        /*Log.d("Size: ", "" + ItemInventoryManager.getInstance().getSize());
-        for (int i = 0; i < ItemInventoryManager.getInstance().getSize(); i++) {
-            ItemInventoryMap itemInventoryMap = ItemInventoryManager.getInstance().getItemInventory(i);
-            itemOCRManager.addItemOCR(new ItemOCR(itemInventoryMap, 0, 1));
-        }
-
-        Log.d("Size: ", "" + itemOCRManager.getSize()); */
-        itemOCRAdapter.setItemOCRs(itemOCRManager.getItemOCRs());
-
-
-        listView.setAdapter(itemOCRAdapter);
-
-        itemOCRAdapter.notifyDataSetChanged();
 
         spinner.setAdapter(adapter);
         spinner.setOnItemSelectedListener(storeSelectedLister);
@@ -281,8 +281,8 @@ public class OCRActivity extends AppCompatActivity {
                                 1200);
 
                 callCloudVision(bitmap);
-                mMainImage.setVisibility(View.VISIBLE);
-                mMainImage.setImageBitmap(bitmap);
+                /*mMainImage.setVisibility(View.VISIBLE);
+                mMainImage.setImageBitmap(bitmap);*/
 
             } catch (IOException e) {
                 Log.d(TAG, "Image picking failed because " + e.getMessage());
@@ -297,6 +297,8 @@ public class OCRActivity extends AppCompatActivity {
     private void callCloudVision(final Bitmap bitmap) throws IOException {
         // Switch text to loading
         mImageDetails.setText(R.string.loading_message);
+        activityLayout.setVisibility(View.GONE);
+        loadingOCR.setVisibility(View.VISIBLE);
 
         // Do the real work in an async task, because we need to use the network anyway
         new AsyncTask<Object, Void, String>() {
@@ -400,7 +402,7 @@ public class OCRActivity extends AppCompatActivity {
                 LevenshteinDistance levenshteinDistance = new LevenshteinDistance();
 
                 ArrayList<ItemInventoryMap> itemInventoryMaps =
-                        levenshteinDistance.doLevenshteinDistance(words);
+                        levenshteinDistance.doLevenshteinDistance(words, itemInventoryManager);
 
                 for (int i = 0; i < itemInventoryMaps.size(); i++) {
                     ItemInventoryMap itemInventoryMap = itemInventoryMaps.get(i);
@@ -408,20 +410,14 @@ public class OCRActivity extends AppCompatActivity {
                     itemOCRManager.addItemOCR(new ItemOCR(itemInventoryMap, price, 1));
                 }
 
-                itemOCRAdapter.setItemOCRs(itemOCRManager.getItemOCRs());
-                itemOCRAdapter.notifyDataSetChanged();
 
-                tvTotalPrice.setVisibility(View.VISIBLE);
-                tvTotalPrice.setText("Total:    " + totalPrice + "   บาท");
+                loadingOCR.setVisibility(View.GONE);
+                PurchaseItemOCRFragment purchaseItemOCRFragment = PurchaseItemOCRFragment
+                        .newInstance(itemOCRManager.getItemOCRs(), currentStore);
 
-
-                btnSaveOCR.setVisibility(View.VISIBLE);
-                storeName.setVisibility(View.VISIBLE);
-                storeName.setText(currentStore);
-                spinner.setVisibility(View.GONE);
-                mImageDetails.setVisibility(View.GONE);
-                fab.setVisibility(View.GONE);
-
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.containerOCR, purchaseItemOCRFragment, PURCHASE_ITEM_OCR_FRAGMENT)
+                        .commit();
 
 
 
@@ -457,6 +453,7 @@ public class OCRActivity extends AppCompatActivity {
         builder.append(String.format("(Total spent %.2f secs, including %.2f secs for upload)\n\n", spentMS / 1000f, uploadDurationSec));
 
         List<EntityAnnotation> labels = response.getResponses().get(0).getTextAnnotations();
+        // ดักด้วย
         Log.i("JackTest", "total labels:" + labels.size());
         if (labels != null) {
             for (int i = 0; i < labels.size(); i++) {
@@ -530,12 +527,21 @@ public class OCRActivity extends AppCompatActivity {
         return str.matches("[\\u0E01-\\u0E5B][\\u0E01-\\u0E5B0-9]*");  //match a number with optional '-' and decimal.
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        if(cItemsListener != null){
+            cItemsListener.remove();
+            cItemsListener = null;
+        }
+    }
 
     /******************************************************************************************
      * ****************************** Listener variable *********************************************
      *******************************************************************************************/
 
-    final View.OnClickListener saveInfoListener = new View.OnClickListener() {
+   /* final View.OnClickListener saveInfoListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
             progressBarOCR.setVisibility(View.VISIBLE);
@@ -605,7 +611,7 @@ public class OCRActivity extends AppCompatActivity {
                         }
                     });
 
-           /* for (int i = 0; i < itemOCRManager.getItemOCRs().size(); i++) {
+           ตรงนี้ for (int i = 0; i < itemOCRManager.getItemOCRs().size(); i++) {
                 ItemOCR itemOCR = itemOCRManager.getItemOCRs().get(i);
                 ItemInventory itemInventory = itemOCR.getItemInventoryMap().getItemInventory();
                 String itemInventoryID = itemOCR.getItemInventoryMap().getId();
@@ -625,9 +631,9 @@ public class OCRActivity extends AppCompatActivity {
                 });
             }
             Toast.makeText(OCRActivity.this, "Update Item Inventory Success", Toast.LENGTH_SHORT).show();
-            finish();*/
+            finish();
         }
-    };
+    }; */
 
     final AdapterView.OnItemSelectedListener storeSelectedLister = new AdapterView.OnItemSelectedListener() {
         @Override
@@ -651,6 +657,60 @@ public class OCRActivity extends AppCompatActivity {
         @Override
         public void onNothingSelected(AdapterView<?> adapterView) {
 
+        }
+    };
+
+    final EventListener<QuerySnapshot> itemListener = new EventListener<QuerySnapshot>() {
+        @Override
+        public void onEvent(QuerySnapshot documentSnapshots, FirebaseFirestoreException e) {
+            if (e != null) {
+                Log.w("TAG", "listen:error", e);
+                return;
+            }
+
+
+            for (DocumentChange dc : documentSnapshots.getDocumentChanges()) {
+                switch (dc.getType()) {
+                    case ADDED:
+                        DocumentSnapshot documentSnapshot = dc.getDocument();
+                        ItemInventory item = documentSnapshot.toObject(ItemInventory.class);
+                        String id = documentSnapshot.getId();
+
+                        //Add
+                        ItemInventoryMap itemMap = new ItemInventoryMap(id, item);
+                        itemInventoryManager.addItemInventory(itemMap);
+
+                        //Toast.makeText(OCRActivity.this, "Added " + item.getName(), Toast.LENGTH_SHORT).show();
+
+                        break;
+
+                    case MODIFIED:
+                        documentSnapshot = dc.getDocument();
+                        ItemInventory update = documentSnapshot.toObject(ItemInventory.class);
+                        id = documentSnapshot.getId();
+
+                        int index = itemInventoryManager.getIndexByKey(id);
+                        itemMap = itemInventoryManager.getItemInventory(index);
+
+                        //Update
+                        itemMap.setItemInventory(update);
+                        itemInventoryManager.sortItem();
+
+                        Toast.makeText(OCRActivity.this, "Update " + update.getName(), Toast.LENGTH_SHORT).show();
+                        break;
+
+                    case REMOVED:
+                        documentSnapshot = dc.getDocument();
+                        item = documentSnapshot.toObject(ItemInventory.class);
+                        id = documentSnapshot.getId();
+
+                        index = itemInventoryManager.getIndexByKey(id);
+                        itemInventoryManager.removeItemInventory(index);
+
+                        Toast.makeText(OCRActivity.this, "Remove " + item.getName(), Toast.LENGTH_SHORT).show();
+                        break;
+                }
+            }
         }
     };
 

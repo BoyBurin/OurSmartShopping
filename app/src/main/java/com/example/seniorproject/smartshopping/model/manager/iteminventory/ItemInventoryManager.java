@@ -16,23 +16,16 @@ public class ItemInventoryManager {
      * ****************************** Variable *********************************************
      *******************************************************************************************/
 
-    private static ItemInventoryManager instance;
     private ArrayList<ItemInventoryMap> itemInventoryMaps;
+    private Context mContext;
 
     /******************************************************************************************
      * ****************************** Methods *********************************************
      *******************************************************************************************/
 
 
-    public static ItemInventoryManager getInstance() {
-        if (instance == null)
-            instance = new ItemInventoryManager();
-        return instance;
-    }
 
-    private Context mContext;
-
-    private ItemInventoryManager() {
+    public ItemInventoryManager() {
 
         mContext = Contextor.getInstance().getContext();
         itemInventoryMaps = new ArrayList<ItemInventoryMap>();

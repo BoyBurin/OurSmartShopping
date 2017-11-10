@@ -5,6 +5,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.AttributeSet;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -13,27 +14,28 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.seniorproject.smartshopping.R;
 import com.example.seniorproject.smartshopping.view.state.BundleSavedState;
 
-public class CustomViewGroupItemOCR extends BaseCustomViewGroup {
+public class CustomViewGroupPurchaseItem extends BaseCustomViewGroup {
 
-    private ImageView imgItem;
+    private ImageView imgViewPurchaseItem;
     private TextView tvName;
     private TextView tvAmount;
     private TextView tvPrice;
+    private ImageButton imgBtnDelete;
 
-    public CustomViewGroupItemOCR(Context context) {
+    public CustomViewGroupPurchaseItem(Context context) {
         super(context);
         initInflate();
         initInstances();
     }
 
-    public CustomViewGroupItemOCR(Context context, AttributeSet attrs) {
+    public CustomViewGroupPurchaseItem(Context context, AttributeSet attrs) {
         super(context, attrs);
         initInflate();
         initInstances();
         initWithAttrs(attrs, 0, 0);
     }
 
-    public CustomViewGroupItemOCR(Context context, AttributeSet attrs, int defStyleAttr) {
+    public CustomViewGroupPurchaseItem(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         initInflate();
         initInstances();
@@ -41,7 +43,7 @@ public class CustomViewGroupItemOCR extends BaseCustomViewGroup {
     }
 
     @TargetApi(21)
-    public CustomViewGroupItemOCR(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public CustomViewGroupPurchaseItem(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         initInflate();
         initInstances();
@@ -49,14 +51,15 @@ public class CustomViewGroupItemOCR extends BaseCustomViewGroup {
     }
 
     private void initInflate() {
-        inflate(getContext(), R.layout.custom_view_group_ocr_item, this);
+        inflate(getContext(), R.layout.custom_view_group_purchase_item, this);
     }
 
     private void initInstances() {
-        imgItem = (ImageView) findViewById(R.id.imgItem);
+        imgViewPurchaseItem = (ImageView) findViewById(R.id.imgViewPurchaseItem);
         tvName = (TextView) findViewById(R.id.tvName);
         tvAmount = (TextView) findViewById(R.id.tvAmount);
         tvPrice = (TextView) findViewById(R.id.tvPrice);
+        imgBtnDelete = (ImageButton) findViewById(R.id.imgBtnDelete);
     }
 
     private void initWithAttrs(AttributeSet attrs, int defStyleAttr, int defStyleRes) {
@@ -95,7 +98,11 @@ public class CustomViewGroupItemOCR extends BaseCustomViewGroup {
                         .centerCrop())
                 //.error(Drawable pic)  picture has problem
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .into(imgItem);
+                .into(imgViewPurchaseItem);
+    }
+
+    public void setImgBtnDelete(OnClickListener deleteListener){
+        imgBtnDelete.setOnClickListener(deleteListener);
     }
 
 

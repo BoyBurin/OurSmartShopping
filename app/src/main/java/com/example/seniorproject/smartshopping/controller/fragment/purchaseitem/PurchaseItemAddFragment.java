@@ -1,33 +1,31 @@
-package com.example.seniorproject.smartshopping.controller.fragment.inventoryfragment;
+package com.example.seniorproject.smartshopping.controller.fragment.purchaseitem;
 
-/**
- * Created by thamm on 9/9/2560.
- */
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.GridView;
 import android.widget.Toast;
 
 import com.example.seniorproject.smartshopping.R;
+import com.example.seniorproject.smartshopping.controller.activity.OCRActivity;
+import com.example.seniorproject.smartshopping.controller.fragment.inventoryfragment.InventoryFragment;
 import com.example.seniorproject.smartshopping.model.dao.iteminventory.ItemInventory;
 import com.example.seniorproject.smartshopping.model.dao.iteminventory.ItemInventoryMap;
-import com.example.seniorproject.smartshopping.model.daorecyclerview.iteminventory.BaseItemInventory;
-import com.example.seniorproject.smartshopping.model.daorecyclerview.iteminventory.ItemInventoryCreator;
-import com.example.seniorproject.smartshopping.model.datatype.MutableInteger;
+import com.example.seniorproject.smartshopping.model.dao.itemocr.ItemOCR;
+import com.example.seniorproject.smartshopping.model.dao.itemocr.PurchaseItemWithAction;
+import com.example.seniorproject.smartshopping.model.daorecyclerview.addpurchaseitem.AddPurchaseItemCreator;
+import com.example.seniorproject.smartshopping.model.daorecyclerview.addpurchaseitem.BaseAddPurchaseItem;
 import com.example.seniorproject.smartshopping.model.manager.group.GroupManager;
 import com.example.seniorproject.smartshopping.model.manager.iteminventory.ItemInventoryManager;
-import com.example.seniorproject.smartshopping.view.adapter.iteminventory.ItemInventoryAdapter;
-import com.example.seniorproject.smartshopping.view.recyclerviewadapter.ItemInventoryRecyclerViewAdapter;
+import com.example.seniorproject.smartshopping.view.customviewgroup.CustomViewGroupAddPurchaseItemDetail;
+import com.example.seniorproject.smartshopping.view.customviewgroup.CustomViewGroupPurchaseItem;
+import com.example.seniorproject.smartshopping.view.recyclerviewadapter.AddPurchaseItemRecyclerViewAdapter;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -39,47 +37,49 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 
-public class InventoryFragment extends Fragment implements ItemInventoryRecyclerViewAdapter.OnItemClickListener{
+
+public class PurchaseItemAddFragment extends Fragment implements AddPurchaseItemRecyclerViewAdapter.OnItemClickListener {
+
+
+    /***********************************************************************************************
+     ************************************* Interface ********************************************
+     ***********************************************************************************************/
+
+    interface AddPurchaseItemInterface{
+        public void addPurchaseItem(ItemOCR purchaseItem);
+    }
 
     /***********************************************************************************************
      ************************************* Variable class ********************************************
      ***********************************************************************************************/
-    public interface MoreItemInventoryListener{
-        void goToMoreItemInventory(ItemInventoryMap itemInventoryMap);
-    }
-
-    public interface ItemInventoryFloatingButton{
-        void setItemInventoryFloationgButton();
-    }
-
-    private FloatingActionButton fab;
 
 
+    private CustomViewGroupAddPurchaseItemDetail customViewGroupItemDetail;
     private RecyclerView recyclerView;
-    private ItemInventoryRecyclerViewAdapter itemInventoryRecyclerViewAdapter;
 
-    private ArrayList<BaseItemInventory> baseItemInventories;
-    private ArrayList<String> types;
-    private ItemInventoryCreator itemInventoryCreator;
+    private AddPurchaseItemRecyclerViewAdapter addPurchaseItemRecyclerViewAdapter;
+    private ArrayList<ItemInventoryMap> itemInventoryMaps;
     private ItemInventoryManager itemInventoryManager;
+    private AddPurchaseItemCreator addPurchaseItemCreator;
+    private ArrayList<BaseAddPurchaseItem> baseAddPurchaseItems;
+    private ItemInventoryMap currentItem;
 
     private FirebaseFirestore db;
     private CollectionReference cItems;
     private ListenerRegistration cItemsListener;
 
 
-
     /***********************************************************************************************
      ************************************* Method class ********************************************
      ***********************************************************************************************/
 
-    public InventoryFragment() {
+    public PurchaseItemAddFragment() {
         super();
     }
 
     @SuppressWarnings("unused")
-    public static InventoryFragment newInstance() {
-        InventoryFragment fragment = new InventoryFragment();
+    public static PurchaseItemAddFragment newInstance() {
+        PurchaseItemAddFragment fragment = new PurchaseItemAddFragment();
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
@@ -97,18 +97,17 @@ public class InventoryFragment extends Fragment implements ItemInventoryRecycler
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_main_inventory, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_main_purchase_item_add, container, false);
         initInstances(rootView, savedInstanceState);
         return rootView;
     }
 
     private void init(Bundle savedInstanceState) {
-        // Init Fragment level's variable(s) here
         itemInventoryManager = new ItemInventoryManager();
-        baseItemInventories = new ArrayList<>();
-        itemInventoryCreator = new ItemInventoryCreator();
-        types = itemInventoryCreator.getTypes(itemInventoryManager.getItemInventoryMaps());
-        itemInventoryRecyclerViewAdapter = new ItemInventoryRecyclerViewAdapter(getContext());
+        baseAddPurchaseItems = new ArrayList<>();
+        addPurchaseItemCreator = new AddPurchaseItemCreator();
+        itemInventoryMaps = new ArrayList<>();
+        addPurchaseItemRecyclerViewAdapter = new AddPurchaseItemRecyclerViewAdapter(getContext());
 
         db = FirebaseFirestore.getInstance();
         cItems = db.collection("groups")
@@ -117,36 +116,30 @@ public class InventoryFragment extends Fragment implements ItemInventoryRecycler
 
         cItemsListener = cItems.addSnapshotListener(itemListener);
 
+
     }
 
     @SuppressWarnings("UnusedParameters")
     private void initInstances(View rootView, Bundle savedInstanceState) {
 
         recyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerView);
+        customViewGroupItemDetail = (CustomViewGroupAddPurchaseItemDetail) rootView.findViewById(R.id.customViewGroupItemDetail);
 
         GridLayoutManager manager = new GridLayoutManager(getContext(), 2);
         manager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
             @Override
             public int getSpanSize(int position) {
-                if(baseItemInventories.get(position).getType() == BaseItemInventory.ITEM_INVENTORY){
+                if(baseAddPurchaseItems.get(position).getType() == BaseAddPurchaseItem.ADD_PURCHASE_ITEM){
                     return 1;
                 }
                 else return 2;
             }
         });
 
+        addPurchaseItemRecyclerViewAdapter.setItemClickListener(this);
         recyclerView.setLayoutManager(manager);
-        recyclerView.setAdapter(itemInventoryRecyclerViewAdapter);
-
-        fab = (FloatingActionButton) rootView.findViewById(R.id.fab);
-        fab.setOnClickListener(addItemListener);
-
-
-
-
-
+        recyclerView.setAdapter(addPurchaseItemRecyclerViewAdapter);
     }
-
 
     @Override
     public void onStart() {
@@ -156,12 +149,12 @@ public class InventoryFragment extends Fragment implements ItemInventoryRecycler
     @Override
     public void onStop() {
         super.onStop();
-
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
+
         if(cItemsListener != null){
             cItemsListener.remove();
             cItemsListener = null;
@@ -185,22 +178,19 @@ public class InventoryFragment extends Fragment implements ItemInventoryRecycler
         // Restore Instance State here
     }
 
-    public void setBaseItemInventories(){
+    public void setInterface(){
+        baseAddPurchaseItems = new ArrayList<>();
 
-        types = itemInventoryCreator.updateTypes(types, itemInventoryManager.getItemInventoryMaps());
-        baseItemInventories = itemInventoryCreator.createItemInventories(itemInventoryManager.getItemInventoryMaps(), types);
+        baseAddPurchaseItems.addAll(addPurchaseItemCreator.createAddPurchaseItem(itemInventoryManager.getItemInventoryMaps()));
+        baseAddPurchaseItems.add(addPurchaseItemCreator.createAddPurchaseItemButton(cancelListener, addListener));
 
-        itemInventoryRecyclerViewAdapter.setItemInventories(baseItemInventories);
-        itemInventoryRecyclerViewAdapter.setItemClickListener(this);
-        itemInventoryRecyclerViewAdapter.notifyDataSetChanged();
-
-        Log.d("size", "" + baseItemInventories.size());
+        addPurchaseItemRecyclerViewAdapter.setAddPurchaseItems(baseAddPurchaseItems);
+        addPurchaseItemRecyclerViewAdapter.notifyDataSetChanged();
     }
 
     /***********************************************************************************************
      ************************************* Listener variables ********************************************
      ***********************************************************************************************/
-
 
     final EventListener<QuerySnapshot> itemListener = new EventListener<QuerySnapshot>() {
         @Override
@@ -221,7 +211,7 @@ public class InventoryFragment extends Fragment implements ItemInventoryRecycler
                         //Add
                         ItemInventoryMap itemMap = new ItemInventoryMap(id, item);
                         itemInventoryManager.addItemInventory(itemMap);
-                        setBaseItemInventories();
+                        setInterface();
 
                         //Toast.makeText(getContext(), "Added " + item.getName(), Toast.LENGTH_SHORT).show();
 
@@ -238,7 +228,7 @@ public class InventoryFragment extends Fragment implements ItemInventoryRecycler
                         //Update
                         itemMap.setItemInventory(update);
                         itemInventoryManager.sortItem();
-                        setBaseItemInventories();
+                        setInterface();
 
                         Toast.makeText(getContext(), "Update " + update.getName(), Toast.LENGTH_SHORT).show();
                         break;
@@ -250,7 +240,8 @@ public class InventoryFragment extends Fragment implements ItemInventoryRecycler
 
                         index = itemInventoryManager.getIndexByKey(id);
                         itemInventoryManager.removeItemInventory(index);
-                        setBaseItemInventories();
+
+                        setInterface();
 
                         Toast.makeText(getContext(), "Remove " + item.getName(), Toast.LENGTH_SHORT).show();
                         break;
@@ -259,22 +250,48 @@ public class InventoryFragment extends Fragment implements ItemInventoryRecycler
         }
     };
 
-    final View.OnClickListener addItemListener = new View.OnClickListener() {
+    View.OnClickListener cancelListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            ItemInventoryFloatingButton itemInventoryFloatingButton = (ItemInventoryFloatingButton)
-                    getActivity();
-            itemInventoryFloatingButton.setItemInventoryFloationgButton();
+            PurchaseItemOCRFragment addPurchaseItemInterface = (PurchaseItemOCRFragment) getActivity().getSupportFragmentManager()
+                    .findFragmentByTag(OCRActivity.PURCHASE_ITEM_OCR_FRAGMENT);
+
+            getActivity().getSupportFragmentManager().beginTransaction()
+                    .remove(PurchaseItemAddFragment.this)
+                    .show(addPurchaseItemInterface)
+                    .commit();
         }
     };
 
+    View.OnClickListener addListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            if(currentItem == null || customViewGroupItemDetail.isPriceEmpty() || customViewGroupItemDetail.isAmountEmpty()){
+                return;
+            }
+            PurchaseItemOCRFragment addPurchaseItemInterface = (PurchaseItemOCRFragment) getActivity().getSupportFragmentManager()
+                    .findFragmentByTag(OCRActivity.PURCHASE_ITEM_OCR_FRAGMENT);
 
 
+            ItemOCR purchaseItem = new ItemOCR();
+            purchaseItem.setPrice(customViewGroupItemDetail.getPrice() * customViewGroupItemDetail.getAmount());
+            purchaseItem.setAmount(customViewGroupItemDetail.getAmount());
+            purchaseItem.setItemInventoryMap(currentItem);
+
+
+            ((AddPurchaseItemInterface)addPurchaseItemInterface).addPurchaseItem(purchaseItem);
+
+            getActivity().getSupportFragmentManager().beginTransaction()
+                    .remove(PurchaseItemAddFragment.this)
+                    .show(addPurchaseItemInterface)
+                    .commit();
+
+        }
+    };
 
     /***********************************************************************************************
      ************************************* Inner class ********************************************
      ***********************************************************************************************/
-
 
     /***********************************************************************************************
      ************************************* Implementation ********************************************
@@ -282,8 +299,8 @@ public class InventoryFragment extends Fragment implements ItemInventoryRecycler
 
     @Override
     public void onItemClick(ItemInventoryMap itemInventory) {
-        MoreItemInventoryListener moreItemInventoryListener =
-                (MoreItemInventoryListener) getActivity();
-        moreItemInventoryListener.goToMoreItemInventory(itemInventory);
+        currentItem = itemInventory;
+        customViewGroupItemDetail.setItemName(itemInventory.getItemInventory().getName());
     }
+
 }

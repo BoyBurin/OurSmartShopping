@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:weightSum="7">
+
+    <TextView
+        android:id="@+id/tvItemName"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:layout_weight="5"
+        android:layout_marginLeft="8dp"
+        android:gravity="center_vertical"
+        android:hint="Item Name"
+        android:background="@drawable/custom_blanck_backgroud"
+        android:textSize="@dimen/text_size_small"/>
+
+    <EditText
+        android:id="@+id/tvAmount"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:layout_weight="1"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:gravity="center"
+        android:hint="Amount"
+        android:inputType="number"
+        android:textSize="@dimen/text_size_small"
+        android:background="@drawable/custom_blanck_backgroud"/>
+
+
+    <EditText
+        android:id="@+id/tvPrice"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:layout_weight="1"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:gravity="center"
+        android:hint="Price"
+        android:inputType="numberDecimal"
+        android:textSize="@dimen/text_size_small"
+        android:background="@drawable/custom_blanck_backgroud"/>
+
+
+</LinearLayout>

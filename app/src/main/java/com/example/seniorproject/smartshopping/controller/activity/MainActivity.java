@@ -114,16 +114,16 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
                             SETTINGFRAGMENT)
                     .add(R.id.containerMain, buyItemFragment,
                             BUYITEMFRAGMENT)
-                    .hide(groupFragment)
+                    .hide(inventoryFragment)
                     .hide(shoppingListFragment)
                     //.hide(shoppingHistoryFragment)
                     .hide(settingFragment)
                     .hide(buyItemFragment)
-                    .show(inventoryFragment)
+                    .show(groupFragment)
                     .commit();
 
-            current = inventoryFragment;
-            currentBtn = btnInventory;
+            current = groupFragment;
+            currentBtn = btnGroup;
             currentBtn.setBackgroundResource(R.drawable.shape_rect_overlay);
         }
 
