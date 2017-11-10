@@ -10,35 +10,41 @@
         android:layout_height="wrap_content"
         android:visibility="gone" />
 
-
-    <ListView
-        android:id="@+id/shoppingListItem"
+    <RelativeLayout
+        android:id="@+id/addItemLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/addedItemBar"
-        android:scrollbars="none" />
+        android:layout_below="@+id/addedItemBar">
+
+        <ListView
+            android:id="@+id/shoppingListItem"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="none" />
+
+
+
+        <android.support.design.widget.FloatingActionButton xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/fab"
+            style="@style/FAB"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginBottom="@dimen/activity_vertical_margin"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"
+            android:onClick="showAddListDialog"
+            android:src="@drawable/icon_add"
+            app:borderWidth="0dp"
+            app:elevation="6dp"
+            app:pressedTranslationZ="12dp"
+            app:rippleColor="@android:color/white" />
+    </RelativeLayout>
 
     <FrameLayout
         android:id="@+id/containerMoreShoppingListItem"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@+id/addedItemBar" />
-
-    <android.support.design.widget.FloatingActionButton xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/fab"
-        style="@style/FAB"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginBottom="@dimen/activity_vertical_margin"
-        android:layout_marginRight="@dimen/activity_horizontal_margin"
-        android:onClick="showAddListDialog"
-        android:src="@drawable/icon_add"
-        app:borderWidth="0dp"
-        app:elevation="6dp"
-        app:pressedTranslationZ="12dp"
-        app:rippleColor="@android:color/white" />
+        android:layout_height="match_parent" />
 
 </RelativeLayout>

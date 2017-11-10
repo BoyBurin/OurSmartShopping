@@ -16,7 +16,6 @@ public class CustomViewGroupShoppingListItemAdd extends BaseCustomViewGroup {
 
     private TextView tvAddedItemName;
     private EditText tvAddedAmount;
-    private ImageButton imgBtnAdded;
 
     public CustomViewGroupShoppingListItemAdd(Context context) {
         super(context);
@@ -53,7 +52,6 @@ public class CustomViewGroupShoppingListItemAdd extends BaseCustomViewGroup {
     private void initInstances() {
         tvAddedItemName = (TextView) findViewById(R.id.tvAddedItemName);
         tvAddedAmount = (EditText) findViewById(R.id.tvAddedAmount);
-        imgBtnAdded = (ImageButton) findViewById(R.id.imgBtnAdded);
     }
 
     private void initWithAttrs(AttributeSet attrs, int defStyleAttr, int defStyleRes) {
@@ -105,8 +103,15 @@ public class CustomViewGroupShoppingListItemAdd extends BaseCustomViewGroup {
         this.tvAddedItemName.setText("");
     }
 
-    public void setAddedButton(OnClickListener onClickListener){
-        imgBtnAdded.setOnClickListener(onClickListener);
+
+    public boolean isAmountEmpty(){
+        if(tvAddedAmount.getText() == null || tvAddedAmount.getText().toString().equals("") ){
+            return true;
+        }
+        else if(Long.parseLong(tvAddedAmount.getText().toString()) < 0) {
+            return true;
+        }
+            return false;
     }
 
 

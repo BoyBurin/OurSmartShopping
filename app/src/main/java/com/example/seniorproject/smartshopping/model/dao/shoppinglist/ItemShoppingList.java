@@ -1,12 +1,14 @@
 package com.example.seniorproject.smartshopping.model.dao.shoppinglist;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.view.View;
 
 /**
  * Created by boyburin on 9/12/2017 AD.
  */
 
-public class ItemShoppingList {
+public class ItemShoppingList  implements Parcelable{
     /******************************************************************************************
      * ****************************** Variable *********************************************
      *******************************************************************************************/
@@ -31,6 +33,7 @@ public class ItemShoppingList {
         this.barcodeId = barcodeId;
         this.status = status;
     }
+
 
     public long getAmount() {
         return amount;
@@ -75,4 +78,36 @@ public class ItemShoppingList {
     /******************************************************************************************
      * ****************************** Implementation *********************************************
      *******************************************************************************************/
+
+    protected ItemShoppingList(Parcel in) {
+        amount = in.readLong();
+        name = in.readString();
+        barcodeId = in.readString();
+        status = in.readInt();
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeLong(amount);
+        dest.writeString(name);
+        dest.writeString(barcodeId);
+        dest.writeInt(status);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Creator<ItemShoppingList> CREATOR = new Creator<ItemShoppingList>() {
+        @Override
+        public ItemShoppingList createFromParcel(Parcel in) {
+            return new ItemShoppingList(in);
+        }
+
+        @Override
+        public ItemShoppingList[] newArray(int size) {
+            return new ItemShoppingList[size];
+        }
+    };
 }

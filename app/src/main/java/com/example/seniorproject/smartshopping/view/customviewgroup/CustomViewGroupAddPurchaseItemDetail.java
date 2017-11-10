@@ -117,14 +117,20 @@ public class CustomViewGroupAddPurchaseItemDetail extends BaseCustomViewGroup {
     }
 
     public boolean isPriceEmpty(){
-        if(tvPrice.getText() == null || Double.parseDouble(tvPrice.getText().toString()) < 0){
+        if(tvPrice.getText() == null || tvPrice.getText().toString().equals("") ){
+            return true;
+        }
+        else if(Long.parseLong(tvPrice.getText().toString()) < 0) {
             return true;
         }
         return false;
     }
 
     public boolean isAmountEmpty(){
-        if(tvAmount.getText() == null || Long.parseLong(tvAmount.getText().toString()) < 0){
+        if(tvAmount.getText() == null || tvAmount.getText().toString().equals("")){
+           return true;
+        }
+        else if(Long.parseLong(tvAmount.getText().toString()) < 0) {
             return true;
         }
         return false;

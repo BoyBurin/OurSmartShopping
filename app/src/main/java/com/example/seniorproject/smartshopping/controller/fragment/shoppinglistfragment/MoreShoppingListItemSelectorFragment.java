@@ -1,9 +1,12 @@
 package com.example.seniorproject.smartshopping.controller.fragment.shoppinglistfragment;
 
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,11 +19,18 @@ import android.widget.Toast;
 import com.example.seniorproject.smartshopping.R;
 import com.example.seniorproject.smartshopping.model.dao.iteminventory.ItemInventory;
 import com.example.seniorproject.smartshopping.model.dao.iteminventory.ItemInventoryMap;
+import com.example.seniorproject.smartshopping.model.dao.shoppinglist.ItemShoppingList;
 import com.example.seniorproject.smartshopping.model.dao.shoppinglist.ShoppingListMap;
+import com.example.seniorproject.smartshopping.model.daorecyclerview.addpurchaseitem.AddPurchaseItemCreator;
+import com.example.seniorproject.smartshopping.model.daorecyclerview.addpurchaseitem.BaseAddPurchaseItem;
 import com.example.seniorproject.smartshopping.model.datatype.MutableInteger;
 import com.example.seniorproject.smartshopping.model.manager.group.GroupManager;
 import com.example.seniorproject.smartshopping.model.manager.iteminventory.ItemInventoryManager;
+import com.example.seniorproject.smartshopping.model.manager.shoppinglist.ItemShoppingListManager;
 import com.example.seniorproject.smartshopping.view.adapter.iteminventory.ItemInventoryAdapter;
+import com.example.seniorproject.smartshopping.view.customviewgroup.CustomViewGroupShoppingListItemAdd;
+import com.example.seniorproject.smartshopping.view.recyclerviewadapter.AddPurchaseItemRecyclerViewAdapter;
+import com.example.seniorproject.smartshopping.view.recyclerviewadapter.ItemInventoryRecyclerViewAdapter;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.CollectionReference;
@@ -33,33 +43,32 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 
-public class MoreShoppingListItemSelectorFragment extends Fragment {
+public class MoreShoppingListItemSelectorFragment extends Fragment implements AddPurchaseItemRecyclerViewAdapter.OnItemClickListener {
 
     /***********************************************************************************************
      ************************************* Variable class ********************************************
      ***********************************************************************************************/
-    public interface AddShoppingListItemListener{
-        public void setName(String name);
-        public long getAmount();
-        public void setButton(View.OnClickListener onClick);
-    }
 
-    public interface FinishAddShoppingListItemListener{
+    public interface FinishAddShoppingListItemListener {
         public void finishAdded();
     }
 
     private ShoppingListMap shoppingListMap;
+    private ItemShoppingListManager itemShoppingListManager;
 
+    private RecyclerView recyclerView;
+    private CustomViewGroupShoppingListItemAdd customViewGroupShoppingListItemAdd;
 
-    private GridView gridView;
-    private ItemInventoryAdapter itemInventoryAdapter;
-    private MutableInteger lastPositionInteger;
+    private AddPurchaseItemRecyclerViewAdapter addItemAdapter;
+    private AddPurchaseItemCreator addItemCreator;
     private ItemInventoryMap currentItemInventoryMap;
     private ItemInventoryManager itemInventoryManager;
+    private ArrayList<BaseAddPurchaseItem> baseAddItems;
 
     private FirebaseFirestore db;
     private CollectionReference cItemShoppingList;
@@ -67,9 +76,6 @@ public class MoreShoppingListItemSelectorFragment extends Fragment {
     private ListenerRegistration cItemsListener;
 
     private ImageButton addedButton;
-
-
-
 
 
     /***********************************************************************************************
@@ -81,10 +87,11 @@ public class MoreShoppingListItemSelectorFragment extends Fragment {
     }
 
     @SuppressWarnings("unused")
-    public static MoreShoppingListItemSelectorFragment newInstance(ShoppingListMap shoppingListMap) {
+    public static MoreShoppingListItemSelectorFragment newInstance(ShoppingListMap shoppingListMap, ArrayList<ItemShoppingList> itemShoppingLists) {
         MoreShoppingListItemSelectorFragment fragment = new MoreShoppingListItemSelectorFragment();
         Bundle args = new Bundle();
         args.putParcelable("shoppingListMap", shoppingListMap);
+        args.putParcelableArrayList("itemShoppingLists", itemShoppingLists);
         fragment.setArguments(args);
         return fragment;
     }
@@ -110,9 +117,19 @@ public class MoreShoppingListItemSelectorFragment extends Fragment {
     }
 
     private void init(Bundle savedInstanceState) {
+
+        ArrayList<Parcelable> item = getArguments().getParcelableArrayList("itemShoppingLists");
+        itemShoppingListManager = new ItemShoppingListManager();
+
+        for (int i = 0; i < item.size(); i++) {
+            ItemShoppingList itemShoppingList = (ItemShoppingList) item.get(i);
+            itemShoppingListManager.addItemShoppingList(itemShoppingList);
+        }
+
         itemInventoryManager = new ItemInventoryManager();
-        lastPositionInteger = new MutableInteger(-1);
-        itemInventoryAdapter = new ItemInventoryAdapter(lastPositionInteger);
+        addItemAdapter = new AddPurchaseItemRecyclerViewAdapter(getContext());
+        addItemCreator = new AddPurchaseItemCreator();
+        baseAddItems = new ArrayList<>();
 
         String groupId = GroupManager.getInstance().getCurrentGroup().getId();
         String shoppingListId = shoppingListMap.getId();
@@ -133,14 +150,23 @@ public class MoreShoppingListItemSelectorFragment extends Fragment {
 
     @SuppressWarnings("UnusedParameters")
     private void initInstances(View rootView, Bundle savedInstanceState) {
-        gridView = (GridView) rootView.findViewById(R.id.gridView);
-        itemInventoryAdapter.setItemInventories(itemInventoryManager.getItemInventories());
-        gridView.setAdapter(itemInventoryAdapter);
-        itemInventoryAdapter.notifyDataSetChanged();
+        recyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerView);
+        customViewGroupShoppingListItemAdd = (CustomViewGroupShoppingListItemAdd) rootView.findViewById(R.id.customViewGroupShoppingListItemAdd);
 
-        gridView.setOnItemClickListener(clickItemListener);
+        GridLayoutManager manager = new GridLayoutManager(getContext(), 2);
+        manager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+            @Override
+            public int getSpanSize(int position) {
+                if (baseAddItems.get(position).getType() == BaseAddPurchaseItem.ADD_PURCHASE_ITEM) {
+                    return 1;
+                } else return 2;
+            }
+        });
 
-        ((AddShoppingListItemListener) getParentFragment()).setButton(savedShoppingListItem);
+        addItemAdapter.setItemClickListener(this);
+        recyclerView.setLayoutManager(manager);
+        recyclerView.setAdapter(addItemAdapter);
+
 
     }
 
@@ -175,37 +201,46 @@ public class MoreShoppingListItemSelectorFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
 
-        if(cItemsListener != null){
+        if (cItemsListener != null) {
             cItemsListener.remove();
             cItemsListener = null;
         }
+    }
+
+    public void setInterface() {
+        baseAddItems = new ArrayList<>();
+
+        baseAddItems.addAll(addItemCreator.createAddPurchaseItem(itemInventoryManager.getItemInventoryMaps()));
+        baseAddItems.add(addItemCreator.createAddPurchaseItemButton(cancelListener, addListener));
+
+        addItemAdapter.setAddPurchaseItems(baseAddItems);
+        addItemAdapter.notifyDataSetChanged();
     }
 
     /***********************************************************************************************
      ************************************* Listener variables ********************************************
      ***********************************************************************************************/
 
-    final AdapterView.OnItemClickListener clickItemListener = new AdapterView.OnItemClickListener() {
+    final View.OnClickListener cancelListener = new View.OnClickListener() {
         @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            AddShoppingListItemListener addShoppingListItemListener =
-                    (AddShoppingListItemListener)getParentFragment();
-            currentItemInventoryMap = itemInventoryManager.getItemInventory(position);
-            addShoppingListItemListener.setName(currentItemInventoryMap.getItemInventory().getName());
+        public void onClick(View view) {
+            FinishAddShoppingListItemListener finishAddShoppingListItemListener =
+                    (FinishAddShoppingListItemListener) getParentFragment();
+
+            finishAddShoppingListItemListener.finishAdded();
         }
     };
 
-    final View.OnClickListener savedShoppingListItem = new View.OnClickListener() {
+    final View.OnClickListener addListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            AddShoppingListItemListener addShoppingListItemListener =
-                    (AddShoppingListItemListener)getParentFragment();
 
-            if(currentItemInventoryMap != null){
-                if(addShoppingListItemListener.getAmount() != 0){
+
+            if (currentItemInventoryMap != null) {
+                if (!customViewGroupShoppingListItemAdd.isAmountEmpty()) {
                     String itemBarcode = currentItemInventoryMap.getItemInventory().getBarcodeId();
                     String itemname = currentItemInventoryMap.getItemInventory().getName();
-                    long amount = addShoppingListItemListener.getAmount();
+                    long amount = customViewGroupShoppingListItemAdd.getAmount();
                     Map<String, Object> newData = new HashMap<>();
 
                     newData.put("amount", amount);
@@ -214,17 +249,17 @@ public class MoreShoppingListItemSelectorFragment extends Fragment {
 
                     cItemShoppingList.document(itemBarcode).set(newData)
                             .addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            FinishAddShoppingListItemListener finishAddShoppingListItemListener =
-                                    (FinishAddShoppingListItemListener) getParentFragment();
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    FinishAddShoppingListItemListener finishAddShoppingListItemListener =
+                                            (FinishAddShoppingListItemListener) getParentFragment();
 
-                            finishAddShoppingListItemListener.finishAdded();
-                            String itemName = currentItemInventoryMap.getItemInventory().getName();
-                            Toast.makeText(getContext(), "Added " +itemName +" Item into Shopping List Success", Toast.LENGTH_SHORT)
-                                    .show();
-                        }
-                    })
+                                    finishAddShoppingListItemListener.finishAdded();
+                                    String itemName = currentItemInventoryMap.getItemInventory().getName();
+                                    Toast.makeText(getContext(), "Added " + itemName + " Item into Shopping List Success", Toast.LENGTH_SHORT)
+                                            .show();
+                                }
+                            })
                             .addOnFailureListener(new OnFailureListener() {
                                 @Override
                                 public void onFailure(@NonNull Exception e) {
@@ -248,20 +283,31 @@ public class MoreShoppingListItemSelectorFragment extends Fragment {
 
 
             for (DocumentChange dc : documentSnapshots.getDocumentChanges()) {
+                boolean isAdded = false;
                 switch (dc.getType()) {
                     case ADDED:
                         DocumentSnapshot documentSnapshot = dc.getDocument();
                         ItemInventory item = documentSnapshot.toObject(ItemInventory.class);
                         String id = documentSnapshot.getId();
+                        isAdded = false;
+                        for (ItemShoppingList itemShoppingList : itemShoppingListManager.getItemShoppingLists()) {
+                            if (itemShoppingList.getBarcodeId().equals(id)) {
+                                isAdded = true;
+                            }
+                        }
+                        if(isAdded){
+                            setInterface();
+                            continue;
+                        }
 
                         //Add
                         ItemInventoryMap itemMap = new ItemInventoryMap(id, item);
                         itemInventoryManager.addItemInventory(itemMap);
 
-                        itemInventoryAdapter.setItemInventories(itemInventoryManager.getItemInventories());
-                        itemInventoryAdapter.notifyDataSetChanged();
+                        setInterface();
 
-                        Toast.makeText(getContext(), "Added " + item.getName(), Toast.LENGTH_SHORT).show();
+
+                        //Toast.makeText(getContext(), "Added " + item.getName(), Toast.LENGTH_SHORT).show();
 
                         break;
 
@@ -269,6 +315,16 @@ public class MoreShoppingListItemSelectorFragment extends Fragment {
                         documentSnapshot = dc.getDocument();
                         ItemInventory update = documentSnapshot.toObject(ItemInventory.class);
                         id = documentSnapshot.getId();
+                        isAdded = false;
+                        for (ItemShoppingList itemShoppingList : itemShoppingListManager.getItemShoppingLists()) {
+                            if (itemShoppingList.getBarcodeId().equals(id)) {
+                                isAdded = true;
+                            }
+                        }
+                        if(isAdded){
+                            setInterface();
+                            continue;
+                        }
 
                         int index = itemInventoryManager.getIndexByKey(id);
                         itemMap = itemInventoryManager.getItemInventory(index);
@@ -277,9 +333,8 @@ public class MoreShoppingListItemSelectorFragment extends Fragment {
                         itemMap.setItemInventory(update);
                         itemInventoryManager.sortItem();
 
-                        itemInventoryAdapter.setItemInventories(itemInventoryManager.getItemInventories());
-                        itemInventoryAdapter.notifyDataSetChanged();
 
+                        setInterface();
                         Toast.makeText(getContext(), "Update " + update.getName(), Toast.LENGTH_SHORT).show();
                         break;
 
@@ -287,12 +342,21 @@ public class MoreShoppingListItemSelectorFragment extends Fragment {
                         documentSnapshot = dc.getDocument();
                         item = documentSnapshot.toObject(ItemInventory.class);
                         id = documentSnapshot.getId();
+                        isAdded = false;
+                        for (ItemShoppingList itemShoppingList : itemShoppingListManager.getItemShoppingLists()) {
+                            if (itemShoppingList.getBarcodeId().equals(id)) {
+                                isAdded = true;
+                            }
+                        }
+                        if(isAdded){
+                            setInterface();
+                            continue;
+                        }
 
                         index = itemInventoryManager.getIndexByKey(id);
                         itemInventoryManager.removeItemInventory(index);
 
-                        itemInventoryAdapter.setItemInventories(itemInventoryManager.getItemInventories());
-                        itemInventoryAdapter.notifyDataSetChanged();
+                        setInterface();
 
                         Toast.makeText(getContext(), "Remove " + item.getName(), Toast.LENGTH_SHORT).show();
                         break;
@@ -305,5 +369,16 @@ public class MoreShoppingListItemSelectorFragment extends Fragment {
     /***********************************************************************************************
      ************************************* Inner class ********************************************
      ***********************************************************************************************/
+
+    /***********************************************************************************************
+     ************************************* Implementation ********************************************
+     ***********************************************************************************************/
+
+    @Override
+    public void onItemClick(ItemInventoryMap itemInventory) {
+        currentItemInventoryMap = itemInventory;
+        customViewGroupShoppingListItemAdd.setItemName(itemInventory.getItemInventory().getName());
+    }
+
 
 }

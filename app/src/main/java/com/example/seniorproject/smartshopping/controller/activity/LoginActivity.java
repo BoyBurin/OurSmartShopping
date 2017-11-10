@@ -104,9 +104,7 @@ public class LoginActivity extends AppCompatActivity implements LoginFragment.Lo
         LoginFragment loginFragment = (LoginFragment) getSupportFragmentManager().findFragmentByTag(LOGINFRAGMENT);
 
         getSupportFragmentManager().beginTransaction()
-                .add(R.id.containerLogin, selectGroupFragment, SELECTGROUPFRAGMENT)
-                .hide(loginFragment)
-                .show(selectGroupFragment)
+                .replace(R.id.containerLogin, selectGroupFragment, SELECTGROUPFRAGMENT)
                 .commit();
     }
 

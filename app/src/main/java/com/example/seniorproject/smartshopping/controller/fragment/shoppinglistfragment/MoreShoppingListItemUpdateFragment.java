@@ -5,11 +5,13 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.example.seniorproject.smartshopping.R;
@@ -38,7 +40,6 @@ import java.util.ArrayList;
 
 
 public class MoreShoppingListItemUpdateFragment extends Fragment implements
-        MoreShoppingListItemSelectorFragment.AddShoppingListItemListener,
         MoreShoppingListItemSelectorFragment.FinishAddShoppingListItemListener {
 
     /***********************************************************************************************
@@ -50,7 +51,9 @@ public class MoreShoppingListItemUpdateFragment extends Fragment implements
     private ListView listView;
     private ItemShoppingListAdapter itemShoppingListAdapter;
     private MutableInteger lastPositionInteger;
+
     private FloatingActionButton fab;
+    private RelativeLayout addItemLayout;
 
     private FirebaseFirestore db;
     private CollectionReference cItemsShoppingList;
@@ -58,7 +61,6 @@ public class MoreShoppingListItemUpdateFragment extends Fragment implements
     private ArrayList<ListenerRegistration> dItemInventoryListeners;
 
     private ItemShoppingListManager itemShoppingListManager;
-    private CustomViewGroupShoppingListItemAdd customViewGroupShoppingListItemAdd;
 
     //private ArrayList<View.OnClickListener> deleteListener;
 
@@ -120,12 +122,11 @@ public class MoreShoppingListItemUpdateFragment extends Fragment implements
     private void initInstances(View rootView, Bundle savedInstanceState) {
         fab = (FloatingActionButton) rootView.findViewById(R.id.fab);
         fab.setOnClickListener(addedShoppingListItemListener);
+        addItemLayout = (RelativeLayout) rootView.findViewById(R.id.addItemLayout);
 
         listView = (ListView) rootView.findViewById(R.id.shoppingListItem);
         listView.setAdapter(itemShoppingListAdapter);
 
-        customViewGroupShoppingListItemAdd = (CustomViewGroupShoppingListItemAdd) rootView
-                .findViewById(R.id.addedItemBar);
 
     }
 
@@ -281,15 +282,13 @@ public class MoreShoppingListItemUpdateFragment extends Fragment implements
         @Override
         public void onClick(View view) {
             MoreShoppingListItemSelectorFragment moreShoppingListItemSelectorFragment =
-                    MoreShoppingListItemSelectorFragment.newInstance(shoppingListMap);
+                    MoreShoppingListItemSelectorFragment.newInstance(shoppingListMap, itemShoppingListManager.getItemShoppingLists());
 
             getChildFragmentManager().beginTransaction()
                     .add(R.id.containerMoreShoppingListItem, moreShoppingListItemSelectorFragment,
                             "moreShoppingListItemSelectorFragment")
                     .commit();
-
-            customViewGroupShoppingListItemAdd.setVisibility(View.VISIBLE);
-            listView.setVisibility(View.GONE);
+            addItemLayout.setVisibility(View.GONE);
         }
     };
 
@@ -325,22 +324,6 @@ public class MoreShoppingListItemUpdateFragment extends Fragment implements
      ***********************************************************************************************/
 
 
-    // AddShoppingListItemListener *******************************************************************
-
-    @Override
-    public void setName(String name) {
-        customViewGroupShoppingListItemAdd.setItemName(name);
-    }
-
-    @Override
-    public long getAmount() {
-        return customViewGroupShoppingListItemAdd.getAmount();
-    }
-
-    @Override
-    public void setButton(View.OnClickListener onClick) {
-        customViewGroupShoppingListItemAdd.setAddedButton(onClick);
-    }
 
 
     // FinishAddShoppingListItemListener ********************************************************************
@@ -355,9 +338,8 @@ public class MoreShoppingListItemUpdateFragment extends Fragment implements
                 .remove(moreShoppingListItemSelectorFragment)
                 .commit();
 
-        customViewGroupShoppingListItemAdd.setVisibility(View.GONE);
-        customViewGroupShoppingListItemAdd.clearAll();
-        listView.setVisibility(View.VISIBLE);
+
+        addItemLayout.setVisibility(View.VISIBLE);
 
     }
 
