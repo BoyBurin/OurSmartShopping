@@ -425,8 +425,15 @@ public class OCRActivity extends AppCompatActivity implements PurchaseItemAddFra
                 return "Cloud Vision API request failed. Check logs for details.";
             }
 
+
             protected void onPostExecute(String result) {
                 //mImageDetails.setText(result);
+                if(result == null){
+                    toast();
+                    activityLayout.setVisibility(View.VISIBLE);
+                    loadingOCR.setVisibility(View.GONE);
+                    return;
+                }
                 String[] myResult = result.split("\n");
                 for (int i = 0; i < myResult.length; i++) {
                     Log.d(i + "", myResult[i]);
@@ -482,6 +489,10 @@ public class OCRActivity extends AppCompatActivity implements PurchaseItemAddFra
         }.execute();
     }
 
+    private void toast(){
+        Toast.makeText(this, "Cannot do receipt recognition", Toast.LENGTH_SHORT).show();
+    }
+
     public Bitmap scaleBitmapDown(Bitmap bitmap, int maxDimension) {
 
         int originalWidth = bitmap.getWidth();
@@ -511,9 +522,8 @@ public class OCRActivity extends AppCompatActivity implements PurchaseItemAddFra
 
         List<EntityAnnotation> labels = response.getResponses().get(0).getTextAnnotations();
         if(labels == null){
-            Toast.makeText(this, "Cannot do receipt recognition", Toast.LENGTH_SHORT).show();
-            activityLayout.setVisibility(View.VISIBLE);
-            loadingOCR.setVisibility(View.GONE);
+
+            return null;
 
         }
         Log.i("JackTest", "total labels:" + labels.size());

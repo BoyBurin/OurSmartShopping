@@ -64,13 +64,14 @@
 
                     <Button
                         android:id="@+id/btnLogin"
-                        android:layout_width="wrap_content"
+                        android:layout_width="200dp"
                         android:layout_height="wrap_content"
                         android:minEms="9"
                         android:layout_gravity="center"
                         android:layout_marginLeft="16dp"
                         android:layout_marginRight="16dp"
                         android:background="@drawable/selector_shape_round_rect_button_white"
+                        android:textSize="@dimen/text_size"
                         android:text="@string/login_text" />
 
                     <TextView
@@ -84,7 +85,7 @@
 
                     <Button
                         android:id="@+id/btnCreateAccount"
-                        android:layout_width="wrap_content"
+                        android:layout_width="200dp"
                         android:layout_height="wrap_content"
                         android:minEms="9"
                         android:layout_gravity="center"
@@ -92,6 +93,7 @@
                         android:layout_marginLeft="16dp"
                         android:layout_marginRight="16dp"
                         android:background="@drawable/selector_shape_round_rect_button_white"
+                        android:textSize="@dimen/text_size"
                         android:text="@string/create_account_text" />
 
 

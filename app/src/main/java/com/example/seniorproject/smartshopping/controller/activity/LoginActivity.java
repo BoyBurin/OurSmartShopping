@@ -2,6 +2,7 @@ package com.example.seniorproject.smartshopping.controller.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -22,7 +23,8 @@ import com.google.firebase.auth.FirebaseUser;
 public class LoginActivity extends AppCompatActivity implements LoginFragment.LoginFragmentListener,
         LoginFragment.CraateAccountFragmentListener, CreateAccountFragment.SaveInfoListener,
         LoginFragment.SelectGroupListener, SelectGroupFragment.SaveCurrentGroupListener,
-        LoginFragment.VisibleLoginFragmentListener, SelectGroupFragment.VisibleSelectGroupFragmentListener {
+        LoginFragment.VisibleLoginFragmentListener, SelectGroupFragment.VisibleSelectGroupFragmentListener,
+        CreateAccountFragment.CancelInfoListener {
 
     /***********************************************************************************************
      ************************************* Variable class ********************************************
@@ -76,6 +78,7 @@ public class LoginActivity extends AppCompatActivity implements LoginFragment.Lo
         CreateAccountFragment createAccountFragment = CreateAccountFragment.newInstance();
         LoginFragment loginFragment = (LoginFragment) getSupportFragmentManager().findFragmentByTag(LOGINFRAGMENT);
         getSupportFragmentManager().beginTransaction()
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                 .add(R.id.containerLogin, createAccountFragment, CREATEACCOUNTFRAGMENT)
                 .hide(loginFragment)
                 .show(createAccountFragment)
@@ -141,6 +144,20 @@ public class LoginActivity extends AppCompatActivity implements LoginFragment.Lo
             container.setVisibility(View.INVISIBLE);
             progressbarLogin.setVisibility(View.VISIBLE);
         }
+    }
+
+    @Override
+    public void cancel() {
+        CreateAccountFragment createAccountFragment =
+                (CreateAccountFragment) getSupportFragmentManager().findFragmentByTag(CREATEACCOUNTFRAGMENT);
+
+        LoginFragment loginFragment =
+                (LoginFragment) getSupportFragmentManager().findFragmentByTag(LOGINFRAGMENT);
+
+        getSupportFragmentManager().beginTransaction()
+                .remove(createAccountFragment)
+                .show(loginFragment)
+                .commit();
     }
 
 

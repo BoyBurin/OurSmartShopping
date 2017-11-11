@@ -184,6 +184,7 @@ public class LoginFragment extends Fragment {
                     customGroupPassword.setTextToEditText("");
 
                     progressBarLogin.setVisibility(View.VISIBLE);
+                    btnLogin.setVisibility(View.GONE);
 
                     mAuth.signInWithEmailAndPassword(email, password).
                             addOnCompleteListener(loginOnCompleteListener);
@@ -212,6 +213,7 @@ public class LoginFragment extends Fragment {
             } else {
                 // If sign in fails, display a message to the user.
                 progressBarLogin.setVisibility(View.GONE);
+                btnLogin.setVisibility(View.VISIBLE);
                 Toast.makeText(Contextor.getInstance().getContext(), "signInWithEmail:failure", Toast.LENGTH_SHORT).show();
             }
         }

@@ -12,6 +12,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.example.seniorproject.smartshopping.R;
+import com.example.seniorproject.smartshopping.controller.fragment.settingfragment.CreatedGroupFragment;
 import com.example.seniorproject.smartshopping.model.dao.group.Group;
 import com.example.seniorproject.smartshopping.model.dao.user.User;
 import com.example.seniorproject.smartshopping.view.customviewgroup.CustomViewGroupEditText;
@@ -32,12 +33,17 @@ public class CreateAccountFragment extends Fragment {
         void saveInfo();
     }
 
+    public interface CancelInfoListener{
+        void cancel();
+    }
+
     private CustomViewGroupEditText customEmail;
     private CustomViewGroupEditText customUsername;
     private CustomViewGroupEditText customPassword;
     private CustomViewGroupEditText customCreateGroup;
 
     private Button btnCreateAccount;
+    private Button btnCancel;
 
     private DatabaseReference mDatabaseRef;
     private FirebaseAuth mAuth;
@@ -93,12 +99,14 @@ public class CreateAccountFragment extends Fragment {
         customPassword = (CustomViewGroupEditText) rootView.findViewById(R.id.customPassword);
         customCreateGroup = (CustomViewGroupEditText) rootView.findViewById(R.id.customCreateGroup);
         btnCreateAccount = (Button) rootView.findViewById(R.id.btnCreateAccount);
+        btnCancel = (Button) rootView.findViewById(R.id.btnCancel);
 
-        /*customEmail.setTextView("Email");
-        customUsername.setTextView("Username");
-        customPassword.setTextView("Password");
-        customCreateGroup.setTextView("Group");*/
+        customEmail.setImage(getResources().getDrawable(R.drawable.user_login, null));
+        customUsername.setImage(getResources().getDrawable(R.drawable.user_login, null));
+        customPassword.setImage(getResources().getDrawable(R.drawable.user_login, null));
+        customCreateGroup.setImage(getResources().getDrawable(R.drawable.user_login, null));
         btnCreateAccount.setOnClickListener(saveInfo);
+        btnCancel.setOnClickListener(cancelListener);
     }
 
     private boolean emptyFill(String name, String password, String group){
@@ -136,6 +144,13 @@ public class CreateAccountFragment extends Fragment {
      ************************************* Listener variables ********************************************
      ***********************************************************************************************/
 
+    final View.OnClickListener cancelListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            CancelInfoListener cancelInfoListener = (CancelInfoListener) getActivity();
+            cancelInfoListener.cancel();
+        }
+    };
     final View.OnClickListener saveInfo = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
