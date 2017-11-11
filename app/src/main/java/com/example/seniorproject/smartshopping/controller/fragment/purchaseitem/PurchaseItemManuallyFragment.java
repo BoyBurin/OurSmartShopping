@@ -3,6 +3,9 @@ package com.example.seniorproject.smartshopping.controller.fragment.purchaseitem
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,9 +16,18 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.example.seniorproject.smartshopping.R;
+import com.example.seniorproject.smartshopping.model.dao.iteminventory.ItemInventory;
+import com.example.seniorproject.smartshopping.model.dao.itemocr.ItemOCR;
+import com.example.seniorproject.smartshopping.model.dao.itemocr.PurchaseItemWithAction;
+import com.example.seniorproject.smartshopping.model.daorecyclerview.purchaseitem.BasePurchaseItem;
+import com.example.seniorproject.smartshopping.model.daorecyclerview.purchaseitem.PurchaseItemCreator;
+import com.example.seniorproject.smartshopping.model.manager.itemocr.PurchaseItemWithActionManager;
+import com.example.seniorproject.smartshopping.view.recyclerviewadapter.PurchaseItemRecyclerViewAdapter;
+
+import java.util.ArrayList;
 
 
-public class PurchaseItemManuallyFragment extends Fragment {
+public class PurchaseItemManuallyFragment extends Fragment implements PurchaseItemAddFragment.AddPurchaseItemInterface{
 
     /***********************************************************************************************
      ************************************* Variable class ********************************************
@@ -23,9 +35,11 @@ public class PurchaseItemManuallyFragment extends Fragment {
 
 
     private Spinner spinnerStore;
-    private TextView tvTotalPrice;
-    private Button btnSaveItem;
-    private ListView listView;
+    private RecyclerView recyclerView;
+
+    private PurchaseItemWithActionManager purchaseItemWithActionManager;
+    private PurchaseItemCreator purchaseItemCreator;
+    private PurchaseItemRecyclerViewAdapter purchaseItemRecyclerViewAdapter;
 
     private ArrayAdapter<String> adapter;
     private String currentStore;
@@ -65,6 +79,9 @@ public class PurchaseItemManuallyFragment extends Fragment {
     }
 
     private void init(Bundle savedInstanceState) {
+        purchaseItemWithActionManager = new PurchaseItemWithActionManager();
+        purchaseItemCreator = new PurchaseItemCreator();
+        purchaseItemRecyclerViewAdapter = new PurchaseItemRecyclerViewAdapter(getContext());
 
         currentStore = "Big C Bangpakok";
         String[] stores = {"Big C Bangpakok", "Max Value Pracha Uthit", "Tesco Lotus Bangpakok", "Tesco Lotus ตลาดโลตัสประชาอุทิศ"};
@@ -76,12 +93,13 @@ public class PurchaseItemManuallyFragment extends Fragment {
     @SuppressWarnings("UnusedParameters")
     private void initInstances(View rootView, Bundle savedInstanceState) {
 
-        spinnerStore = (Spinner) rootView.findViewById(R.id.spinnerStore);
-        tvTotalPrice = (TextView) rootView.findViewById(R.id.tvTotalPrice);
-        listView = (ListView) rootView.findViewById(R.id.listView);
-        btnSaveItem = (Button) rootView.findViewById(R.id.btnSaveItem);
+        /*spinnerStore = (Spinner) rootView.findViewById(R.id.spinnerStore);
+        spinnerStore.setAdapter(adapter);*/
+        recyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerView);
 
-        spinnerStore.setAdapter(adapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setAdapter(purchaseItemRecyclerViewAdapter);
+        setInterface();
     }
 
     @Override
@@ -111,13 +129,68 @@ public class PurchaseItemManuallyFragment extends Fragment {
         // Restore Instance State here
     }
 
+    private void setInterface(){
+        ArrayList<BasePurchaseItem> basePurchaseItems = new ArrayList<>();
+
+        //basePurchaseItems.add(purchaseItemCreator.createStoreName(storeName));
+
+        double totalPrice = 0;
+        for(PurchaseItemWithAction purchaseItemWithAction : purchaseItemWithActionManager.getIPurchaseItemWithActions()){
+            totalPrice += purchaseItemWithAction.getItemOCR().getPrice();
+        }
+
+        basePurchaseItems.add(purchaseItemCreator.createTotalPrice(totalPrice));
+        //basePurchaseItems.add(purchaseItemCreator.createSaveButton());
+        basePurchaseItems.addAll(purchaseItemCreator.createPurchaseItems(purchaseItemWithActionManager.getIPurchaseItemWithActions()));
+        basePurchaseItems.add(purchaseItemCreator.createAddButton(addPurchaseItem));
+
+        purchaseItemRecyclerViewAdapter.setPurchaseItems(basePurchaseItems);
+        purchaseItemRecyclerViewAdapter.notifyDataSetChanged();
+    }
+
     /***********************************************************************************************
      ************************************* Listener variables ********************************************
      ***********************************************************************************************/
+
+    View.OnClickListener addPurchaseItem = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            PurchaseItemAddFragment purchaseItemAddFragment = PurchaseItemAddFragment.newInstance();
+            getActivity().getSupportFragmentManager().beginTransaction()
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                    .add(((ViewGroup)getView().getParent()).getId(), purchaseItemAddFragment)
+                    .hide(PurchaseItemManuallyFragment.this)
+                    .commit();
+        }
+    };
 
 
     /***********************************************************************************************
      ************************************* Inner class ********************************************
      ***********************************************************************************************/
+
+    /***********************************************************************************************
+     ************************************* Implementation ********************************************
+     ***********************************************************************************************/
+    @Override
+    public void addPurchaseItem(ItemOCR purchaseItem) {
+        final ItemInventory itemInventory = purchaseItem.getItemInventoryMap().getItemInventory();
+        View.OnClickListener deleteListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String barcodeId = itemInventory.getBarcodeId();
+                purchaseItemWithActionManager.removePurchaseItemWithAction(barcodeId);
+                setInterface();
+            }
+        };
+
+        PurchaseItemWithAction purchaseItemWithAction = new PurchaseItemWithAction();
+
+        purchaseItemWithAction.setItemOCR(purchaseItem);
+        purchaseItemWithAction.setDelete(deleteListener);
+        purchaseItemWithActionManager.addPurchaseItemWithAction(purchaseItemWithAction);
+
+        setInterface();
+    }
 
 }

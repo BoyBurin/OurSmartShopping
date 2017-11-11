@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -103,7 +104,7 @@ public class FragmentDialogAddShoppingList extends DialogFragment {
 
     @SuppressWarnings("UnusedParameters")
     private void initInstances(View rootView, Bundle savedInstanceState) {
-        // Init 'View' instance(s) with rootView.findViewById here
+
         edtListName = (EditText) rootView.findViewById(R.id.edtListName);
         edtListDescribe = (EditText) rootView.findViewById(R.id.edtListDescribe);
         btnUploadImage = (Button) rootView.findViewById(R.id.btnUploadImage);

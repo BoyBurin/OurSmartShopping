@@ -10,7 +10,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 import com.example.seniorproject.smartshopping.R;
-import com.example.seniorproject.smartshopping.controller.activity.MoreBuyItemManuallyActivity;
+import com.example.seniorproject.smartshopping.controller.activity.PurchaseItemManuallyActivity;
 import com.example.seniorproject.smartshopping.controller.activity.OCRActivity;
 
 
@@ -107,7 +107,7 @@ public class PurchaseItemFragment extends Fragment {
     private View.OnClickListener manuallyListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            Intent intent = new Intent(getActivity(), MoreBuyItemManuallyActivity.class);
+            Intent intent = new Intent(getActivity(), PurchaseItemManuallyActivity.class);
             getActivity().startActivity(intent);
         }
     };

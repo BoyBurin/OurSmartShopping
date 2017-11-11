@@ -6,16 +6,19 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.example.seniorproject.smartshopping.R;
+import com.example.seniorproject.smartshopping.controller.fragment.purchaseitem.PurchaseItemAddFragment;
 import com.example.seniorproject.smartshopping.controller.fragment.purchaseitem.PurchaseItemManuallyFragment;
 import com.example.seniorproject.smartshopping.model.manager.group.GroupManager;
 
-public class MoreBuyItemManuallyActivity extends AppCompatActivity {
+public class PurchaseItemManuallyActivity extends AppCompatActivity implements PurchaseItemAddFragment.MainFragmentTag{
 
     /***********************************************************************************************
      ************************************* Variable class ********************************************
      ***********************************************************************************************/
 
-    final String MORE_BUY_ITEM_MANUALLY_FRAGMENT = "moreBuyItemManuallyFragment";
+    private static final String PURCHASE_ITEM__FRAGMENT_TAG = "purchaseItemFragmentTag";
+
+
 
 
 
@@ -34,7 +37,7 @@ public class MoreBuyItemManuallyActivity extends AppCompatActivity {
             getSupportFragmentManager()
                     .beginTransaction()
                     .add(R.id.containerMoreBuyItem, purchaseItemManuallyFragmentbuy,
-                            MORE_BUY_ITEM_MANUALLY_FRAGMENT)
+                            PURCHASE_ITEM__FRAGMENT_TAG)
                     .commit();
         }
     }
@@ -52,17 +55,16 @@ public class MoreBuyItemManuallyActivity extends AppCompatActivity {
             finish();
             return true;
         }
-
-        if(item.getItemId() == R.id.action_add){
-
-            return true;
-        }
         return super.onOptionsItemSelected(item);
     }
 
+
+    /***********************************************************************************************
+     ************************************* Implementation ********************************************
+     ***********************************************************************************************/
+
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_add, menu);
-        return true;
+    public String getMainFragmentTag() {
+        return PURCHASE_ITEM__FRAGMENT_TAG;
     }
 }

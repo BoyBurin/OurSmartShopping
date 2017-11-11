@@ -8,6 +8,7 @@ import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 
 import com.example.seniorproject.smartshopping.R;
 import com.example.seniorproject.smartshopping.model.dao.iteminventory.ItemInventoryMap;
@@ -72,7 +73,7 @@ public class MoreItemInventoryFragment extends Fragment {
         viewPager.setAdapter(new FragmentStatePagerAdapter(getChildFragmentManager()) {
             @Override
             public Fragment getItem(int page) {
-                switch (page){
+                switch (page) {
                     case 0:
                         return MoreItemInventoryPhotoSummaryFragment.newInstance(itemInventoryMap);
                     case 1:
@@ -84,6 +85,7 @@ public class MoreItemInventoryFragment extends Fragment {
 
                 }
             }
+
             @Override
             public int getCount() {
                 return 3;
@@ -91,7 +93,7 @@ public class MoreItemInventoryFragment extends Fragment {
 
             @Override
             public CharSequence getPageTitle(int position) {
-                switch (position){
+                switch (position) {
                     case 0:
                         return "Summary";
                     case 1:
@@ -103,6 +105,8 @@ public class MoreItemInventoryFragment extends Fragment {
                 }
             }
         });
+
+        hideKeyboard();
 
         slidingTabLayout = (SlidingTabLayout) rootView.findViewById(R.id.slidingTabLayout);
         slidingTabLayout.setViewPager(viewPager);
@@ -133,6 +137,28 @@ public class MoreItemInventoryFragment extends Fragment {
     @SuppressWarnings("UnusedParameters")
     private void onRestoreInstanceState(Bundle savedInstanceState) {
         // Restore Instance State here
+    }
+
+    private void hideKeyboard(){
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(getContext().INPUT_METHOD_SERVICE);
+                if(imm != null){
+                    imm.hideSoftInputFromWindow(viewPager.getWindowToken(), 0);
+                }
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
     }
 
     /***********************************************************************************************

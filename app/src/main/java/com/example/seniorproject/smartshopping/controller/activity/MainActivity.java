@@ -90,6 +90,7 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
         btnShoppingHistory.setOnClickListener(topBarOnClickListener);
 
 
+        currentBtn = btnGroup;
 
         if(savedInstanceState == null) {
             ShoppingListFragment shoppingListFragment = ShoppingListFragment.newInstance();

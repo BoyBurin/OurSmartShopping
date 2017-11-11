@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -162,6 +163,7 @@ public class PurchaseItemOCRFragment extends Fragment implements PurchaseItemAdd
         public void onClick(View view) {
             PurchaseItemAddFragment purchaseItemAddFragment = PurchaseItemAddFragment.newInstance();
             getActivity().getSupportFragmentManager().beginTransaction()
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                     .add(((ViewGroup)getView().getParent()).getId(), purchaseItemAddFragment)
                     .hide(PurchaseItemOCRFragment.this)
                     .commit();

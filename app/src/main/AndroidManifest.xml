@@ -48,7 +48,7 @@
 
         <receiver android:name=".controller.boardcastreceiver.AlarmReceiver" />
         <activity
-            android:name=".controller.activity.MoreBuyItemManuallyActivity"
+            android:name=".controller.activity.PurchaseItemManuallyActivity"
             android:theme="@style/BrownTheme" />
     </application>
 

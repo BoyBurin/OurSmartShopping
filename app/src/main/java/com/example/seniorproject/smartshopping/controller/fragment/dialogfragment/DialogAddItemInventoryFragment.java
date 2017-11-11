@@ -9,11 +9,14 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RadioGroup;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -74,6 +77,8 @@ public class DialogAddItemInventoryFragment extends DialogFragment {
     private EditText edtNumber;
     private LinearLayout buttonLayout1;
     private LinearLayout buttonLayout2;
+    private RelativeLayout downloading;
+    private ProgressBar progressBar;
 
     private ItemInventoryManager itemInventoryManager = new ItemInventoryManager();
 
@@ -134,6 +139,7 @@ public class DialogAddItemInventoryFragment extends DialogFragment {
 
     @SuppressWarnings("UnusedParameters")
     private void initInstances(View rootView, Bundle savedInstanceState) {
+
         imgItem = (ImageView) rootView.findViewById(R.id.imgItem);
         tvName = (TextView) rootView.findViewById(R.id.tvName);
         edtAmount = (EditText) rootView.findViewById(R.id.edtAmount);
@@ -150,6 +156,8 @@ public class DialogAddItemInventoryFragment extends DialogFragment {
         btnCancel2 = (Button) rootView.findViewById(R.id.btnCancel2);
         buttonLayout1 = (LinearLayout)rootView.findViewById(R.id.buttonLayout1);
         buttonLayout2 = (LinearLayout)rootView.findViewById(R.id.buttonLayout2);
+        downloading = (RelativeLayout) rootView.findViewById(R.id.downloading);
+        progressBar = (ProgressBar) rootView.findViewById(R.id.progressBar);
 
 
         btnScanBarcode.setOnClickListener(addBarcodeListener);
@@ -215,6 +223,16 @@ public class DialogAddItemInventoryFragment extends DialogFragment {
         }
     }
 
+    private void downLoading() {
+        progressBar.setVisibility(View.VISIBLE);
+        downloading.setVisibility(View.GONE);
+    }
+
+    private void finishDownloading(){
+        progressBar.setVisibility(View.GONE);
+        downloading.setVisibility(View.VISIBLE);
+    }
+
     /***********************************************************************************************
      ************************************* Listener variables ********************************************
      ***********************************************************************************************/
@@ -222,6 +240,7 @@ public class DialogAddItemInventoryFragment extends DialogFragment {
     final View.OnClickListener updateItemListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
+            downLoading();
             db.runTransaction(new Transaction.Function<Void>() {
                 @Override
                 public Void apply(Transaction transaction) throws FirebaseFirestoreException {
@@ -233,9 +252,13 @@ public class DialogAddItemInventoryFragment extends DialogFragment {
                     else{
                         mul = -1;
                     }
+
                     long updateAmount = Long.parseLong(edtNumber.getText().toString());
                     long newAmount = snapshot.getLong("amount") + (updateAmount * mul);
-                    transaction.update(cItems.document(barcodeId), "amount", newAmount);
+
+                    if(!(newAmount < 0)){
+                        transaction.update(cItems.document(barcodeId), "amount", newAmount);
+                    }
 
                     // Success
                     return null;
@@ -251,6 +274,8 @@ public class DialogAddItemInventoryFragment extends DialogFragment {
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
+                            finishDownloading();
+                            Toast.makeText(getContext(), "Update amount Failed", Toast.LENGTH_SHORT).show();
                             Log.w("TAG", "Transaction failure.", e);
                         }
                     });
@@ -330,17 +355,20 @@ public class DialogAddItemInventoryFragment extends DialogFragment {
 
 
 
+
     final View.OnClickListener addItemInventory = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
+
+            downLoading();
 
             if(tvName.getText().toString().equals("") || tvName.getText().toString() == null ||
                     edtAmount.getText().toString().equals("") || edtAmount.getText().toString() == null ||
                     edtHard.getText().toString().equals("") || edtHard.getText().toString() == null ||
                     edtSoft.getText().toString().equals("") || edtSoft.getText().toString() == null){
 
-                Toast.makeText(getContext(), "Please complete information", Toast.LENGTH_SHORT).show();
-                closeDialog();
+                Toast.makeText(getContext(), "Please complete all information", Toast.LENGTH_SHORT).show();
+                finishDownloading();
                 return;
             }
 
@@ -349,6 +377,12 @@ public class DialogAddItemInventoryFragment extends DialogFragment {
             String comment = edtListDescribe.getText().toString();
             long hard = Long.parseLong(edtHard.getText().toString());
             long soft = Long.parseLong(edtSoft.getText().toString());
+
+            if(soft <= hard){
+                Toast.makeText(getContext(), "Number of soft have to be more than number of hard", Toast.LENGTH_SHORT).show();
+                finishDownloading();
+                return;
+            }
 
             ItemInventory item = new ItemInventory(name, amount, comment,
                     photoUrl, unit, barcodeId, hard, soft, type);
@@ -361,6 +395,7 @@ public class DialogAddItemInventoryFragment extends DialogFragment {
                         closeDialog();
                     }
                     else{
+                        finishDownloading();
                         Log.d("TAG", "Cannot add Item");
                     }
                 }

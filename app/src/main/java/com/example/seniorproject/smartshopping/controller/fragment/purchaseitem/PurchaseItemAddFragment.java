@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -47,6 +48,10 @@ public class PurchaseItemAddFragment extends Fragment implements AddPurchaseItem
 
     interface AddPurchaseItemInterface{
         public void addPurchaseItem(ItemOCR purchaseItem);
+    }
+
+    public interface MainFragmentTag{
+        public String getMainFragmentTag();
     }
 
     /***********************************************************************************************
@@ -178,7 +183,7 @@ public class PurchaseItemAddFragment extends Fragment implements AddPurchaseItem
         // Restore Instance State here
     }
 
-    public void setInterface(){
+    private void setInterface(){
         baseAddPurchaseItems = new ArrayList<>();
 
         baseAddPurchaseItems.addAll(addPurchaseItemCreator.createAddPurchaseItem(itemInventoryManager.getItemInventoryMaps()));
@@ -186,6 +191,33 @@ public class PurchaseItemAddFragment extends Fragment implements AddPurchaseItem
 
         addPurchaseItemRecyclerViewAdapter.setAddPurchaseItems(baseAddPurchaseItems);
         addPurchaseItemRecyclerViewAdapter.notifyDataSetChanged();
+    }
+
+    private void removeThisFragment(){
+        MainFragmentTag mainFragmentID = (MainFragmentTag) getActivity();
+
+        if((PurchaseItemManuallyFragment) getActivity().getSupportFragmentManager().findFragmentByTag(mainFragmentID.getMainFragmentTag())
+                instanceof PurchaseItemManuallyFragment) {
+            PurchaseItemManuallyFragment addPurchaseItemInterface = (PurchaseItemManuallyFragment) getActivity().getSupportFragmentManager()
+                    .findFragmentByTag(mainFragmentID.getMainFragmentTag());
+
+            getActivity().getSupportFragmentManager().beginTransaction()
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE)
+                    .remove(PurchaseItemAddFragment.this)
+                    .show(addPurchaseItemInterface)
+                    .commit();
+        }
+        else{
+
+            PurchaseItemOCRFragment addPurchaseItemInterface = (PurchaseItemOCRFragment) getActivity().getSupportFragmentManager()
+                    .findFragmentByTag(mainFragmentID.getMainFragmentTag());
+
+            getActivity().getSupportFragmentManager().beginTransaction()
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE)
+                    .remove(PurchaseItemAddFragment.this)
+                    .show(addPurchaseItemInterface)
+                    .commit();
+        }
     }
 
     /***********************************************************************************************
@@ -253,13 +285,7 @@ public class PurchaseItemAddFragment extends Fragment implements AddPurchaseItem
     View.OnClickListener cancelListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            PurchaseItemOCRFragment addPurchaseItemInterface = (PurchaseItemOCRFragment) getActivity().getSupportFragmentManager()
-                    .findFragmentByTag(OCRActivity.PURCHASE_ITEM_OCR_FRAGMENT);
-
-            getActivity().getSupportFragmentManager().beginTransaction()
-                    .remove(PurchaseItemAddFragment.this)
-                    .show(addPurchaseItemInterface)
-                    .commit();
+            removeThisFragment();
         }
     };
 
@@ -269,22 +295,39 @@ public class PurchaseItemAddFragment extends Fragment implements AddPurchaseItem
             if(currentItem == null || customViewGroupItemDetail.isPriceEmpty() || customViewGroupItemDetail.isAmountEmpty()){
                 return;
             }
-            PurchaseItemOCRFragment addPurchaseItemInterface = (PurchaseItemOCRFragment) getActivity().getSupportFragmentManager()
-                    .findFragmentByTag(OCRActivity.PURCHASE_ITEM_OCR_FRAGMENT);
+            MainFragmentTag mainFragmentID = (MainFragmentTag) getActivity();
+
+            if((PurchaseItemManuallyFragment) getActivity().getSupportFragmentManager().findFragmentByTag(mainFragmentID.getMainFragmentTag())
+                    instanceof PurchaseItemManuallyFragment) {
+                PurchaseItemManuallyFragment addPurchaseItemInterface = (PurchaseItemManuallyFragment) getActivity().getSupportFragmentManager()
+                        .findFragmentByTag(mainFragmentID.getMainFragmentTag());
 
 
-            ItemOCR purchaseItem = new ItemOCR();
-            purchaseItem.setPrice(customViewGroupItemDetail.getPrice() * customViewGroupItemDetail.getAmount());
-            purchaseItem.setAmount(customViewGroupItemDetail.getAmount());
-            purchaseItem.setItemInventoryMap(currentItem);
+                ItemOCR purchaseItem = new ItemOCR();
+                purchaseItem.setPrice(customViewGroupItemDetail.getPrice() * customViewGroupItemDetail.getAmount());
+                purchaseItem.setAmount(customViewGroupItemDetail.getAmount());
+                purchaseItem.setItemInventoryMap(currentItem);
 
 
-            ((AddPurchaseItemInterface)addPurchaseItemInterface).addPurchaseItem(purchaseItem);
+                ((AddPurchaseItemInterface) addPurchaseItemInterface).addPurchaseItem(purchaseItem);
 
-            getActivity().getSupportFragmentManager().beginTransaction()
-                    .remove(PurchaseItemAddFragment.this)
-                    .show(addPurchaseItemInterface)
-                    .commit();
+                removeThisFragment();
+            }
+            else{
+                PurchaseItemOCRFragment addPurchaseItemInterface = (PurchaseItemOCRFragment) getActivity().getSupportFragmentManager()
+                        .findFragmentByTag(mainFragmentID.getMainFragmentTag());
+
+
+                ItemOCR purchaseItem = new ItemOCR();
+                purchaseItem.setPrice(customViewGroupItemDetail.getPrice() * customViewGroupItemDetail.getAmount());
+                purchaseItem.setAmount(customViewGroupItemDetail.getAmount());
+                purchaseItem.setItemInventoryMap(currentItem);
+
+
+                ((AddPurchaseItemInterface) addPurchaseItemInterface).addPurchaseItem(purchaseItem);
+
+                removeThisFragment();
+            }
 
         }
     };

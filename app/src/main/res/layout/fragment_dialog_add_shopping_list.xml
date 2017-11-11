@@ -34,10 +34,13 @@
         android:id="@+id/btnUploadImage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/activity_vertical_margin"
         android:layout_below="@+id/edtListDescribe"
         android:layout_centerHorizontal="true"
-        android:text="@string/add_shopping_list_photo_button" />
+        android:text="@string/add_shopping_list_photo_button"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
+        android:background="@drawable/selector_shape_rect_button_brown"
+        android:textColor="#FFFFFF"/>
 
     <TextView
         android:id="@+id/tvURI"
@@ -64,16 +67,22 @@
 
         <Button
             android:id="@+id/btnCancel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:layout_marginRight="36dp"
-            android:text="@string/add_shopping_list_cancel_button" />
+            android:text="@string/add_shopping_list_cancel_button"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/activity_vertical_margin"
+            android:background="@drawable/selector_shape_rect_button_brown"
+            android:textColor="#FFFFFF"/>
 
         <Button
             android:id="@+id/btnAdd"
-            android:layout_width="wrap_content"
+            android:text="@string/add_shopping_list_add_button"
+            android:layout_width="100dp"
             android:layout_height="wrap_content"
-            android:text="@string/add_shopping_list_add_button" />
+            android:layout_marginTop="@dimen/activity_vertical_margin"
+            android:background="@drawable/selector_shape_rect_button_brown"
+            android:textColor="#FFFFFF"/>
 
         </LinearLayout>
 

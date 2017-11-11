@@ -203,6 +203,17 @@ public class MoreItemInventoryEditFragment extends Fragment {
         });
     }
 
+    private void downLoading() {
+        progressBar.setVisibility(View.VISIBLE);
+        backgroundLoading.setVisibility(View.VISIBLE);
+        btnSave.setVisibility(View.GONE);
+    }
+
+    private void finishDownloading(){
+        progressBar.setVisibility(View.GONE);
+        backgroundLoading.setVisibility(View.GONE);
+        btnSave.setVisibility(View.VISIBLE);
+    }
     /***********************************************************************************************
      ************************************* Listener variables ********************************************
      ***********************************************************************************************/
@@ -210,14 +221,26 @@ public class MoreItemInventoryEditFragment extends Fragment {
     final View.OnClickListener saveItemInventoryListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            progressBar.setVisibility(View.VISIBLE);
-            backgroundLoading.setVisibility(View.VISIBLE);
-            btnSave.setVisibility(View.GONE);
+
+            downLoading();
+
+            if(edtSoft.getText().toString().equals("") || edtHard.getText().toString().equals("")
+                    || edtAmount.getText().toString().equals("")) {
+                Toast.makeText(getContext(), "Please complete all information", Toast.LENGTH_SHORT).show();
+                finishDownloading();
+                return;
+            }
 
             final String comment = edtComment.getText().toString();
             final long amount = Integer.parseInt(edtAmount.getText().toString());
             final long soft = Long.parseLong(edtSoft.getText().toString());
             final long hard = Long.parseLong(edtHard.getText().toString());
+
+            if(soft <= hard){
+                Toast.makeText(getContext(), "Number of soft have to be more than number of hard", Toast.LENGTH_SHORT).show();
+                finishDownloading();
+                return;
+            }
 
             WriteBatch batch = db.batch();
 
@@ -234,15 +257,14 @@ public class MoreItemInventoryEditFragment extends Fragment {
 
                         //cShoppingList.get().addOnCompleteListener(getShoppingList);
 
-                        progressBar.setVisibility(View.GONE);
-                        backgroundLoading.setVisibility(View.GONE);
-                        btnSave.setVisibility(View.VISIBLE);
+                        finishDownloading();
 
                         //clearText();
                         Toast.makeText(getActivity(), "Update Item Inventory Successful", Toast.LENGTH_SHORT).show();
                     }
                     else{
 
+                        finishDownloading();
                         Toast.makeText(getActivity(), "Update Item Inventory Failed", Toast.LENGTH_SHORT).show();
                     }
                 }

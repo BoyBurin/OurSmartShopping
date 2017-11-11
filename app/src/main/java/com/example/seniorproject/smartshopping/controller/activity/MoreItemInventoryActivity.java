@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.inputmethod.InputMethodManager;
 
 import com.example.seniorproject.smartshopping.R;
 import com.example.seniorproject.smartshopping.controller.fragment.inventoryfragment.MoreItemInventoryFragment;
@@ -71,6 +72,7 @@ public class MoreItemInventoryActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if(item.getItemId() == android.R.id.home){
+            hideSoftKeyboard();
             finish();
             return true;
         }
@@ -78,6 +80,7 @@ public class MoreItemInventoryActivity extends AppCompatActivity {
         if(item.getItemId() == R.id.action_delete){
             dItem.delete().addOnSuccessListener(deleteItemSuccess)
                     .addOnFailureListener(deleteItemFailed);
+            finish();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -93,6 +96,15 @@ public class MoreItemInventoryActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_delete, menu);
         return true;
+    }
+
+    public void hideSoftKeyboard() {
+        if(getCurrentFocus()!=null) {
+            InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+            if(inputMethodManager != null) {
+                inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+            }
+        }
     }
 
     /***********************************************************************************************

@@ -8,55 +8,60 @@
     android:paddingRight="@dimen/activity_vertical_margin"
     android:paddingTop="@dimen/activity_vertical_margin">
 
+    <RelativeLayout
+        android:id="@+id/downloading"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
     <ImageView
         android:id="@+id/imgItem"
         android:layout_width="wrap_content"
         android:layout_height="150dp"
-        android:visibility="gone"/>
+        android:visibility="gone" />
 
     <TextView
-        android:layout_marginTop="@dimen/activity_vertical_margin"
         android:id="@+id/tvName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:textColor="@android:color/black"
         android:layout_below="@+id/imgItem"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
+        android:textColor="@android:color/black"
         android:textColorHint="@color/dark_grey"
-        android:visibility="gone"/>
+        android:visibility="gone" />
 
     <RadioGroup
         android:id="@+id/rg"
-        android:layout_marginTop="@dimen/activity_vertical_margin"
-        android:layout_below="@+id/tvName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/tvName"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
         android:checkedButton="@+id/rp"
         android:orientation="horizontal"
         android:visibility="gone">
 
-    <RadioButton
-        android:id="@+id/rIncrease"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
-        android:text="Increase" />
+        <RadioButton
+            android:id="@+id/rIncrease"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:text="Increase" />
 
-    <RadioButton
-        android:id="@+id/rDecrease"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
-        android:text="Decrease" />
+        <RadioButton
+            android:id="@+id/rDecrease"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:text="Decrease" />
 
     </RadioGroup>
 
     <LinearLayout
         android:id="@+id/groupUpdateAmount"
-        android:layout_marginTop="@dimen/activity_vertical_margin"
-        android:layout_below="@+id/rg"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/rg"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
         android:orientation="horizontal">
 
 
@@ -64,11 +69,11 @@
             android:id="@+id/edtNumber"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
             android:layout_weight="1"
             android:background="@color/cardview_shadow_end_color"
             android:inputType="number"
             android:text="1"
-            android:layout_marginLeft="@dimen/activity_horizontal_margin"
             android:visibility="gone" />
 
 
@@ -79,102 +84,109 @@
             android:layout_weight="1"
             android:freezesText="true"
             android:text="Unit"
-            android:visibility="gone"/>
+            android:visibility="gone" />
     </LinearLayout>
 
     <EditText
         android:id="@+id/edtAmount"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/tvName"
         android:layout_centerHorizontal="true"
         android:hint="Amount"
-        android:inputType="textCapWords"
+        android:inputType="number"
         android:textColor="@android:color/black"
         android:textColorHint="@color/dark_grey"
-        android:layout_below="@+id/tvName"
-        android:visibility="gone"/>
+        android:visibility="gone" />
 
     <EditText
         android:id="@+id/edtSoft"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/edtAmount"
         android:layout_weight="4"
         android:hint="Soft remainder"
         android:inputType="number"
-        android:layout_below="@+id/edtAmount"
         android:textColorHint="@color/dark_grey"
-        android:visibility="gone"/>
+        android:visibility="gone" />
 
     <EditText
         android:id="@+id/edtHard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/edtSoft"
         android:layout_weight="4"
         android:hint="Hard remainder"
         android:inputType="number"
-        android:layout_below="@+id/edtSoft"
         android:textColorHint="@color/dark_grey"
-        android:visibility="gone"/>
+        android:visibility="gone" />
 
     <EditText
         android:id="@+id/edtListDescribe"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/activity_vertical_margin"
         android:layout_below="@+id/edtHard"
         android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
         android:hint="Detail of your Item"
         android:inputType="textCapWords"
         android:textColor="@android:color/black"
         android:textColorHint="@color/dark_grey"
-        android:visibility="gone"/>
+        android:visibility="gone" />
 
 
     <Button
         android:id="@+id/btnScanBarcode"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/activity_vertical_margin"
         android:layout_below="@+id/edtListDescribe"
         android:layout_centerHorizontal="true"
-        android:text="Scan barcode" />
-
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
+        android:background="@drawable/selector_shape_rect_button_brown"
+        android:text="@string/scan_barcode"
+        android:textColor="#FFFFFF" />
 
 
     <LinearLayout
         android:id="@+id/buttonLayout1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/activity_vertical_margin"
         android:layout_below="@+id/btnScanBarcode"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
         android:orientation="horizontal"
         android:visibility="gone">
 
         <View
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            />
+            android:layout_weight="1" />
 
         <Button
             android:id="@+id/btnCancel"
-            android:layout_width="wrap_content"
+            android:layout_width="100dp"
             android:layout_height="wrap_content"
-            android:layout_marginRight="36dp"
+            android:background="@drawable/selector_shape_rect_button_brown"
             android:text="@string/add_shopping_list_cancel_button"
+            android:textColor="#FFFFFF"
+            android:textSize="@dimen/text_size"
+            android:layout_marginRight="@dimen/margin_padding"
             android:visibility="gone"/>
 
         <Button
             android:id="@+id/btnAdd"
-            android:layout_width="wrap_content"
+            android:layout_width="100dp"
             android:layout_height="wrap_content"
+            android:background="@drawable/selector_shape_rect_button_brown"
             android:text="@string/add_shopping_list_add_button"
+            android:textColor="#FFFFFF"
+            android:textSize="@dimen/text_size"
             android:visibility="gone"/>
+
         <View
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"/>
-
+            android:layout_weight="1" />
 
 
     </LinearLayout>
@@ -183,39 +195,52 @@
         android:id="@+id/buttonLayout2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/activity_vertical_margin"
         android:layout_below="@+id/groupUpdateAmount"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
         android:orientation="horizontal"
         android:visibility="gone">
 
         <View
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            />
+            android:layout_weight="1" />
 
         <Button
             android:id="@+id/btnCancel2"
-            android:layout_width="wrap_content"
+            android:layout_width="100dp"
             android:layout_height="wrap_content"
-            android:layout_marginRight="36dp"
+            android:background="@drawable/selector_shape_rect_button_brown"
             android:text="@string/add_shopping_list_cancel_button"
+            android:textColor="#FFFFFF"
+            android:textSize="@dimen/text_size"
+            android:layout_marginRight="@dimen/margin_padding"
             android:visibility="gone"/>
 
         <Button
             android:id="@+id/btnAdd2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:text="@string/add_shopping_list_add_button"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/selector_shape_rect_button_brown"
+            android:textColor="#FFFFFF"
+            android:textSize="@dimen/text_size"
             android:visibility="gone"/>
+
         <View
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"/>
-
+            android:layout_weight="1" />
 
 
     </LinearLayout>
+    </RelativeLayout>
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="gone"/>
 
 
 </RelativeLayout>

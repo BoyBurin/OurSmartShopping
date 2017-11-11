@@ -160,7 +160,7 @@ public class ItemView extends BaseCustomViewGroup {
         ivRoundRed.setVisibility(GONE);
         if(amount > soft){
             return;
-        } else if(amount < hard){
+        } else if(amount <= hard){
             ivRoundRed.setVisibility(VISIBLE);
         } else{
             ivRoundYellow.setVisibility(VISIBLE);

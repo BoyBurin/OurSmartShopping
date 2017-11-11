@@ -17,13 +17,17 @@
 package com.example.seniorproject.smartshopping.controller.activity;
 
 import android.Manifest;
+import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -45,6 +49,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.seniorproject.smartshopping.controller.fragment.purchaseitem.PurchaseItemAddFragment;
 import com.example.seniorproject.smartshopping.controller.fragment.purchaseitem.PurchaseItemOCRFragment;
 import com.example.seniorproject.smartshopping.model.dao.iteminventory.ItemInventory;
 import com.example.seniorproject.smartshopping.model.dao.iteminventory.ItemInventoryMap;
@@ -77,6 +82,7 @@ import com.google.api.services.vision.v1.model.ImageContext;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -95,17 +101,21 @@ import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.Transaction;
 
-public class OCRActivity extends AppCompatActivity {
+public class OCRActivity extends AppCompatActivity implements PurchaseItemAddFragment.MainFragmentTag {
     private static final String CLOUD_VISION_API_KEY = "AIzaSyCFC2KKqZoQ5lIWyNp00bh3wDoO4p_z7xY";
     public static final String FILE_NAME = "temp.jpg";
+
+    private static final String IMAGE_FILE_LOCATION = "file:///sdcard/temp.jpg";//temp file
+    private static Uri tmpUri = Uri.parse(IMAGE_FILE_LOCATION);//The Uri to store the big bitmap
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final int GALLERY_PERMISSIONS_REQUEST = 0;
     private static final int GALLERY_IMAGE_REQUEST = 1;
     public static final int CAMERA_PERMISSIONS_REQUEST = 2;
     public static final int CAMERA_IMAGE_REQUEST = 3;
+    public static final int PIC_CROP = 4;
 
-    public static final String PURCHASE_ITEM_OCR_FRAGMENT = "purchaseITEMOCRFRAGMENT";
+    private static final String PURCHASE_ITEM__FRAGMENT_TAG = "purchaseItemFragmentTag";
 
     private TextView mImageDetails;
     private RelativeLayout activityLayout;
@@ -139,6 +149,8 @@ public class OCRActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private CollectionReference cItems;
     private ListenerRegistration cItemsListener;
+
+    private Uri picUri;
 
 
     @Override
@@ -208,7 +220,7 @@ public class OCRActivity extends AppCompatActivity {
 
         currentStore = "Big C Bangpakok";
         String[] stores = {"Big C Bangpakok", "Max Value Pracha Uthit", "Tesco Lotus Bangpakok", "Tesco Lotus ตลาดโลตัสประชาอุทิศ"};
-        adapter = new ArrayAdapter<String>(getApplicationContext(),  android.R.layout.simple_spinner_item, stores);
+        adapter = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_spinner_item, stores);
 
         spinner.setAdapter(adapter);
         spinner.setOnItemSelectedListener(storeSelectedLister);
@@ -225,6 +237,16 @@ public class OCRActivity extends AppCompatActivity {
     }
 
     public void startCamera() {
+
+        if (Build.VERSION.SDK_INT >= 24) {
+            try {
+                Method m = StrictMode.class.getMethod("disableDeathOnFileUriExposure");
+                m.invoke(null);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
         if (PermissionUtils.requestPermission(
                 this,
                 CAMERA_PERMISSIONS_REQUEST,
@@ -247,8 +269,44 @@ public class OCRActivity extends AppCompatActivity {
 
         if (requestCode == GALLERY_IMAGE_REQUEST && resultCode == RESULT_OK && data != null) {
             uploadImage(data.getData());
+            Log.d("boy", "No");
+
         } else if (requestCode == CAMERA_IMAGE_REQUEST && resultCode == RESULT_OK) {
-            uploadImage(Uri.fromFile(getCameraFile()));
+            //uploadImage(Uri.fromFile(getCameraFile()));
+            picUri = Uri.fromFile(getCameraFile());
+            performCrop();
+        }
+        else if(requestCode == PIC_CROP && resultCode == RESULT_OK){
+            Uri uri = data.getData();
+            uploadImage(uri);
+            Log.d("boy", "Yeah");
+        }
+    }
+
+
+    private void performCrop() {
+        try {
+            //call the standard crop action intent (the user device may not support it)
+            Intent cropIntent = new Intent("com.android.camera.action.CROP");
+//indicate image type and Uri
+            cropIntent.setDataAndType(picUri, "image/*");
+//set crop properties
+            cropIntent.putExtra("crop", "true");
+//indicate aspect of desired crop
+            //cropIntent.putExtra("aspectX", 1);
+            //cropIntent.putExtra("aspectY", 1);
+//indicate output X and Y
+            //cropIntent.putExtra("outputX", 256);
+            //cropIntent.putExtra("outputY", 256);
+//retrieve data on return
+            cropIntent.putExtra("return-data", true);
+            cropIntent.putExtra(MediaStore.EXTRA_OUTPUT, tmpUri);
+//start the activity - we handle returning in onActivityResult
+            startActivityForResult(cropIntent, PIC_CROP);
+        } catch (ActivityNotFoundException anfe) {
+            //display an error message
+            String errorMessage = "Whoops - your device doesn't support the crop action!";
+            Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -370,14 +428,14 @@ public class OCRActivity extends AppCompatActivity {
             protected void onPostExecute(String result) {
                 //mImageDetails.setText(result);
                 String[] myResult = result.split("\n");
-                for(int i = 0 ; i < myResult.length ; i++){
-                    Log.d(i+ "", myResult[i]);
+                for (int i = 0; i < myResult.length; i++) {
+                    Log.d(i + "", myResult[i]);
                 }
 
                 ArrayList<String> words = new ArrayList<String>();
                 ArrayList<String> amount = new ArrayList<String>();
 
-                for (int i = 3 ; i < myResult.length ; i++) {
+                for (int i = 3; i < myResult.length; i++) {
                     String line = myResult[i];
                     if (isNumeric(line)) {
                         amount.add(line);
@@ -386,13 +444,13 @@ public class OCRActivity extends AppCompatActivity {
                     }
                 }
 
-                Log.d("Word: " , words.size() + "");
-                Log.d("Amount: " , amount.size() + "");
+                Log.d("Word: ", words.size() + "");
+                Log.d("Amount: ", amount.size() + "");
                 double totalPrice = 0;
                 int position = 0;
-                for(int i = 0 ; i < amount.size() ; i++){
+                for (int i = 0; i < amount.size(); i++) {
                     double price = Double.parseDouble(amount.get(i));
-                    if(price > totalPrice){
+                    if (price > totalPrice) {
                         totalPrice = price;
                         position = i;
                     }
@@ -416,9 +474,8 @@ public class OCRActivity extends AppCompatActivity {
                         .newInstance(itemOCRManager.getItemOCRs(), currentStore);
 
                 getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.containerOCR, purchaseItemOCRFragment, PURCHASE_ITEM_OCR_FRAGMENT)
+                        .replace(R.id.containerOCR, purchaseItemOCRFragment, PURCHASE_ITEM__FRAGMENT_TAG)
                         .commit();
-
 
 
             }
@@ -453,7 +510,12 @@ public class OCRActivity extends AppCompatActivity {
         builder.append(String.format("(Total spent %.2f secs, including %.2f secs for upload)\n\n", spentMS / 1000f, uploadDurationSec));
 
         List<EntityAnnotation> labels = response.getResponses().get(0).getTextAnnotations();
-        // ดักด้วย
+        if(labels == null){
+            Toast.makeText(this, "Cannot do receipt recognition", Toast.LENGTH_SHORT).show();
+            activityLayout.setVisibility(View.VISIBLE);
+            loadingOCR.setVisibility(View.GONE);
+
+        }
         Log.i("JackTest", "total labels:" + labels.size());
         if (labels != null) {
             for (int i = 0; i < labels.size(); i++) {
@@ -531,7 +593,7 @@ public class OCRActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
 
-        if(cItemsListener != null){
+        if (cItemsListener != null) {
             cItemsListener.remove();
             cItemsListener = null;
         }
@@ -638,7 +700,7 @@ public class OCRActivity extends AppCompatActivity {
     final AdapterView.OnItemSelectedListener storeSelectedLister = new AdapterView.OnItemSelectedListener() {
         @Override
         public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
-            switch (position){
+            switch (position) {
                 case 0:
                     currentStore = "Big C Bangpakok";
                     break;
@@ -715,4 +777,12 @@ public class OCRActivity extends AppCompatActivity {
     };
 
 
+    /***********************************************************************************************
+     ************************************* Implementation ********************************************
+     ***********************************************************************************************/
+
+    @Override
+    public String getMainFragmentTag() {
+        return PURCHASE_ITEM__FRAGMENT_TAG;
+    }
 }
