@@ -218,8 +218,8 @@ public class OCRActivity extends AppCompatActivity implements PurchaseItemAddFra
         containerOCR = (FrameLayout) findViewById(R.id.containerOCR);
         itemOCRManager = new ItemOCRManager();
 
-        currentStore = "Big C Bangpakok";
-        String[] stores = {"Big C Bangpakok", "Max Value Pracha Uthit", "Tesco Lotus Bangpakok", "Tesco Lotus ตลาดโลตัสประชาอุทิศ"};
+        currentStore = "บิ๊กซี พระราม 2";
+        String[] stores = {"บิ๊กซี พระราม 2", "Max Value Pracha Uthit", "Tesco Lotus Bangpakok", "Tesco Lotus ตลาดโลตัสประชาอุทิศ"};
         adapter = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_spinner_item, stores);
 
         spinner.setAdapter(adapter);

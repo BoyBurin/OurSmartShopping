@@ -25,6 +25,7 @@
     <string name="group">Group</string>
     <string name="accept">Accept</string>
     <string name="decline">Decline</string>
+    <string name="select_group">Select Group</string>
 
     <!-- OCR -->
     <string name="action_settings">Settings</string>
@@ -61,5 +62,9 @@
     <string name="percent">%</string>
 
     <string name="scan_barcode">Scan Barcode</string>
+
+    <string name="change_group">Change Group</string>
+
+    <string name="log_out">Logout</string>
 
 </resources>

@@ -214,6 +214,7 @@ public class MoreItemInventoryAlarmFragment extends Fragment {
                         calendar.setTimeInMillis(System.currentTimeMillis());
                         calendar.set(Calendar.HOUR_OF_DAY, itemAlarm.getHour());
                         calendar.set(Calendar.MINUTE, itemAlarm.getMinute());
+                        calendar.set(Calendar.SECOND, 0);
 
                         int dayNum = 0;
                         switch (itemAlarm.getDay()){
@@ -242,7 +243,7 @@ public class MoreItemInventoryAlarmFragment extends Fragment {
                         calendar.set(Calendar.DAY_OF_WEEK, dayNum);
 
                         alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, itemAlarm.getTimeInMillis(),
-                                3000, alarmIntent);
+                                AlarmManager.INTERVAL_DAY * 7, alarmIntent);
 
 
 

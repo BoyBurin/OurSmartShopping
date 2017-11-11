@@ -2,16 +2,25 @@ package com.example.seniorproject.smartshopping.controller.fragment.settingfragm
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
 import com.example.seniorproject.smartshopping.R;
+import com.example.seniorproject.smartshopping.model.dao.user.User;
+import com.example.seniorproject.smartshopping.view.customviewgroup.ItemView;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 
 public class SettingFragment extends Fragment {
@@ -30,6 +39,12 @@ public class SettingFragment extends Fragment {
 
     private Button logout;
     private Button btnGroups;
+    private ItemView profile;
+
+    private FirebaseFirestore db;
+    private DocumentReference dUser;
+
+    private User user;
 
 
     /***********************************************************************************************
@@ -66,7 +81,14 @@ public class SettingFragment extends Fragment {
     }
 
     private void init(Bundle savedInstanceState) {
-        // Init Fragment level's variable(s) here
+
+        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        if(firebaseUser != null) {
+            String id = firebaseUser.getUid();
+            db = FirebaseFirestore.getInstance();
+            dUser = db.collection("users").document(id);
+
+        }
 
     }
 
@@ -74,9 +96,29 @@ public class SettingFragment extends Fragment {
     private void initInstances(View rootView, Bundle savedInstanceState) {
         logout = (Button)rootView.findViewById(R.id.btnLogout);
         btnGroups = (Button) rootView.findViewById(R.id.btnGroups);
+        profile = (ItemView) rootView.findViewById(R.id.profile);
 
         logout.setOnClickListener(logoutListener);
         btnGroups.setOnClickListener(groupSettingListener);
+
+
+        dUser.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document != null) {
+                        user = document.toObject(User.class);
+                        profile.setImageUrl(user.getPhotoUrl());
+                        profile.setNameText(user.getName().toString());
+                    } else {
+                        Log.d("TAG", "No such document");
+                    }
+                } else {
+                    Log.d("TAG", "get failed with ", task.getException());
+                }
+            }
+        });
     }
 
     @Override

@@ -101,8 +101,8 @@ public class PurchaseItemManuallyFragment extends Fragment implements PurchaseIt
         purchaseItemCreator = new PurchaseItemCreator();
         purchaseItemRecyclerViewAdapter = new PurchaseItemRecyclerViewAdapter(getContext());
 
-        currentStore = "Big C Bangpakok";
-        String[] stores = {"Big C Bangpakok", "Max Value Pracha Uthit", "Tesco Lotus Bangpakok", "Tesco Lotus ตลาดโลตัสประชาอุทิศ"};
+        currentStore = "บิ๊กซี พระราม 2";
+        String[] stores = {"บิ๊กซี พระราม 2", "Max Value Pracha Uthit", "Tesco Lotus Bangpakok", "Tesco Lotus ตลาดโลตัสประชาอุทิศ"};
         adapter = new ArrayAdapter<String>(getActivity(),  android.R.layout.simple_spinner_item, stores);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 

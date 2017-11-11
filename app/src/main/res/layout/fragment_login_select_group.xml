@@ -7,7 +7,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:text="@string/group"
+        android:text="@string/select_group"
         android:textColor="@color/white"
         android:textSize="@dimen/text_size_36"
         android:padding="@dimen/margin_padding_extra_large"/>

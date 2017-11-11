@@ -164,7 +164,7 @@ public class MoreShoppingListItemOptimizePriceFragment extends Fragment {
 
     private void setStores(){
         stores = new ArrayList<String>();
-        stores.add("Big C Bangpakok");
+        stores.add("บิ๊กซี พระราม 2");
         stores.add("Max Value Pracha Uthit");
         stores.add("Tesco Lotus Bangpakok");
         stores.add("Tesco Lotus ตลาดโลตัสประชาอุทิศ");

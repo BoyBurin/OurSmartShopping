@@ -88,10 +88,10 @@ public class ItemShoppingListManager {
             long value2 = item2.getStatus();
 
             if(value1 < value2){
-                return -1;
+                return 1;
             }
             else if(value1 > value2){
-                return 1;
+                return -1;
             }
             else{
                 return 0;
