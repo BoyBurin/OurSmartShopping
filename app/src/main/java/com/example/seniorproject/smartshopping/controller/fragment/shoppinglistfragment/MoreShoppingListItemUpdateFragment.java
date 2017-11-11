@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -63,8 +64,6 @@ public class MoreShoppingListItemUpdateFragment extends Fragment implements
     private ItemShoppingListManager itemShoppingListManager;
 
     //private ArrayList<View.OnClickListener> deleteListener;
-
-
 
 
     /***********************************************************************************************
@@ -133,13 +132,13 @@ public class MoreShoppingListItemUpdateFragment extends Fragment implements
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if(cItemsShoppingListListener != null){
+        if (cItemsShoppingListListener != null) {
             cItemsShoppingListListener.remove();
             cItemsShoppingListListener = null;
         }
 
-        for(ListenerRegistration dItemInventoryListener : dItemInventoryListeners){
-            if(dItemInventoryListener != null){
+        for (ListenerRegistration dItemInventoryListener : dItemInventoryListeners) {
+            if (dItemInventoryListener != null) {
                 dItemInventoryListener.remove();
             }
             dItemInventoryListeners = null;
@@ -173,14 +172,14 @@ public class MoreShoppingListItemUpdateFragment extends Fragment implements
         // Restore Instance State here
     }
 
-    public int getStatus(long soft, long hard, long amount){
+    public int getStatus(long soft, long hard, long amount) {
         int status = -1;
 
-        if(amount > soft){
+        if (amount > soft) {
             status = 0;
-        } else if(amount < hard){
+        } else if (amount < hard) {
             status = 2;
-        } else{
+        } else {
             status = 1;
         }
 
@@ -214,7 +213,7 @@ public class MoreShoppingListItemUpdateFragment extends Fragment implements
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
                                                 Log.d("TAG", "DocumentSnapshot successfully deleted!");
-                                                Toast.makeText(getContext(), "Delete " + newItemShoppingList.getName()+
+                                                Toast.makeText(getContext(), "Delete " + newItemShoppingList.getName() +
                                                         " Success", Toast.LENGTH_SHORT).show();
                                             }
                                         })
@@ -238,7 +237,7 @@ public class MoreShoppingListItemUpdateFragment extends Fragment implements
                         itemShoppingListAdapter.setItemShoppingLists(itemShoppingListManager.getItemShoppingLists());
                         itemShoppingListAdapter.notifyDataSetChanged();
 
-                        Toast.makeText(getContext(), "Added " + newItemShoppingList.getName(), Toast.LENGTH_SHORT).show();
+                        //   Toast.makeText(getContext(), "Added " + newItemShoppingList.getName(), Toast.LENGTH_SHORT).show();
 
                         break;
 
@@ -256,7 +255,7 @@ public class MoreShoppingListItemUpdateFragment extends Fragment implements
                         itemShoppingListAdapter.notifyDataSetChanged();*/
 
 
-                        Toast.makeText(getContext(), "Update Status Successful" , Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Update Status Successful", Toast.LENGTH_SHORT).show();
                         break;
 
                     case REMOVED:
@@ -270,7 +269,7 @@ public class MoreShoppingListItemUpdateFragment extends Fragment implements
                         itemShoppingListAdapter.notifyDataSetChanged();
 
 
-                        Toast.makeText(getContext(), "Remove " + newItemShoppingListRemove.getName() , Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Remove " + newItemShoppingListRemove.getName(), Toast.LENGTH_SHORT).show();
                         break;
                 }
             }
@@ -285,6 +284,7 @@ public class MoreShoppingListItemUpdateFragment extends Fragment implements
                     MoreShoppingListItemSelectorFragment.newInstance(shoppingListMap, itemShoppingListManager.getItemShoppingLists());
 
             getChildFragmentManager().beginTransaction()
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                     .add(R.id.containerMoreShoppingListItem, moreShoppingListItemSelectorFragment,
                             "moreShoppingListItemSelectorFragment")
                     .commit();
@@ -324,10 +324,7 @@ public class MoreShoppingListItemUpdateFragment extends Fragment implements
      ***********************************************************************************************/
 
 
-
-
     // FinishAddShoppingListItemListener ********************************************************************
-
     @Override
     public void finishAdded() {
         MoreShoppingListItemSelectorFragment moreShoppingListItemSelectorFragment =
@@ -335,6 +332,7 @@ public class MoreShoppingListItemUpdateFragment extends Fragment implements
                         getChildFragmentManager().findFragmentByTag("moreShoppingListItemSelectorFragment");
 
         getChildFragmentManager().beginTransaction()
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE)
                 .remove(moreShoppingListItemSelectorFragment)
                 .commit();
 

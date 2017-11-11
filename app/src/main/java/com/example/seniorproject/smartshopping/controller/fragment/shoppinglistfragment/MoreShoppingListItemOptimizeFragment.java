@@ -7,6 +7,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
 import com.example.seniorproject.smartshopping.R;
 
@@ -15,23 +17,20 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 
-public class MoreShoppingListItemOptimizeFragment extends Fragment {
+public class MoreShoppingListItemOptimizeFragment extends Fragment implements MoreShoppingListItemOptimizePriceFragment.BackgroundLoadingOptimizePrice,
+        MoreShoppingListItemOptimizeTimeFragment.BackgroundLoadingOptimizeTime{
 
     /***********************************************************************************************
      ************************************* Variable class ********************************************
      ***********************************************************************************************/
-    interface OptimizePriceListener {
-        void startOptimizePrice();
-    }
 
-    interface OptimizeTimeListener {
-        void startOptimizeTime();
-    }
 
     ShoppingListMap shoppingListMap;
 
     private Button optimizePrice;
     private Button optimizeTime;
+    private RelativeLayout backgroundLoading;
+    private LinearLayout linearBtn;
 
     private DatabaseReference mDatabaseRef;
 
@@ -79,26 +78,14 @@ public class MoreShoppingListItemOptimizeFragment extends Fragment {
 
     @SuppressWarnings("UnusedParameters")
     private void initInstances(View rootView, Bundle savedInstanceState) {
+        backgroundLoading = (RelativeLayout) rootView.findViewById(R.id.backgroundLoading);
+        linearBtn = (LinearLayout) rootView.findViewById(R.id.linearBtn);
+
         optimizePrice = (Button) rootView.findViewById(R.id.price);
         optimizeTime = (Button) rootView.findViewById(R.id.time);
 
         optimizePrice.setOnClickListener(optimizePriceListener);
         optimizeTime.setOnClickListener(optimizeTimeListener);
-
-        MoreShoppingListItemOptimizePriceFragment moreShoppingListItemOptimizePriceFragment =
-                MoreShoppingListItemOptimizePriceFragment.newInstance(shoppingListMap);
-
-        MoreShoppingListItemOptimizeTimeFragment moreShoppingListItemOptimizeTimeFragment =
-                MoreShoppingListItemOptimizeTimeFragment.newInstance(shoppingListMap);
-
-        getChildFragmentManager().beginTransaction()
-                .add(R.id.containerMoreShoppingListOptimize, moreShoppingListItemOptimizePriceFragment,
-                        "moreShoppingListItemOptimizePriceFragment")
-                .add(R.id.containerMoreShoppingListOptimize, moreShoppingListItemOptimizeTimeFragment,
-                        "moreShoppingListItemOptimizeTimeFragment")
-                .detach(moreShoppingListItemOptimizePriceFragment)
-                .detach(moreShoppingListItemOptimizeTimeFragment)
-                .commit();
 
     }
 
@@ -129,6 +116,11 @@ public class MoreShoppingListItemOptimizeFragment extends Fragment {
         // Restore Instance State here
     }
 
+    private void loadingOptimize(){
+        linearBtn.setVisibility(View.GONE);
+        backgroundLoading.setVisibility(View.VISIBLE);
+    }
+
     /***********************************************************************************************
      ************************************* Listener variables ********************************************
      ***********************************************************************************************/
@@ -137,20 +129,16 @@ public class MoreShoppingListItemOptimizeFragment extends Fragment {
     final View.OnClickListener optimizePriceListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            MoreShoppingListItemOptimizePriceFragment moreShoppingListItemOptimizePriceFragment =
-                    (MoreShoppingListItemOptimizePriceFragment) getChildFragmentManager()
-                            .findFragmentByTag("moreShoppingListItemOptimizePriceFragment");
 
-            MoreShoppingListItemOptimizeTimeFragment moreShoppingListItemOptimizeTimeFragment =
-                    (MoreShoppingListItemOptimizeTimeFragment) getChildFragmentManager()
-                            .findFragmentByTag("moreShoppingListItemOptimizeTimeFragment");
+            loadingOptimize();
+
+            MoreShoppingListItemOptimizePriceFragment moreShoppingListItemOptimizePriceFragment =
+                    MoreShoppingListItemOptimizePriceFragment.newInstance(shoppingListMap);
 
             getChildFragmentManager().beginTransaction()
-                    .detach(moreShoppingListItemOptimizeTimeFragment)
-                    .attach(moreShoppingListItemOptimizePriceFragment)
+                    .replace(R.id.containerMoreShoppingListOptimize, moreShoppingListItemOptimizePriceFragment)
                     .commit();
 
-            moreShoppingListItemOptimizePriceFragment.startOptimizePrice();
         }
     };
 
@@ -158,27 +146,38 @@ public class MoreShoppingListItemOptimizeFragment extends Fragment {
         @Override
         public void onClick(View view) {
 
-            MoreShoppingListItemOptimizePriceFragment moreShoppingListItemOptimizePriceFragment =
-                    (MoreShoppingListItemOptimizePriceFragment) getChildFragmentManager()
-                            .findFragmentByTag("moreShoppingListItemOptimizePriceFragment");
+            loadingOptimize();
 
             MoreShoppingListItemOptimizeTimeFragment moreShoppingListItemOptimizeTimeFragment =
-                    (MoreShoppingListItemOptimizeTimeFragment) getChildFragmentManager()
-                            .findFragmentByTag("moreShoppingListItemOptimizeTimeFragment");
+                    MoreShoppingListItemOptimizeTimeFragment.newInstance(shoppingListMap);
 
             getChildFragmentManager().beginTransaction()
-                    .detach(moreShoppingListItemOptimizePriceFragment)
-                    .attach(moreShoppingListItemOptimizeTimeFragment)
+                    .replace(R.id.containerMoreShoppingListOptimize, moreShoppingListItemOptimizeTimeFragment)
                     .commit();
 
-            moreShoppingListItemOptimizeTimeFragment.startOptimizeTime();
 
         }
     };
+
 
 
     /***********************************************************************************************
      ************************************* Inner class ********************************************
      ***********************************************************************************************/
 
+    /***********************************************************************************************
+     ************************************* Implementation ********************************************
+     ***********************************************************************************************/
+
+    @Override
+    public void closeBackgroubdLoadingPrice() {
+        linearBtn.setVisibility(View.VISIBLE);
+        backgroundLoading.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void closeBackgroubdLoadingTime() {
+        linearBtn.setVisibility(View.VISIBLE);
+        backgroundLoading.setVisibility(View.GONE);
+    }
 }

@@ -43,6 +43,7 @@ public class ShoppingListFragment extends Fragment {
         void goToMoreShoppingListItem(ShoppingListMap shoppingListMap, int position);
     }
 
+
     private ListView listView;
     private ShoppingListAdapter shoppingListAdapter;
     private ShoppingListManager shoppingListManager;
@@ -90,11 +91,9 @@ public class ShoppingListFragment extends Fragment {
 
     private void init(Bundle savedInstanceState) {
         // Init Fragment level's variable(s) here
-        shoppingListManager = ShoppingListManager.getInstance();
+        shoppingListManager = new ShoppingListManager();
         lastPositionInteger = new MutableInteger(-1);
-
         shoppingListAdapter = new ShoppingListAdapter(lastPositionInteger);
-        shoppingListManager = ShoppingListManager.getInstance();
 
         db = FirebaseFirestore.getInstance();
         cShoppingLists = db.collection("groups").document(GroupManager.getInstance().getCurrentGroup().getId())
@@ -235,7 +234,7 @@ public class ShoppingListFragment extends Fragment {
                         shoppingListAdapter.setShoppingLists(shoppingListManager.getShoppingLists());
                         shoppingListAdapter.notifyDataSetChanged();
 
-                        Toast.makeText(getContext(), "Added " + newShoppingList.getName(), Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(getContext(), "Added " + newShoppingList.getName(), Toast.LENGTH_SHORT).show();
 
                         break;
 
@@ -277,7 +276,7 @@ public class ShoppingListFragment extends Fragment {
     final AdapterView.OnItemClickListener moreShoppingListItemListener = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            if(position < ShoppingListManager.getInstance().getSize()) {
+            if(position < shoppingListManager.getSize()) {
                 MoreShoppingListItemListener moreShoppingListItemListener =
                         (MoreShoppingListItemListener) getActivity();
                 ShoppingListMap shoppingListMap = shoppingListManager.getShoppingList(position);

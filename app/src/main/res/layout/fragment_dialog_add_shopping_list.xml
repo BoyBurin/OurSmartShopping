@@ -49,17 +49,18 @@
         android:text="Hello"
         android:visibility="gone"/>
 
-    <LinearLayout
-        android:layout_width="wrap_content"
+    <RelativeLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/activity_vertical_margin"
         android:layout_below="@+id/tvURI"
-        android:orientation="horizontal">
+        >
 
-        <View
-            android:layout_width="0dp"
+        <LinearLayout
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"/>
+            android:orientation="horizontal"
+            android:layout_centerInParent="true">
 
         <Button
             android:id="@+id/btnCancel"
@@ -73,12 +74,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/add_shopping_list_add_button" />
-        <View
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"/>
 
-    </LinearLayout>
+        </LinearLayout>
+
+
+    </RelativeLayout>
 
 
 </RelativeLayout>

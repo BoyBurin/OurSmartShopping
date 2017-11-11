@@ -4,22 +4,24 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
-import android.widget.TextView;
 
 import com.example.seniorproject.smartshopping.R;
 import com.example.seniorproject.smartshopping.model.dao.shoppinglist.ItemShoppingList;
 import com.example.seniorproject.smartshopping.model.dao.productstore.ProductCrowd;
 import com.example.seniorproject.smartshopping.model.dao.shoppinglist.ShoppingListMap;
-import com.example.seniorproject.smartshopping.model.datatype.MutableInteger;
+import com.example.seniorproject.smartshopping.model.daorecyclerview.shoppinglistitemoptimize.BaseItemOptimize;
+import com.example.seniorproject.smartshopping.model.daorecyclerview.shoppinglistitemoptimize.ItemOptimizeCreator;
 import com.example.seniorproject.smartshopping.model.manager.group.GroupManager;
 import com.example.seniorproject.smartshopping.model.manager.shoppinglist.ItemShoppingListManager;
 import com.example.seniorproject.smartshopping.model.manager.itemocr.ProductCrowdManager;
-import com.example.seniorproject.smartshopping.view.adapter.shoppinglist.ItemOptimizeAdapter;
+import com.example.seniorproject.smartshopping.view.recyclerviewadapter.ShoppingListItemOptimizeRecyclerViewAdapter;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -36,8 +38,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class MoreShoppingListItemOptimizeTimeFragment extends Fragment implements
-        MoreShoppingListItemOptimizeFragment.OptimizeTimeListener {
+public class MoreShoppingListItemOptimizeTimeFragment extends Fragment  {
+
+    /***********************************************************************************************
+     ************************************* Interface ********************************************
+     ***********************************************************************************************/
+
+    interface BackgroundLoadingOptimizeTime{
+        public void closeBackgroubdLoadingTime();
+    }
 
     /***********************************************************************************************
      ************************************* Variable class ********************************************
@@ -46,16 +55,14 @@ public class MoreShoppingListItemOptimizeTimeFragment extends Fragment implement
 
     ShoppingListMap shoppingListMap;
     private ItemShoppingListManager itemShoppingListManager;
-    private MutableInteger lastPositionInteger;
-    private ItemOptimizeAdapter itemOptimizeAdapter;
     private ProductCrowdManager productCrowdManager;
+    private ShoppingListItemOptimizeRecyclerViewAdapter shoppingListItemOptimizeRecyclerViewAdapter;
+    private ItemOptimizeCreator itemOptimizeCreator;
 
     private ArrayList<String> stores;
     private ArrayList<Double> retailPrice;
 
-    private TextView tvTotalPrice;
-    private TextView tvSavePrice;
-    private ListView listView;
+    private RecyclerView recyclerView;
 
     private FirebaseFirestore db;
     private CollectionReference cItemsShoppingList;
@@ -99,7 +106,8 @@ public class MoreShoppingListItemOptimizeTimeFragment extends Fragment implement
     }
 
     private void init(Bundle savedInstanceState) {
-        lastPositionInteger = new MutableInteger(-1);
+        shoppingListItemOptimizeRecyclerViewAdapter = new ShoppingListItemOptimizeRecyclerViewAdapter(getContext());
+        itemOptimizeCreator = new ItemOptimizeCreator();
 
         db = FirebaseFirestore.getInstance();
         cProductList = db.collection("productlist");
@@ -114,14 +122,14 @@ public class MoreShoppingListItemOptimizeTimeFragment extends Fragment implement
 
     @SuppressWarnings("UnusedParameters")
     private void initInstances(View rootView, Bundle savedInstanceState) {
-        tvTotalPrice = (TextView) rootView.findViewById(R.id.tvTotalPrice);
-        tvSavePrice = (TextView) rootView.findViewById(R.id.tvSavePrice);
+        recyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerView);
 
-        tvTotalPrice.setVisibility(View.GONE);
-        tvSavePrice.setVisibility(View.GONE);
+        recyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setAdapter(shoppingListItemOptimizeRecyclerViewAdapter);
 
-        listView = (ListView) rootView.findViewById(R.id.listViewOptimizePrice);
-        listView.setAdapter(itemOptimizeAdapter);
+        startOptimizeTime();
+
     }
 
     @Override
@@ -157,6 +165,17 @@ public class MoreShoppingListItemOptimizeTimeFragment extends Fragment implement
         stores.add("Max Value Pracha Uthit");
         stores.add("Tesco Lotus Bangpakok");
         stores.add("Tesco Lotus ตลาดโลตัสประชาอุทิศ");
+    }
+
+    private void setInterface(ArrayList<ProductCrowd> productCrowds, double totalPrice, long savePrice){
+        ArrayList<BaseItemOptimize> baseItemOptimizes = new ArrayList<>();
+
+        baseItemOptimizes.add(itemOptimizeCreator.createTotalPrice(totalPrice));
+        baseItemOptimizes.add(itemOptimizeCreator.createSavePrice(savePrice));
+        baseItemOptimizes.addAll(itemOptimizeCreator.createItemOptimize(productCrowds));
+
+        shoppingListItemOptimizeRecyclerViewAdapter.setPurchaseItems(baseItemOptimizes);
+        shoppingListItemOptimizeRecyclerViewAdapter.notifyDataSetChanged();
     }
 
     final void doTransaction(){
@@ -274,17 +293,12 @@ public class MoreShoppingListItemOptimizeTimeFragment extends Fragment implement
      ************************************* Implementation ********************************************
      ***********************************************************************************************/
 
-    @Override
+
     public void startOptimizeTime() {
         itemShoppingListManager = new ItemShoppingListManager();
         productCrowdManager = new ProductCrowdManager();
         retailPrice = new ArrayList<Double>();
-        itemOptimizeAdapter = new ItemOptimizeAdapter(lastPositionInteger);
 
-        if(tvSavePrice != null || tvSavePrice != null){
-            tvTotalPrice.setVisibility(View.GONE);
-            tvSavePrice.setVisibility(View.GONE);
-        }
 
         cItemsShoppingList.get().addOnCompleteListener(getItemShoppingList);
     }
@@ -319,8 +333,8 @@ public class MoreShoppingListItemOptimizeTimeFragment extends Fragment implement
             }
         }
 
-        tvTotalPrice.setVisibility(View.VISIBLE);
-        tvTotalPrice.setText("ราคารวม:  " + priceMin + "    บาท");
+        //tvTotalPrice.setVisibility(View.VISIBLE);
+        //tvTotalPrice.setText("ราคารวม:  " + priceMin + "    บาท");
 
 
         for(ProductCrowd productCrowd : allStore.get(index).getProductCrowds()) {
@@ -334,11 +348,13 @@ public class MoreShoppingListItemOptimizeTimeFragment extends Fragment implement
         }
 
         long percent = Math.round(((retail - priceMin) / retail) * 100);
-        tvSavePrice.setVisibility(View.VISIBLE);
-        tvSavePrice.setText("ประหยัด:  " + percent + "    %");
+        //tvSavePrice.setVisibility(View.VISIBLE);
+        //tvSavePrice.setText("ประหยัด:  " + percent + "    %");
 
-        itemOptimizeAdapter.setItemShoppingLists(optimizeProductCrowd.getProductCrowds());
-        itemOptimizeAdapter.notifyDataSetChanged();
+        BackgroundLoadingOptimizeTime backgroundLoading = (BackgroundLoadingOptimizeTime) getParentFragment();
+
+        backgroundLoading.closeBackgroubdLoadingTime();
+        setInterface(optimizeProductCrowd.getProductCrowds(), priceMin, percent);
 
         for (String s : stores) {
             Log.d("tag: ", s);

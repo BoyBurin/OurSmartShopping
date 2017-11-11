@@ -6,7 +6,7 @@ import android.widget.BaseAdapter;
 
 import com.example.seniorproject.smartshopping.model.dao.productstore.ProductCrowd;
 import com.example.seniorproject.smartshopping.model.datatype.MutableInteger;
-import com.example.seniorproject.smartshopping.view.customviewgroup.CustomViewGroupShoppingItemOptimize;
+import com.example.seniorproject.smartshopping.view.customviewgroup.CustomViewGroupShoppingListItemOptimize;
 
 import java.util.ArrayList;
 
@@ -63,16 +63,15 @@ public class ItemOptimizeAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View view, ViewGroup viewGroup) {
         //if(getItemViewType(i) == 0) {
-        CustomViewGroupShoppingItemOptimize item;
+        CustomViewGroupShoppingListItemOptimize item;
         if (view != null)
-            item = (CustomViewGroupShoppingItemOptimize) view;
+            item = (CustomViewGroupShoppingListItemOptimize) view;
         else
-            item = new CustomViewGroupShoppingItemOptimize(viewGroup.getContext());
+            item = new CustomViewGroupShoppingListItemOptimize(viewGroup.getContext());
 
         ProductCrowd productCrowd = (ProductCrowd) getItem(position);
         item.setName(productCrowd.getName());
         item.setPrice(productCrowd.getPrice());
-        item.setPlace(productCrowd.getStore());
 
         lastPositionInteger.setValue(position);
 

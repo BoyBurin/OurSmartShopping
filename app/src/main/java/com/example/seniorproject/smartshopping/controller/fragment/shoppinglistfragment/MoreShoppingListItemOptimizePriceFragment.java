@@ -4,23 +4,25 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
-import android.widget.TextView;
 
 import com.example.seniorproject.smartshopping.R;
 import com.example.seniorproject.smartshopping.model.dao.shoppinglist.ItemShoppingList;
 import com.example.seniorproject.smartshopping.model.dao.productstore.ProductCrowd;
 import com.example.seniorproject.smartshopping.model.dao.shoppinglist.ShoppingListMap;
-import com.example.seniorproject.smartshopping.model.datatype.MutableInteger;
+import com.example.seniorproject.smartshopping.model.daorecyclerview.shoppinglistitemoptimize.BaseItemOptimize;
+import com.example.seniorproject.smartshopping.model.daorecyclerview.shoppinglistitemoptimize.ItemOptimizeCreator;
 import com.example.seniorproject.smartshopping.model.manager.group.GroupManager;
 import com.example.seniorproject.smartshopping.model.manager.shoppinglist.ItemShoppingListManager;
 import com.example.seniorproject.smartshopping.model.manager.itemocr.ProductCrowdManager;
 import com.example.seniorproject.smartshopping.model.util.GenerateSubSet;
-import com.example.seniorproject.smartshopping.view.adapter.shoppinglist.ItemOptimizeAdapter;
+import com.example.seniorproject.smartshopping.view.recyclerviewadapter.ShoppingListItemOptimizeRecyclerViewAdapter;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -37,8 +39,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class MoreShoppingListItemOptimizePriceFragment extends Fragment implements
-        MoreShoppingListItemOptimizeFragment.OptimizePriceListener {
+public class MoreShoppingListItemOptimizePriceFragment extends Fragment {
+
+    /***********************************************************************************************
+     ************************************* Interface ********************************************
+     ***********************************************************************************************/
+
+       interface BackgroundLoadingOptimizePrice{
+        public void closeBackgroubdLoadingPrice();
+    }
 
     /***********************************************************************************************
      ************************************* Variable class ********************************************
@@ -47,16 +56,15 @@ public class MoreShoppingListItemOptimizePriceFragment extends Fragment implemen
 
     ShoppingListMap shoppingListMap;
     private ItemShoppingListManager itemShoppingListManager;
-    private MutableInteger lastPositionInteger;
-    private ItemOptimizeAdapter itemOptimizeAdapter;
     private ProductCrowdManager productCrowdManager;
+    private ShoppingListItemOptimizeRecyclerViewAdapter shoppingListItemOptimizeRecyclerViewAdapter;
+    private ItemOptimizeCreator itemOptimizeCreator;
 
     private ArrayList<String> stores;
     private ArrayList<Double> retailPrice;
 
-    private TextView tvTotalPrice;
-    private TextView tvSavePrice;
-    private ListView listView;
+    private RecyclerView recyclerView;
+
 
     private FirebaseFirestore db;
     private CollectionReference cItemsShoppingList;
@@ -100,8 +108,8 @@ public class MoreShoppingListItemOptimizePriceFragment extends Fragment implemen
     }
 
     private void init(Bundle savedInstanceState) {
-        lastPositionInteger = new MutableInteger(-1);
-        itemOptimizeAdapter = new ItemOptimizeAdapter(lastPositionInteger);
+        shoppingListItemOptimizeRecyclerViewAdapter = new ShoppingListItemOptimizeRecyclerViewAdapter(getContext());
+        itemOptimizeCreator = new ItemOptimizeCreator();
 
         db = FirebaseFirestore.getInstance();
         cProductList = db.collection("productlist");
@@ -116,14 +124,13 @@ public class MoreShoppingListItemOptimizePriceFragment extends Fragment implemen
 
     @SuppressWarnings("UnusedParameters")
     private void initInstances(View rootView, Bundle savedInstanceState) {
-        tvTotalPrice = (TextView) rootView.findViewById(R.id.tvTotalPrice);
-        tvSavePrice = (TextView) rootView.findViewById(R.id.tvSavePrice);
+        recyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerView);
 
-        tvTotalPrice.setVisibility(View.GONE);
-        tvSavePrice.setVisibility(View.GONE);
+        recyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setAdapter(shoppingListItemOptimizeRecyclerViewAdapter);
 
-        listView = (ListView) rootView.findViewById(R.id.listViewOptimizePrice);
-        listView.setAdapter(itemOptimizeAdapter);
+        startOptimizePrice();
     }
 
     @Override
@@ -161,6 +168,17 @@ public class MoreShoppingListItemOptimizePriceFragment extends Fragment implemen
         stores.add("Max Value Pracha Uthit");
         stores.add("Tesco Lotus Bangpakok");
         stores.add("Tesco Lotus ตลาดโลตัสประชาอุทิศ");
+    }
+
+    private void setInterface(ArrayList<ProductCrowd> productCrowds,  double totalPrice, long savePrice){
+        ArrayList<BaseItemOptimize> baseItemOptimizes = new ArrayList<>();
+
+        baseItemOptimizes.add(itemOptimizeCreator.createTotalPrice(totalPrice));
+        baseItemOptimizes.add(itemOptimizeCreator.createSavePrice(savePrice));
+        baseItemOptimizes.addAll(itemOptimizeCreator.createItemOptimize(productCrowds));
+
+        shoppingListItemOptimizeRecyclerViewAdapter.setPurchaseItems(baseItemOptimizes);
+        shoppingListItemOptimizeRecyclerViewAdapter.notifyDataSetChanged();
     }
 
 
@@ -284,19 +302,12 @@ public class MoreShoppingListItemOptimizePriceFragment extends Fragment implemen
      ************************************* Implementation ********************************************
      ***********************************************************************************************/
 
-    @Override
     public void startOptimizePrice() {
 
         itemShoppingListManager = new ItemShoppingListManager();
         productCrowdManager = new ProductCrowdManager();
         retailPrice = new ArrayList<Double>();
-        itemOptimizeAdapter.setItemShoppingLists(productCrowdManager.getProductCrowds());
-        itemOptimizeAdapter.notifyDataSetChanged();
 
-        if(tvSavePrice != null || tvSavePrice != null){
-            tvTotalPrice.setVisibility(View.GONE);
-            tvSavePrice.setVisibility(View.GONE);
-        }
 
         cItemsShoppingList.get().addOnCompleteListener(getItemShoppingList);
     }
@@ -392,8 +403,8 @@ public class MoreShoppingListItemOptimizePriceFragment extends Fragment implemen
             Log.d("Hello: ", productCrowd.getName());
         }
 
-        tvTotalPrice.setVisibility(View.VISIBLE);
-        tvTotalPrice.setText("ราคารวม:  " + totalPrice + "    บาท");
+        //tvTotalPrice.setVisibility(View.VISIBLE);
+        //tvTotalPrice.setText("ราคารวม:  " + totalPrice + "    บาท");
 
         double retail = 0;
         for(int i = 0 ; i < retailPrice.size(); i++){
@@ -402,11 +413,13 @@ public class MoreShoppingListItemOptimizePriceFragment extends Fragment implemen
 
         Log.d("Retail: ", retail + "");
         long percent = Math.round(((retail - totalPrice) / retail) * 100);
-        tvSavePrice.setVisibility(View.VISIBLE);
-        tvSavePrice.setText("ประหยัด:  " + percent + "    %");
+        //tvSavePrice.setVisibility(View.VISIBLE);
+        //tvSavePrice.setText("ประหยัด:  " + percent + "    %");
 
-        itemOptimizeAdapter.setItemShoppingLists(optimize);
-        itemOptimizeAdapter.notifyDataSetChanged();
+        BackgroundLoadingOptimizePrice backgroundLoading = (BackgroundLoadingOptimizePrice) getParentFragment();
+
+        backgroundLoading.closeBackgroubdLoadingPrice();
+        setInterface(optimize, totalPrice, percent);
 
     }
 

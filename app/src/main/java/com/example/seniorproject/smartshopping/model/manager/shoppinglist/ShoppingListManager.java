@@ -14,7 +14,6 @@ public class ShoppingListManager {
      * ****************************** Variable *********************************************
      *******************************************************************************************/
 
-    private static ShoppingListManager instance;
     private ArrayList<ShoppingListMap> shoppingListMaps;
 
     /******************************************************************************************
@@ -22,15 +21,10 @@ public class ShoppingListManager {
      *******************************************************************************************/
 
 
-    public static ShoppingListManager getInstance() {
-        if (instance == null)
-            instance = new ShoppingListManager();
-        return instance;
-    }
 
     private Context mContext;
 
-    private ShoppingListManager() {
+    public ShoppingListManager() {
 
         mContext = Contextor.getInstance().getContext();
         shoppingListMaps = new ArrayList<ShoppingListMap>();

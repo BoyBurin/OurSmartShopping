@@ -215,6 +215,10 @@ public class FragmentDialogAddShoppingList extends DialogFragment {
     final View.OnClickListener addDialogListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
+            if(edtListName.getText().toString().equals("") || edtListDescribe.getText().toString().equals("")){
+                Toast.makeText(getContext(), "Please fill all information", Toast.LENGTH_SHORT).show();
+                return;
+            }
             if(selectedImageUri != null){
                 StorageReference photRef = mShoopingListStorageRef.child(selectedImageUri.getLastPathSegment());
                 photRef.putFile(selectedImageUri).addOnSuccessListener(uploadSuccessListener).addOnFailureListener(uploadFailed);

@@ -33,4 +33,23 @@
         android:layout_below="@+id/linearBtn"
         android:layout_marginTop="@dimen/activity_vertical_margin"/>
 
+    <RelativeLayout
+        android:id="@+id/backgroundLoading"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:alpha="0.6"
+        android:background="@android:color/black" />
+
+    <ProgressBar
+        android:id="@+id/progressBarSaveIteminventory"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true" />
+
+    </RelativeLayout>
+
 </RelativeLayout>

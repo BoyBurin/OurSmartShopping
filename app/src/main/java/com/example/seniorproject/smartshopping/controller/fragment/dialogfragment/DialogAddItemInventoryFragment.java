@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -71,6 +72,8 @@ public class DialogAddItemInventoryFragment extends DialogFragment {
     private RadioGroup rg;
     private TextView tvUnit;
     private EditText edtNumber;
+    private LinearLayout buttonLayout1;
+    private LinearLayout buttonLayout2;
 
     private ItemInventoryManager itemInventoryManager = new ItemInventoryManager();
 
@@ -145,6 +148,8 @@ public class DialogAddItemInventoryFragment extends DialogFragment {
         edtNumber = (EditText) rootView.findViewById(R.id.edtNumber);
         btnAdd2 = (Button) rootView.findViewById(R.id.btnAdd2);
         btnCancel2 = (Button) rootView.findViewById(R.id.btnCancel2);
+        buttonLayout1 = (LinearLayout)rootView.findViewById(R.id.buttonLayout1);
+        buttonLayout2 = (LinearLayout)rootView.findViewById(R.id.buttonLayout2);
 
 
         btnScanBarcode.setOnClickListener(addBarcodeListener);
@@ -260,6 +265,10 @@ public class DialogAddItemInventoryFragment extends DialogFragment {
             if (task.isSuccessful()) {
                 DocumentSnapshot document = task.getResult().getDocuments().get(0);
                 if (document != null) {
+                    imgItem.setVisibility(View.VISIBLE);
+                    tvName.setVisibility(View.VISIBLE);
+                    buttonLayout1.setVisibility(View.VISIBLE);
+                    buttonLayout2.setVisibility(View.VISIBLE);
                     ProductList productList = document.toObject(ProductList.class);
                     Glide.with(getContext())
                             .load(productList.getPhotoUrl())
