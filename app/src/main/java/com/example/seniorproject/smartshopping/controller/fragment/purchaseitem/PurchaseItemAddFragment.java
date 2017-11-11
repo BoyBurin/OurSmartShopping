@@ -2,6 +2,7 @@ package com.example.seniorproject.smartshopping.controller.fragment.purchaseitem
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -24,6 +25,7 @@ import com.example.seniorproject.smartshopping.model.daorecyclerview.addpurchase
 import com.example.seniorproject.smartshopping.model.daorecyclerview.addpurchaseitem.BaseAddPurchaseItem;
 import com.example.seniorproject.smartshopping.model.manager.group.GroupManager;
 import com.example.seniorproject.smartshopping.model.manager.iteminventory.ItemInventoryManager;
+import com.example.seniorproject.smartshopping.model.manager.itemocr.PurchaseItemWithActionManager;
 import com.example.seniorproject.smartshopping.view.customviewgroup.CustomViewGroupAddPurchaseItemDetail;
 import com.example.seniorproject.smartshopping.view.customviewgroup.CustomViewGroupPurchaseItem;
 import com.example.seniorproject.smartshopping.view.recyclerviewadapter.AddPurchaseItemRecyclerViewAdapter;
@@ -36,6 +38,7 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.net.PortUnreachableException;
 import java.util.ArrayList;
 
 
@@ -68,6 +71,7 @@ public class PurchaseItemAddFragment extends Fragment implements AddPurchaseItem
     private AddPurchaseItemCreator addPurchaseItemCreator;
     private ArrayList<BaseAddPurchaseItem> baseAddPurchaseItems;
     private ItemInventoryMap currentItem;
+    private PurchaseItemWithActionManager purchaseItemWithActionManager;
 
     private FirebaseFirestore db;
     private CollectionReference cItems;
@@ -83,9 +87,10 @@ public class PurchaseItemAddFragment extends Fragment implements AddPurchaseItem
     }
 
     @SuppressWarnings("unused")
-    public static PurchaseItemAddFragment newInstance() {
+    public static PurchaseItemAddFragment newInstance(ArrayList<PurchaseItemWithAction> purchaseItemWithActions) {
         PurchaseItemAddFragment fragment = new PurchaseItemAddFragment();
         Bundle args = new Bundle();
+        args.putParcelableArrayList("purchaseItemWithActions", purchaseItemWithActions);
         fragment.setArguments(args);
         return fragment;
     }
@@ -108,6 +113,14 @@ public class PurchaseItemAddFragment extends Fragment implements AddPurchaseItem
     }
 
     private void init(Bundle savedInstanceState) {
+        ArrayList<Parcelable> parcelables = getArguments().getParcelableArrayList("purchaseItemWithActions");
+        purchaseItemWithActionManager = new PurchaseItemWithActionManager();
+
+        for(int i = 0 ; i < parcelables.size() ; i++){
+            PurchaseItemWithAction purchaseItemWithAction = (PurchaseItemWithAction) parcelables.get(i);
+            purchaseItemWithActionManager.addPurchaseItemWithAction(purchaseItemWithAction);
+        }
+
         itemInventoryManager = new ItemInventoryManager();
         baseAddPurchaseItems = new ArrayList<>();
         addPurchaseItemCreator = new AddPurchaseItemCreator();
@@ -196,7 +209,7 @@ public class PurchaseItemAddFragment extends Fragment implements AddPurchaseItem
     private void removeThisFragment(){
         MainFragmentTag mainFragmentID = (MainFragmentTag) getActivity();
 
-        if((PurchaseItemManuallyFragment) getActivity().getSupportFragmentManager().findFragmentByTag(mainFragmentID.getMainFragmentTag())
+        if(getActivity().getSupportFragmentManager().findFragmentByTag(mainFragmentID.getMainFragmentTag())
                 instanceof PurchaseItemManuallyFragment) {
             PurchaseItemManuallyFragment addPurchaseItemInterface = (PurchaseItemManuallyFragment) getActivity().getSupportFragmentManager()
                     .findFragmentByTag(mainFragmentID.getMainFragmentTag());
@@ -234,11 +247,24 @@ public class PurchaseItemAddFragment extends Fragment implements AddPurchaseItem
 
 
             for (DocumentChange dc : documentSnapshots.getDocumentChanges()) {
+                boolean isAdded = false;
                 switch (dc.getType()) {
                     case ADDED:
                         DocumentSnapshot documentSnapshot = dc.getDocument();
                         ItemInventory item = documentSnapshot.toObject(ItemInventory.class);
                         String id = documentSnapshot.getId();
+
+                        isAdded = false;
+                        for (PurchaseItemWithAction purchaseItemWithAction : purchaseItemWithActionManager.getIPurchaseItemWithActions()) {
+                            String barcodeId = purchaseItemWithAction.getItemOCR().getItemInventoryMap().getItemInventory().getBarcodeId();
+                            if (barcodeId.equals(id)) {
+                                isAdded = true;
+                            }
+                        }
+                        if(isAdded){
+                            setInterface();
+                            continue;
+                        }
 
                         //Add
                         ItemInventoryMap itemMap = new ItemInventoryMap(id, item);
@@ -253,6 +279,18 @@ public class PurchaseItemAddFragment extends Fragment implements AddPurchaseItem
                         documentSnapshot = dc.getDocument();
                         ItemInventory update = documentSnapshot.toObject(ItemInventory.class);
                         id = documentSnapshot.getId();
+
+                        isAdded = false;
+                        for (PurchaseItemWithAction purchaseItemWithAction : purchaseItemWithActionManager.getIPurchaseItemWithActions()) {
+                            String barcodeId = purchaseItemWithAction.getItemOCR().getItemInventoryMap().getItemInventory().getBarcodeId();
+                            if (barcodeId.equals(id)) {
+                                isAdded = true;
+                            }
+                        }
+                        if(isAdded){
+                            setInterface();
+                            continue;
+                        }
 
                         int index = itemInventoryManager.getIndexByKey(id);
                         itemMap = itemInventoryManager.getItemInventory(index);
@@ -269,6 +307,18 @@ public class PurchaseItemAddFragment extends Fragment implements AddPurchaseItem
                         documentSnapshot = dc.getDocument();
                         item = documentSnapshot.toObject(ItemInventory.class);
                         id = documentSnapshot.getId();
+
+                        isAdded = false;
+                        for (PurchaseItemWithAction purchaseItemWithAction : purchaseItemWithActionManager.getIPurchaseItemWithActions()) {
+                            String barcodeId = purchaseItemWithAction.getItemOCR().getItemInventoryMap().getItemInventory().getBarcodeId();
+                            if (barcodeId.equals(id)) {
+                                isAdded = true;
+                            }
+                        }
+                        if(isAdded){
+                            setInterface();
+                            continue;
+                        }
 
                         index = itemInventoryManager.getIndexByKey(id);
                         itemInventoryManager.removeItemInventory(index);
@@ -297,7 +347,7 @@ public class PurchaseItemAddFragment extends Fragment implements AddPurchaseItem
             }
             MainFragmentTag mainFragmentID = (MainFragmentTag) getActivity();
 
-            if((PurchaseItemManuallyFragment) getActivity().getSupportFragmentManager().findFragmentByTag(mainFragmentID.getMainFragmentTag())
+            if( getActivity().getSupportFragmentManager().findFragmentByTag(mainFragmentID.getMainFragmentTag())
                     instanceof PurchaseItemManuallyFragment) {
                 PurchaseItemManuallyFragment addPurchaseItemInterface = (PurchaseItemManuallyFragment) getActivity().getSupportFragmentManager()
                         .findFragmentByTag(mainFragmentID.getMainFragmentTag());

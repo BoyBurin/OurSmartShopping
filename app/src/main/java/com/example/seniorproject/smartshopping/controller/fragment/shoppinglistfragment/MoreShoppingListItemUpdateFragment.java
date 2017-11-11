@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 import com.example.seniorproject.smartshopping.R;
 import com.example.seniorproject.smartshopping.model.dao.iteminventory.ItemInventory;
+import com.example.seniorproject.smartshopping.model.dao.iteminventory.ItemInventoryMap;
 import com.example.seniorproject.smartshopping.model.dao.shoppinglist.ItemShoppingList;
 import com.example.seniorproject.smartshopping.model.dao.shoppinglist.ShoppingListMap;
 import com.example.seniorproject.smartshopping.model.datatype.MutableInteger;
@@ -177,7 +178,7 @@ public class MoreShoppingListItemUpdateFragment extends Fragment implements
 
         if (amount > soft) {
             status = 0;
-        } else if (amount < hard) {
+        } else if (amount <= hard) {
             status = 2;
         } else {
             status = 1;
@@ -318,6 +319,8 @@ public class MoreShoppingListItemUpdateFragment extends Fragment implements
             }
         }
     };
+
+
 
     /***********************************************************************************************
      ************************************* Implementation ********************************************

@@ -74,7 +74,8 @@
             android:background="@color/cardview_shadow_end_color"
             android:inputType="number"
             android:text="1"
-            android:visibility="gone" />
+            android:visibility="gone"
+            android:imeOptions="actionDone"/>
 
 
         <TextView
@@ -97,7 +98,8 @@
         android:inputType="number"
         android:textColor="@android:color/black"
         android:textColorHint="@color/dark_grey"
-        android:visibility="gone" />
+        android:visibility="gone"
+        android:imeOptions="actionDone"/>
 
     <EditText
         android:id="@+id/edtSoft"
@@ -108,7 +110,8 @@
         android:hint="Soft remainder"
         android:inputType="number"
         android:textColorHint="@color/dark_grey"
-        android:visibility="gone" />
+        android:visibility="gone"
+        android:imeOptions="actionDone"/>
 
     <EditText
         android:id="@+id/edtHard"
@@ -119,7 +122,8 @@
         android:hint="Hard remainder"
         android:inputType="number"
         android:textColorHint="@color/dark_grey"
-        android:visibility="gone" />
+        android:visibility="gone"
+        android:imeOptions="actionDone"/>
 
     <EditText
         android:id="@+id/edtListDescribe"
@@ -132,7 +136,8 @@
         android:inputType="textCapWords"
         android:textColor="@android:color/black"
         android:textColorHint="@color/dark_grey"
-        android:visibility="gone" />
+        android:visibility="gone"
+        android:imeOptions="actionDone"/>
 
 
     <Button
@@ -145,6 +150,7 @@
         android:layout_marginTop="@dimen/activity_vertical_margin"
         android:background="@drawable/selector_shape_rect_button_brown"
         android:text="@string/scan_barcode"
+        android:textSize="@dimen/text_size_small"
         android:textColor="#FFFFFF" />
 
 
@@ -169,7 +175,7 @@
             android:background="@drawable/selector_shape_rect_button_brown"
             android:text="@string/add_shopping_list_cancel_button"
             android:textColor="#FFFFFF"
-            android:textSize="@dimen/text_size"
+            android:textSize="@dimen/text_size_small"
             android:layout_marginRight="@dimen/margin_padding"
             android:visibility="gone"/>
 
@@ -180,7 +186,7 @@
             android:background="@drawable/selector_shape_rect_button_brown"
             android:text="@string/add_shopping_list_add_button"
             android:textColor="#FFFFFF"
-            android:textSize="@dimen/text_size"
+            android:textSize="@dimen/text_size_small"
             android:visibility="gone"/>
 
         <View

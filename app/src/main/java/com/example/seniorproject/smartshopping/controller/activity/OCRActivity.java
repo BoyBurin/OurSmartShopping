@@ -462,18 +462,49 @@ public class OCRActivity extends AppCompatActivity implements PurchaseItemAddFra
                         position = i;
                     }
                 }
-                amount.remove(position);
+                //amount.remove(position);
 
                 LevenshteinDistance levenshteinDistance = new LevenshteinDistance();
 
                 ArrayList<ItemInventoryMap> itemInventoryMaps =
                         levenshteinDistance.doLevenshteinDistance(words, itemInventoryManager);
 
-                for (int i = 0; i < itemInventoryMaps.size(); i++) {
-                    ItemInventoryMap itemInventoryMap = itemInventoryMaps.get(i);
-                    double price = Double.parseDouble(amount.get(i));
-                    itemOCRManager.addItemOCR(new ItemOCR(itemInventoryMap, price, 1));
+                if(amount.size() >= itemInventoryMaps.size()) {
+                    for (int i = 0; i < itemInventoryMaps.size(); i++) {
+                        ItemInventoryMap itemInventoryMap = itemInventoryMaps.get(i);
+                        double price = Double.parseDouble(amount.get(i));
+                        itemOCRManager.addItemOCR(new ItemOCR(itemInventoryMap, price, 1));
+                    }
                 }
+
+               /* ArrayList<String> barcodes = new ArrayList<String>();
+                for(ItemOCR itemOCR :itemOCRManager.getItemOCRs()){
+                    String id = itemOCR.getItemInventoryMap().getItemInventory().getBarcodeId();
+                    boolean found = false;
+                    for(String barcode : barcodes){
+                        if(barcode.equals(id)){
+                            found = true;
+                            break;
+                        }
+                    }
+                    if(!found){
+                        barcodes.add(id);
+                    }
+                }
+                ItemOCRManager newItemOcrManager = new ItemOCRManager();
+                for(String barcode : barcodes){
+                    int num = 0;
+                    ItemOCR item = new ItemOCR();
+                    for(ItemOCR itemOCR :itemOCRManager.getItemOCRs()){
+                        String id = itemOCR.getItemInventoryMap().getItemInventory().getBarcodeId();
+                        if(barcode.equals(id)){
+                            num++;
+                            item = itemOCR;
+                        }
+                    }
+                    item.setAmount(num);
+                    newItemOcrManager.addItemOCR(item);
+                }*/
 
 
                 loadingOCR.setVisibility(View.GONE);

@@ -45,6 +45,14 @@ public class ItemShoppingListManager {
         Collections.sort(itemShoppingLists, new ItemSort());
     }
 
+    public boolean isContain(String barcodeId){
+        int index = getIndexByKey(barcodeId);
+        if(index == -1){
+            return false;
+        }
+        return true;
+    }
+
 
     public ArrayList<ItemShoppingList> getItemShoppingLists(){
         return itemShoppingLists;

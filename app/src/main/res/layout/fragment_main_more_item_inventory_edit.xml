@@ -28,7 +28,10 @@
             android:layout_height="wrap_content"
             android:layout_weight="4"
             android:gravity="center"
-            android:hint="Comment" />
+            android:maxLines="2"
+            android:maxLength="30"
+            android:hint="Comment"
+            android:imeOptions="actionDone"/>
 
     </LinearLayout>
 
@@ -57,7 +60,8 @@
             android:layout_weight="4"
             android:gravity="center"
             android:hint="Amount of Item"
-            android:inputType="number" />
+            android:inputType="number"
+            android:imeOptions="actionDone"/>
 
     </LinearLayout>
 
@@ -77,7 +81,8 @@
             android:layout_weight="1"
             android:paddingLeft="5dp"
             android:text="เตือนปกติ:"
-            android:textSize="14sp" />
+            android:textSize="14sp"
+            />
 
         <EditText
             android:id="@+id/edtSoft"
@@ -86,7 +91,8 @@
             android:layout_weight="4"
             android:gravity="center"
             android:hint="Soft remainder"
-            android:inputType="number" />
+            android:inputType="number"
+            android:imeOptions="actionDone"/>
 
     </LinearLayout>
 
@@ -116,7 +122,8 @@
             android:layout_weight="4"
             android:gravity="center"
             android:hint="Hard remainder"
-            android:inputType="number" />
+            android:inputType="number"
+            android:imeOptions="actionDone"/>
     </LinearLayout>
 
     <Button

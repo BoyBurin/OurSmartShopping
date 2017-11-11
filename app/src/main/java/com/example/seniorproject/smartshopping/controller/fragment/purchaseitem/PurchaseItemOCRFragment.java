@@ -2,26 +2,41 @@ package com.example.seniorproject.smartshopping.controller.fragment.purchaseitem
 
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.example.seniorproject.smartshopping.R;
 import com.example.seniorproject.smartshopping.model.dao.iteminventory.ItemInventory;
 import com.example.seniorproject.smartshopping.model.dao.itemocr.ItemOCR;
 import com.example.seniorproject.smartshopping.model.dao.itemocr.PurchaseItemWithAction;
+import com.example.seniorproject.smartshopping.model.dao.productstore.ProductCrowd;
 import com.example.seniorproject.smartshopping.model.daorecyclerview.purchaseitem.BasePurchaseItem;
 import com.example.seniorproject.smartshopping.model.daorecyclerview.purchaseitem.PurchaseItemCreator;
+import com.example.seniorproject.smartshopping.model.manager.group.GroupManager;
 import com.example.seniorproject.smartshopping.model.manager.itemocr.ItemOCRManager;
 import com.example.seniorproject.smartshopping.model.manager.itemocr.PurchaseItemWithActionManager;
 import com.example.seniorproject.smartshopping.view.recyclerviewadapter.PurchaseItemRecyclerViewAdapter;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.Transaction;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class PurchaseItemOCRFragment extends Fragment implements PurchaseItemAddFragment.AddPurchaseItemInterface {
@@ -32,11 +47,14 @@ public class PurchaseItemOCRFragment extends Fragment implements PurchaseItemAdd
 
 
     private RecyclerView recyclerView;
+    private ProgressBar progressBar;
     //private ItemOCRManager itemOCRManager;
     private PurchaseItemWithActionManager purchaseItemWithActionManager;
     private PurchaseItemCreator purchaseItemCreator;
     private String storeName;
     private PurchaseItemRecyclerViewAdapter purchaseItemRecyclerViewAdapter;
+
+    private FirebaseFirestore db;
 
     /***********************************************************************************************
      ************************************* Method class ********************************************
@@ -79,7 +97,7 @@ public class PurchaseItemOCRFragment extends Fragment implements PurchaseItemAdd
         purchaseItemWithActionManager = new PurchaseItemWithActionManager();
 
         ArrayList<Parcelable> item = getArguments().getParcelableArrayList("itemOCRs");
-        for(int i = 0 ; i < item.size() ; i++){
+        for (int i = 0; i < item.size(); i++) {
             final ItemOCR purchasetem = (ItemOCR) item.get(i);
             View.OnClickListener deleteListener = new View.OnClickListener() {
                 @Override
@@ -97,12 +115,16 @@ public class PurchaseItemOCRFragment extends Fragment implements PurchaseItemAdd
         storeName = getArguments().getString("storeName");
         purchaseItemCreator = new PurchaseItemCreator();
         purchaseItemRecyclerViewAdapter = new PurchaseItemRecyclerViewAdapter(getContext());
+
+        db = FirebaseFirestore.getInstance();
     }
 
     @SuppressWarnings("UnusedParameters")
     private void initInstances(View rootView, Bundle savedInstanceState) {
+        progressBar = (ProgressBar) rootView.findViewById(R.id.progressBar);
         recyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerView);
 
+        recyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(purchaseItemRecyclerViewAdapter);
         setInterface();
@@ -135,18 +157,18 @@ public class PurchaseItemOCRFragment extends Fragment implements PurchaseItemAdd
         // Restore Instance State here
     }
 
-    public void setInterface(){
+    public void setInterface() {
         ArrayList<BasePurchaseItem> basePurchaseItems = new ArrayList<>();
 
         basePurchaseItems.add(purchaseItemCreator.createStoreName(storeName));
 
         double totalPrice = 0;
-        for(PurchaseItemWithAction purchaseItemWithAction : purchaseItemWithActionManager.getIPurchaseItemWithActions()){
+        for (PurchaseItemWithAction purchaseItemWithAction : purchaseItemWithActionManager.getIPurchaseItemWithActions()) {
             totalPrice += purchaseItemWithAction.getItemOCR().getPrice();
         }
 
         basePurchaseItems.add(purchaseItemCreator.createTotalPrice(totalPrice));
-        //basePurchaseItems.add(purchaseItemCreator.createSaveButton());
+        basePurchaseItems.add(purchaseItemCreator.createSaveButton(saveInfoListener));
         basePurchaseItems.addAll(purchaseItemCreator.createPurchaseItems(purchaseItemWithActionManager.getIPurchaseItemWithActions()));
         basePurchaseItems.add(purchaseItemCreator.createAddButton(addPurchaseItem));
 
@@ -161,12 +183,99 @@ public class PurchaseItemOCRFragment extends Fragment implements PurchaseItemAdd
     View.OnClickListener addPurchaseItem = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            PurchaseItemAddFragment purchaseItemAddFragment = PurchaseItemAddFragment.newInstance();
+            PurchaseItemAddFragment purchaseItemAddFragment = PurchaseItemAddFragment.newInstance(purchaseItemWithActionManager
+            .getIPurchaseItemWithActions());
             getActivity().getSupportFragmentManager().beginTransaction()
                     .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                    .add(((ViewGroup)getView().getParent()).getId(), purchaseItemAddFragment)
+                    .add(((ViewGroup) getView().getParent()).getId(), purchaseItemAddFragment)
                     .hide(PurchaseItemOCRFragment.this)
                     .commit();
+        }
+    };
+
+    View.OnClickListener saveInfoListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            if(purchaseItemWithActionManager.getSize() == 0){
+                Toast.makeText(getContext(), "Please select Item", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            recyclerView.setVisibility(View.GONE);
+            progressBar.setVisibility(View.VISIBLE);
+            db.runTransaction(new Transaction.Function<Void>() {
+                @Override
+                public Void apply(Transaction transaction) throws FirebaseFirestoreException {
+                    CollectionReference storeRef = db.collection("stores").document(storeName)
+                            .collection("products");
+                    CollectionReference itemRef = db.collection("groups").document(GroupManager.getInstance().getCurrentGroup().getId())
+                            .collection("items");
+
+                    long[] amountSet = new long[purchaseItemWithActionManager.getIPurchaseItemWithActions().size()];
+                    double[] priceSet = new double[purchaseItemWithActionManager.getIPurchaseItemWithActions().size()];
+
+                    for (int i = 0; i < purchaseItemWithActionManager.getIPurchaseItemWithActions().size(); i++) {
+                        ItemOCR itemOCR = purchaseItemWithActionManager.getIPurchaseItemWithActions().get(i).getItemOCR();
+                        priceSet[i] = itemOCR.getPrice();
+                        amountSet[i] = itemOCR.getAmount();
+                        priceSet[i] = priceSet[i]/amountSet[i];
+                    }
+
+                    ArrayList<ProductCrowd> products = new ArrayList<ProductCrowd>();
+                    for (int i = 0; i < purchaseItemWithActionManager.getIPurchaseItemWithActions().size(); i++) {
+                        String itemInventoryID = purchaseItemWithActionManager.getIPurchaseItemWithActions().get(i)
+                                .getItemOCR().getItemInventoryMap().getId();
+                        ProductCrowd newData = transaction.get(storeRef.document(itemInventoryID)).toObject(ProductCrowd.class);
+                        products.add(newData);
+                    }
+
+                    ArrayList<ItemInventory> itemInventories = new ArrayList<ItemInventory>();
+                    double[] updateAmount = new double[purchaseItemWithActionManager.getIPurchaseItemWithActions().size()];
+                    for (int i = 0; i < purchaseItemWithActionManager.getIPurchaseItemWithActions().size(); i++) {
+                        String itemInventoryID = purchaseItemWithActionManager.getIPurchaseItemWithActions().get(i)
+                                .getItemOCR().getItemInventoryMap().getId();
+                        ItemInventory newData = transaction.get(itemRef.document(itemInventoryID)).toObject(ItemInventory.class);
+                        itemInventories.add(newData);
+                        updateAmount[i] = newData.getAmount() + amountSet[i];
+                    }
+
+                    for (int i = 0; i < purchaseItemWithActionManager.getIPurchaseItemWithActions().size(); i++) {
+                        String itemInventoryID = purchaseItemWithActionManager.getIPurchaseItemWithActions().get(i)
+                                .getItemOCR().getItemInventoryMap().getId();
+                        String name = purchaseItemWithActionManager.getIPurchaseItemWithActions().get(i)
+                                .getItemOCR().getItemInventoryMap().getItemInventory().getName();
+                        Map<String, Object> update = new HashMap<>();
+                        update.put("price", priceSet[i]);
+                        update.put("name", name);
+                        update.put("store", storeName);
+                        transaction.set(storeRef.document(itemInventoryID), update);
+                    }
+
+                    for (int i = 0; i < purchaseItemWithActionManager.getIPurchaseItemWithActions().size(); i++) {
+                        String itemInventoryID = purchaseItemWithActionManager.getIPurchaseItemWithActions().get(i)
+                                .getItemOCR().getItemInventoryMap().getId();
+                        Map<String, Object> update = new HashMap<>();
+                        update.put("amount", updateAmount[i]);
+                        transaction.update(itemRef.document(itemInventoryID), update);
+                    }
+
+                    return null;
+                }
+            }).addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    Log.d("TAG", "Transaction success!");
+                    Toast.makeText(getContext(), "Save Successful", Toast.LENGTH_SHORT).show();
+                    getActivity().finish();
+                }
+            })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            progressBar.setVisibility(View.GONE);
+                            recyclerView.setVisibility(View.VISIBLE);
+                            Log.w("TAG", "Transaction failure.", e);
+                        }
+                    });
         }
     };
 

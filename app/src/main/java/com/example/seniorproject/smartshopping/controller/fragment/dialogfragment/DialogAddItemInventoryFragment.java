@@ -288,6 +288,12 @@ public class DialogAddItemInventoryFragment extends DialogFragment {
         public void onComplete(@NonNull Task<QuerySnapshot> task) {
 
             if (task.isSuccessful()) {
+                if(task.getResult().getDocuments().size() == 0){
+                    Toast.makeText(getContext(), "Item is not found", Toast.LENGTH_SHORT).show();
+                    Log.d("TAG", "No such document");
+                    closeDialog();
+                    return;
+                }
                 DocumentSnapshot document = task.getResult().getDocuments().get(0);
                 if (document != null) {
                     imgItem.setVisibility(View.VISIBLE);
@@ -323,6 +329,7 @@ public class DialogAddItemInventoryFragment extends DialogFragment {
                         edtListDescribe.setVisibility(View.VISIBLE);
                         btnCancel.setVisibility(View.VISIBLE);
                         btnAdd.setVisibility(View.VISIBLE);
+                        btnScanBarcode.setVisibility(View.GONE);
                     }
 
                 } else {
