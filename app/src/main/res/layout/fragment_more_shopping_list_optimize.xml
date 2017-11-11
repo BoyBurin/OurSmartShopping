@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-     android:layout_width="match_parent"
+    android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <LinearLayout
@@ -14,15 +14,23 @@
             android:id="@+id/price"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_padding_small"
             android:layout_weight="1"
-            android:text="Optimize Price"/>
+            android:background="@drawable/selector_shape_rect_button_brown"
+            android:text="@string/optimize_price"
+            android:textColor="#FFFFFF"
+            android:textSize="@dimen/text_size_small" />
 
         <Button
             android:id="@+id/time"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_padding_small"
             android:layout_weight="1"
-            android:text="Optimize Time"/>
+            android:background="@drawable/selector_shape_rect_button_brown"
+            android:text="@string/optimize_trip"
+            android:textColor="#FFFFFF"
+            android:textSize="@dimen/text_size_small" />
 
     </LinearLayout>
 
@@ -31,24 +39,25 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/linearBtn"
-        android:layout_marginTop="@dimen/activity_vertical_margin"/>
+        android:layout_marginTop="@dimen/activity_vertical_margin" />
 
     <RelativeLayout
         android:id="@+id/backgroundLoading"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="gone">
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:alpha="0.6"
-        android:background="@android:color/black" />
 
-    <ProgressBar
-        android:id="@+id/progressBarSaveIteminventory"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:alpha="0.6"
+            android:background="@android:color/black" />
+
+        <ProgressBar
+            android:id="@+id/progressBarSaveIteminventory"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true" />
 
     </RelativeLayout>
 

@@ -6,7 +6,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.example.seniorproject.smartshopping.R;
-import com.example.seniorproject.smartshopping.controller.fragment.buyitemfragment.MoreBuyItemManuallyFragment;
+import com.example.seniorproject.smartshopping.controller.fragment.purchaseitem.PurchaseItemManuallyFragment;
 import com.example.seniorproject.smartshopping.model.manager.group.GroupManager;
 
 public class MoreBuyItemManuallyActivity extends AppCompatActivity {
@@ -30,10 +30,10 @@ public class MoreBuyItemManuallyActivity extends AppCompatActivity {
         initInstances();
 
         if(savedInstanceState == null){
-            MoreBuyItemManuallyFragment moreBuyItemManuallyFragmentbuy = MoreBuyItemManuallyFragment.newInstance();
+            PurchaseItemManuallyFragment purchaseItemManuallyFragmentbuy = PurchaseItemManuallyFragment.newInstance();
             getSupportFragmentManager()
                     .beginTransaction()
-                    .add(R.id.containerMoreBuyItem, moreBuyItemManuallyFragmentbuy,
+                    .add(R.id.containerMoreBuyItem, purchaseItemManuallyFragmentbuy,
                             MORE_BUY_ITEM_MANUALLY_FRAGMENT)
                     .commit();
         }

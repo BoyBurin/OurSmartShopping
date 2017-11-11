@@ -52,4 +52,12 @@
 
     <string name="save_price">Save</string>
 
+    <string name="receipt_recognition">Receipt Recognition</string>
+    <string name="add_maunally">Add Item Manually</string>
+
+    <string name="optimize_trip">Optimize Trip</string>
+    <string name="optimize_price">Optimize Price</string>
+
+    <string name="percent">%</string>
+
 </resources>

@@ -1,47 +1,41 @@
-package com.example.seniorproject.smartshopping.controller.fragment.buyitemfragment;
+package com.example.seniorproject.smartshopping.controller.fragment.purchaseitem;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ListView;
-import android.widget.Spinner;
-import android.widget.TextView;
 
 import com.example.seniorproject.smartshopping.R;
+import com.example.seniorproject.smartshopping.controller.activity.MoreBuyItemManuallyActivity;
+import com.example.seniorproject.smartshopping.controller.activity.OCRActivity;
 
 
-public class MoreBuyItemManuallyFragment extends Fragment {
+public class PurchaseItemFragment extends Fragment {
 
     /***********************************************************************************************
      ************************************* Variable class ********************************************
      ***********************************************************************************************/
 
+    private Button btnOCR;
+    private Button btnManually;
 
-    private Spinner spinnerStore;
-    private TextView tvTotalPrice;
-    private Button btnSaveItem;
-    private ListView listView;
-
-    private ArrayAdapter<String> adapter;
-    private String currentStore;
 
 
     /***********************************************************************************************
      ************************************* Method class ********************************************
      ***********************************************************************************************/
 
-    public MoreBuyItemManuallyFragment() {
+    public PurchaseItemFragment() {
         super();
     }
 
     @SuppressWarnings("unused")
-    public static MoreBuyItemManuallyFragment newInstance() {
-        MoreBuyItemManuallyFragment fragment = new MoreBuyItemManuallyFragment();
+    public static PurchaseItemFragment newInstance() {
+        PurchaseItemFragment fragment = new PurchaseItemFragment();
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
@@ -59,29 +53,24 @@ public class MoreBuyItemManuallyFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_main_purchase_item_manually, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_main_purchase_item, container, false);
         initInstances(rootView, savedInstanceState);
         return rootView;
     }
 
     private void init(Bundle savedInstanceState) {
-
-        currentStore = "Big C Bangpakok";
-        String[] stores = {"Big C Bangpakok", "Max Value Pracha Uthit", "Tesco Lotus Bangpakok", "Tesco Lotus ตลาดโลตัสประชาอุทิศ"};
-        adapter = new ArrayAdapter<String>(getActivity(),  android.R.layout.simple_spinner_item, stores);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        // Init Fragment level's variable(s) here
 
     }
 
     @SuppressWarnings("UnusedParameters")
     private void initInstances(View rootView, Bundle savedInstanceState) {
 
-        spinnerStore = (Spinner) rootView.findViewById(R.id.spinnerStore);
-        tvTotalPrice = (TextView) rootView.findViewById(R.id.tvTotalPrice);
-        listView = (ListView) rootView.findViewById(R.id.listView);
-        btnSaveItem = (Button) rootView.findViewById(R.id.btnSaveItem);
+        btnOCR = (Button) rootView.findViewById(R.id.btnOCR);
+        btnManually = (Button) rootView.findViewById(R.id.btnManually);
 
-        spinnerStore.setAdapter(adapter);
+        btnManually.setOnClickListener(manuallyListener);
+        btnOCR.setOnClickListener(ocrListener);
     }
 
     @Override
@@ -114,6 +103,22 @@ public class MoreBuyItemManuallyFragment extends Fragment {
     /***********************************************************************************************
      ************************************* Listener variables ********************************************
      ***********************************************************************************************/
+
+    private View.OnClickListener manuallyListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            Intent intent = new Intent(getActivity(), MoreBuyItemManuallyActivity.class);
+            getActivity().startActivity(intent);
+        }
+    };
+
+    private View.OnClickListener ocrListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            Intent intent = new Intent(getActivity(), OCRActivity.class);
+            getActivity().startActivity(intent);
+        }
+    };
 
 
     /***********************************************************************************************

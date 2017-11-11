@@ -23,8 +23,6 @@ import com.example.seniorproject.smartshopping.model.dao.group.GroupWatingWithAc
 import com.example.seniorproject.smartshopping.model.datatype.MutableInteger;
 import com.example.seniorproject.smartshopping.model.manager.group.GroupManager;
 import com.example.seniorproject.smartshopping.model.manager.group.GroupWatingManager;
-import com.example.seniorproject.smartshopping.model.manager.iteminventory.ItemInventoryManager;
-import com.example.seniorproject.smartshopping.model.manager.shoppinglist.ShoppingListManager;
 import com.example.seniorproject.smartshopping.view.adapter.group.GroupSettingAdapter;
 import com.example.seniorproject.smartshopping.view.recyclerviewadapter.GroupWatingRecyclerViewAdapter;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -100,7 +98,7 @@ public class GroupSettingFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_group_setting, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_main_setting_group_setting, container, false);
         initInstances(rootView, savedInstanceState);
         return rootView;
     }

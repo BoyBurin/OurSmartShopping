@@ -11,7 +11,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageButton;
 
 import com.example.seniorproject.smartshopping.R;
-import com.example.seniorproject.smartshopping.controller.fragment.buyitemfragment.BuyItemFragment;
+import com.example.seniorproject.smartshopping.controller.fragment.purchaseitem.PurchaseItemFragment;
 import com.example.seniorproject.smartshopping.controller.fragment.dialogfragment.DialogAddItemInventoryFragment;
 import com.example.seniorproject.smartshopping.controller.fragment.dialogfragment.FragmentDialogAddShoppingList;
 import com.example.seniorproject.smartshopping.controller.fragment.groupfragment.GroupFragment;
@@ -21,7 +21,6 @@ import com.example.seniorproject.smartshopping.controller.fragment.shoppinglistf
 import com.example.seniorproject.smartshopping.controller.fragment.shoppinghistoryfragment.ShoppingHistoryFragment;
 import com.example.seniorproject.smartshopping.model.dao.iteminventory.ItemInventoryMap;
 import com.example.seniorproject.smartshopping.model.dao.shoppinglist.ShoppingListMap;
-import com.example.seniorproject.smartshopping.model.manager.group.GroupManager;
 
 public class MainActivity extends AppCompatActivity implements ShoppingListFragment.ShoopingListFloatingButton
 , FragmentDialogAddShoppingList.DeleteAddShoppingListDialog, FragmentDialogAddShoppingList.PickImageShoppingListDialog,
@@ -98,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
             GroupFragment groupFragment = GroupFragment.newInstance();
             //ShoppingHistoryFragment shoppingHistoryFragment = ShoppingHistoryFragment.newInstance();
             SettingFragment settingFragment = SettingFragment.newInstance();
-            BuyItemFragment buyItemFragment = BuyItemFragment.newInstance();
+            PurchaseItemFragment purchaseItemFragment = PurchaseItemFragment.newInstance();
 
 
             getSupportFragmentManager().beginTransaction()
@@ -112,13 +111,13 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
                     //        SHOPPING_HISTORY_FRAGMENT)
                     .add(R.id.containerMain, settingFragment,
                             SETTINGFRAGMENT)
-                    .add(R.id.containerMain, buyItemFragment,
+                    .add(R.id.containerMain, purchaseItemFragment,
                             BUYITEMFRAGMENT)
                     .hide(inventoryFragment)
                     .hide(shoppingListFragment)
                     //.hide(shoppingHistoryFragment)
                     .hide(settingFragment)
-                    .hide(buyItemFragment)
+                    .hide(purchaseItemFragment)
                     .show(groupFragment)
                     .commit();
 
@@ -200,17 +199,17 @@ public class MainActivity extends AppCompatActivity implements ShoppingListFragm
             SettingFragment settingFragment = (SettingFragment)
                     getSupportFragmentManager().findFragmentByTag(SETTINGFRAGMENT);
 
-            BuyItemFragment buyItemFragment = (BuyItemFragment)
+            PurchaseItemFragment purchaseItemFragment = (PurchaseItemFragment)
                     getSupportFragmentManager().findFragmentByTag(BUYITEMFRAGMENT);
 
             if(view == btnPromotion){
-                if(current == buyItemFragment) return;
+                if(current == purchaseItemFragment) return;
 
                 getSupportFragmentManager().beginTransaction()
-                        .show(buyItemFragment)
+                        .show(purchaseItemFragment)
                         .hide(current)
                         .commit();
-                current = buyItemFragment;
+                current = purchaseItemFragment;
                 currentBtn.setBackgroundResource(android.R.color.transparent);
                 currentBtn = btnPromotion;
                 currentBtn.setBackgroundResource(R.drawable.shape_rect_overlay);
