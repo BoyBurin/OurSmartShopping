@@ -2,6 +2,7 @@ package com.example.seniorproject.smartshopping.controller.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -10,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 
 import com.example.seniorproject.smartshopping.R;
+import com.example.seniorproject.smartshopping.controller.fragment.dialogfragment.FragmentDialogAddShoppingList;
 import com.example.seniorproject.smartshopping.controller.fragment.loginfragment.CreateAccountFragment;
 import com.example.seniorproject.smartshopping.controller.fragment.loginfragment.LoginFragment;
 import com.example.seniorproject.smartshopping.controller.fragment.loginfragment.SelectGroupFragment;
@@ -24,7 +26,8 @@ public class LoginActivity extends AppCompatActivity implements LoginFragment.Lo
         LoginFragment.CraateAccountFragmentListener, CreateAccountFragment.SaveInfoListener,
         LoginFragment.SelectGroupListener, SelectGroupFragment.SaveCurrentGroupListener,
         LoginFragment.VisibleLoginFragmentListener, SelectGroupFragment.VisibleSelectGroupFragmentListener,
-        CreateAccountFragment.CancelInfoListener {
+        CreateAccountFragment.CancelInfoListener, CreateAccountFragment.PickImageUser,
+        CreateAccountFragment.PickImageGroup {
 
     /***********************************************************************************************
      ************************************* Variable class ********************************************
@@ -64,6 +67,28 @@ public class LoginActivity extends AppCompatActivity implements LoginFragment.Lo
         GroupManager.getInstance().reset();
         progressbarLogin = (ProgressBar) findViewById(R.id.progressbarLogin);
 
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == CreateAccountFragment.RC_PHOTO_USER) {
+            if (resultCode == RESULT_OK) {
+                Fragment createAccountFragment = getSupportFragmentManager()
+                        .findFragmentByTag(CREATEACCOUNTFRAGMENT);
+
+                createAccountFragment.onActivityResult(requestCode, resultCode, data);
+            }
+        }
+
+        if (requestCode == CreateAccountFragment.RC_PHOTO_GROUP) {
+            if (resultCode == RESULT_OK) {
+                Fragment createAccountFragment = getSupportFragmentManager()
+                        .findFragmentByTag(CREATEACCOUNTFRAGMENT);
+
+                createAccountFragment.onActivityResult(requestCode, resultCode, data);
+            }
+        }
     }
 
     @Override
@@ -158,6 +183,24 @@ public class LoginActivity extends AppCompatActivity implements LoginFragment.Lo
                 .remove(createAccountFragment)
                 .show(loginFragment)
                 .commit();
+    }
+
+    @Override
+    public void pickImageUser() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("image/jpeg");
+        intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
+        startActivityForResult(Intent.createChooser(intent, "Complete action using"),
+                CreateAccountFragment.RC_PHOTO_USER);
+    }
+
+    @Override
+    public void pickImageGroup() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("image/jpeg");
+        intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
+        startActivityForResult(Intent.createChooser(intent, "Complete action using"),
+                CreateAccountFragment.RC_PHOTO_GROUP);
     }
 
 

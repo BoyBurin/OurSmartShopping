@@ -66,5 +66,6 @@
     <string name="change_group">Change Group</string>
 
     <string name="log_out">Logout</string>
+    <string name="create">Create</string>
 
 </resources>

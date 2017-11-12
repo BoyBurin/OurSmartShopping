@@ -7,36 +7,78 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fillViewport="true"
-        >
+        android:fillViewport="true">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:weightSum="3">
-
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1">
-
-
-
-            </FrameLayout>
+            android:orientation="vertical">
 
             <RelativeLayout
                 android:id="@+id/containerLogin"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="2">
+                android:layout_height="match_parent">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_alignParentTop="true"
                     android:orientation="vertical"
-                    android:visibility="visible">
+                    android:visibility="visible"
+                    android:weightSum="3">
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="@dimen/margin_padding"
+                        android:weightSum="4">
+
+                        <FrameLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1" />
+
+                        <RelativeLayout
+                            android:layout_width="50dp"
+                            android:layout_height="100dp"
+                            android:layout_weight="1"
+                            android:layout_margin="@dimen/margin_padding">
+                        <ImageView
+                            android:id="@+id/imgViewUser"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerInParent="true"
+                            android:scaleType="fitXY"
+                            android:src="@drawable/bg_small" />
+                        </RelativeLayout>
+
+                        <RelativeLayout
+                            android:layout_width="50dp"
+                            android:layout_height="100dp"
+                            android:layout_weight="1"
+                            android:layout_margin="@dimen/margin_padding">
+                            <ImageView
+                                android:id="@+id/imgViewGroup"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerInParent="true"
+                                android:scaleType="fitXY"
+                                android:src="@drawable/bg_small" />
+                        </RelativeLayout>
+
+                        <FrameLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1" />
+
+
+                    </LinearLayout>
 
                     <com.example.seniorproject.smartshopping.view.customviewgroup.CustomViewGroupEditText
                         android:id="@+id/customEmail"
@@ -67,44 +109,35 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:padding="@dimen/margin_padding"
                         android:layout_marginTop="@dimen/margin_padding"
+                        android:padding="@dimen/margin_padding"
                         android:weightSum="2">
-                    <Button
-                        android:id="@+id/btnCancel"
-                        android:layout_width="100dp"
-                        android:layout_height="wrap_content"
-                        android:minEms="9"
-                        android:layout_gravity="center"
-                        android:layout_marginBottom="16dp"
-                        android:layout_marginLeft="16dp"
-                        android:layout_marginRight="16dp"
-                        android:background="@drawable/selector_shape_round_rect_button_white"
-                        android:layout_weight="1"
-                        android:textSize="@dimen/text_size_small"
-                        android:text="@string/cancel_button" />
 
                         <Button
-                            android:id="@+id/btnCreateAccount"
-                            android:layout_width="100dp"
+                            android:id="@+id/btnCancel"
+                            android:layout_width="150dp"
                             android:layout_height="wrap_content"
                             android:minEms="9"
                             android:layout_gravity="center"
-                            android:layout_marginBottom="16dp"
                             android:layout_marginLeft="16dp"
                             android:layout_marginRight="16dp"
                             android:background="@drawable/selector_shape_round_rect_button_white"
-                            android:layout_weight="1"
-                            android:textSize="@dimen/text_size_small"
-                            android:text="@string/create_account_text" />
+                            android:textSize="@dimen/text_size"
+                            android:text="@string/cancel_button" />
+
+                        <Button
+                            android:id="@+id/btnCreateAccount"
+                            android:layout_width="150dp"
+                            android:layout_height="wrap_content"
+                            android:minEms="9"
+                            android:layout_gravity="center"
+                            android:background="@drawable/selector_shape_round_rect_button_white"
+                            android:textSize="@dimen/text_size"
+                            android:text="@string/create" />
 
                     </LinearLayout>
 
 
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1" />
 
                 </LinearLayout>
 
