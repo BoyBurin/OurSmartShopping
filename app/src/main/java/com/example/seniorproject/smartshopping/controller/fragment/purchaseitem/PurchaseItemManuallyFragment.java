@@ -278,7 +278,7 @@ public class PurchaseItemManuallyFragment extends Fragment implements PurchaseIt
         public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
             switch (position) {
                 case 0:
-                    currentStore = "Big C Bangpakok";
+                    currentStore = "บิ๊กซี พระราม 2";
                     break;
                 case 1:
                     currentStore = "Max Value Pracha Uthit";
