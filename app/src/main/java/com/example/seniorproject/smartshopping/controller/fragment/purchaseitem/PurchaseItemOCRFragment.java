@@ -27,14 +27,18 @@ import com.example.seniorproject.smartshopping.model.manager.group.GroupManager;
 import com.example.seniorproject.smartshopping.model.manager.itemocr.ItemOCRManager;
 import com.example.seniorproject.smartshopping.model.manager.itemocr.PurchaseItemWithActionManager;
 import com.example.seniorproject.smartshopping.view.recyclerviewadapter.PurchaseItemRecyclerViewAdapter;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Transaction;
+import com.google.firebase.firestore.WriteBatch;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -176,6 +180,30 @@ public class PurchaseItemOCRFragment extends Fragment implements PurchaseItemAdd
         purchaseItemRecyclerViewAdapter.notifyDataSetChanged();
     }
 
+    private double getTotalRetailPrice(ArrayList<PurchaseItemWithAction> purchaseItemWithActions) {
+        double totalRetailPrice = 0;
+        for (PurchaseItemWithAction purchaseItemWithAction : purchaseItemWithActions) {
+            ItemInventory itemInventory = purchaseItemWithAction.getItemOCR().getItemInventoryMap().getItemInventory();
+
+            double retailPrice = itemInventory.getRetailPrice() * purchaseItemWithAction.getItemOCR().getAmount();
+            totalRetailPrice += retailPrice;
+        }
+
+        return totalRetailPrice;
+    }
+
+    private double getTotalPrice(ArrayList<PurchaseItemWithAction> purchaseItemWithActions) {
+        double totalPrice = 0;
+        for (PurchaseItemWithAction purchaseItemWithAction : purchaseItemWithActions) {
+            ItemOCR itemOCR = purchaseItemWithAction.getItemOCR();
+
+            double price = itemOCR.getPrice();
+            totalPrice += price;
+        }
+
+        return totalPrice;
+    }
+
     /***********************************************************************************************
      ************************************* Listener variables ********************************************
      ***********************************************************************************************/
@@ -184,7 +212,7 @@ public class PurchaseItemOCRFragment extends Fragment implements PurchaseItemAdd
         @Override
         public void onClick(View view) {
             PurchaseItemAddFragment purchaseItemAddFragment = PurchaseItemAddFragment.newInstance(purchaseItemWithActionManager
-            .getIPurchaseItemWithActions());
+                    .getIPurchaseItemWithActions());
             getActivity().getSupportFragmentManager().beginTransaction()
                     .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                     .add(((ViewGroup) getView().getParent()).getId(), purchaseItemAddFragment)
@@ -196,7 +224,7 @@ public class PurchaseItemOCRFragment extends Fragment implements PurchaseItemAdd
     View.OnClickListener saveInfoListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            if(purchaseItemWithActionManager.getSize() == 0){
+            if (purchaseItemWithActionManager.getSize() == 0) {
                 Toast.makeText(getContext(), "Please select Item", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -217,7 +245,7 @@ public class PurchaseItemOCRFragment extends Fragment implements PurchaseItemAdd
                         ItemOCR itemOCR = purchaseItemWithActionManager.getIPurchaseItemWithActions().get(i).getItemOCR();
                         priceSet[i] = itemOCR.getPrice();
                         amountSet[i] = itemOCR.getAmount();
-                        priceSet[i] = priceSet[i]/amountSet[i];
+                        priceSet[i] = priceSet[i] / amountSet[i];
                     }
 
                     ArrayList<ProductCrowd> products = new ArrayList<ProductCrowd>();
@@ -264,8 +292,55 @@ public class PurchaseItemOCRFragment extends Fragment implements PurchaseItemAdd
                 @Override
                 public void onSuccess(Void aVoid) {
                     Log.d("TAG", "Transaction success!");
-                    Toast.makeText(getContext(), "Save Successful", Toast.LENGTH_SHORT).show();
-                    getActivity().finish();
+
+                    double totalRetailPrice = getTotalRetailPrice(purchaseItemWithActionManager.getIPurchaseItemWithActions());
+                    double totalPrice = getTotalPrice(purchaseItemWithActionManager.getIPurchaseItemWithActions());
+
+                    Calendar calendar = Calendar.getInstance();
+                    int year = calendar.get(Calendar.YEAR);
+                    int month = calendar.get(Calendar.MONTH) + 1;
+                    int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+                    int hour = calendar.get(Calendar.HOUR_OF_DAY);
+                    int minute = calendar.get(Calendar.MINUTE);
+                    int second = calendar.get(Calendar.SECOND);
+
+                    WriteBatch batch = db.batch();
+
+                    HashMap<String, Object> data = new HashMap<String, Object>();
+                    data.put("totalRetailPrice", totalRetailPrice);
+                    data.put("totalPrice", totalPrice);
+                    data.put("date", year + "/" + month + "/" + day);
+                    data.put("time", hour + "." + minute + "." + second);
+                    data.put("store", storeName);
+
+                    batch.set(db.collection("groups").document(GroupManager.getInstance().getCurrentGroup().getId())
+                            .collection("history").document(year + "" + month + "" + day + hour + "" + minute + "" + second), data);
+
+                    for (PurchaseItemWithAction purchaseItemWithAction : purchaseItemWithActionManager.getIPurchaseItemWithActions()) {
+                        long amount = purchaseItemWithAction.getItemOCR().getAmount();
+                        double price = purchaseItemWithAction.getItemOCR().getPrice();
+                        String name = purchaseItemWithAction.getItemOCR().getItemInventoryMap().getItemInventory().getName();
+
+                        HashMap<String, Object> newData = new HashMap<String, Object>();
+                        newData.put("amount", amount);
+                        newData.put("price", price);
+                        newData.put("name", name);
+
+                        batch.set(db.collection("groups").document(GroupManager.getInstance().getCurrentGroup().getId())
+                                .collection("history").document(year + "" + month + "" + day + hour + "" + minute + "" + second)
+                                .collection("purchaseitems").document(name), newData);
+                    }
+
+                    batch.commit().addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            Toast.makeText(getContext(), "Save Successful", Toast.LENGTH_SHORT).show();
+                            getActivity().finish();
+                        }
+                    });
+                    //Toast.makeText(getContext(), "Save Successful", Toast.LENGTH_SHORT).show();
+                    //getActivity().finish();
                 }
             })
                     .addOnFailureListener(new OnFailureListener() {

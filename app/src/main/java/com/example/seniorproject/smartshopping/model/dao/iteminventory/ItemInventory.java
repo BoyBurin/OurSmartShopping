@@ -21,6 +21,7 @@ public class ItemInventory implements Parcelable {
     private String unit;
     private String barcodeId;
     private String type;
+    private double retailPrice;
 
     /******************************************************************************************
      * ****************************** Methods *********************************************
@@ -31,7 +32,7 @@ public class ItemInventory implements Parcelable {
     }
 
     public ItemInventory(String name, long amount, String comment, String photoUrl, String unit, String barcodeId
-    , long hard, long soft, String type){
+    , long hard, long soft, String type, double retailPrice){
 
         this.name = name;
         this.amount = amount;
@@ -42,6 +43,7 @@ public class ItemInventory implements Parcelable {
         this.hard = hard;
         this.soft = soft;
         this.type = type;
+        this.retailPrice = retailPrice;
     }
 
 
@@ -118,6 +120,14 @@ public class ItemInventory implements Parcelable {
         this.type = type;
     }
 
+    public double getRetailPrice() {
+        return retailPrice;
+    }
+
+    public void setRetailPrice(double retailPrice) {
+        this.retailPrice = retailPrice;
+    }
+
     /******************************************************************************************
      * ****************************** Implementation *********************************************
      *******************************************************************************************/
@@ -134,6 +144,7 @@ public class ItemInventory implements Parcelable {
         hard = in.readLong();
         soft = in.readLong();
         type = in.readString();
+        retailPrice = in.readDouble();
     }
 
     @Override
@@ -147,6 +158,7 @@ public class ItemInventory implements Parcelable {
         dest.writeLong(hard);
         dest.writeLong(soft);
         dest.writeString(type);
+        dest.writeDouble(retailPrice);
     }
 
     @Override

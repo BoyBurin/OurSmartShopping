@@ -87,6 +87,7 @@ public class DialogAddItemInventoryFragment extends DialogFragment {
     private String unit;
     private String barcodeId;
     private String type;
+    private double retailPrice;
 
 
 
@@ -312,6 +313,7 @@ public class DialogAddItemInventoryFragment extends DialogFragment {
                     photoUrl = productList.getPhotoUrl().toString();
                     unit = productList.getUnit();
                     type = productList.getType();
+                    retailPrice = productList.getRetailprice();
 
                     if(itemInventoryManager.isContain(barcodeId)){
                         rg.setVisibility(View.VISIBLE);
@@ -392,7 +394,7 @@ public class DialogAddItemInventoryFragment extends DialogFragment {
             }
 
             ItemInventory item = new ItemInventory(name, amount, comment,
-                    photoUrl, unit, barcodeId, hard, soft, type);
+                    photoUrl, unit, barcodeId, hard, soft, type, retailPrice);
 
             cItems.document(barcodeId).set(item).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
